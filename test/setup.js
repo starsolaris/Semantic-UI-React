@@ -2,27 +2,12 @@
  * Setup
  * This is the bootstrap code that is run before any tests, utils, mocks.
  */
-import Adapter from '@wojtekmaj/enzyme-adapter-react-17'
+import '@testing-library/jest-dom'
 import chai from 'chai'
-import chaiEnzyme from 'chai-enzyme'
-import enzyme from 'enzyme'
 import dirtyChai from 'dirty-chai'
 import sinonChai from 'sinon-chai'
 
 import nestedShallow from './utils/nestedShallow'
-
-// ----------------------------------------
-// Enzyme
-// ----------------------------------------
-global.enzyme = enzyme
-global.shallow = nestedShallow
-global.render = enzyme.render
-global.mount = enzyme.mount
-
-enzyme.configure({
-  adapter: new Adapter(),
-  disableLifecycleMethods: true,
-})
 
 // ----------------------------------------
 // Mocha
@@ -36,7 +21,6 @@ mocha.setup({
 // ----------------------------------------
 global.expect = chai.expect
 chai.should()
-chai.use(chaiEnzyme())
 chai.use(dirtyChai)
 chai.use(sinonChai)
 
@@ -50,11 +34,13 @@ let info
 let warn
 let error
 
-const throwOnConsole = (method) => (...args) => {
-  throw new Error(
-    `console.${method} should never be called but was called with:\n${args.join(' ')}`,
-  )
-}
+const throwOnConsole =
+  (method) =>
+  (...args) => {
+    throw new Error(
+      `console.${method} should never be called but was called with:\n${args.join(' ')}`,
+    )
+  }
 
 /* eslint-disable no-console */
 beforeEach(() => {

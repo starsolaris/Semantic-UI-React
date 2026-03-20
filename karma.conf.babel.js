@@ -65,6 +65,7 @@ export default (karmaConfig) => {
       { pattern: 'docs/public/logo.png', watched: false, included: false, served: true },
       { pattern: 'docs/public/**/*.jpg', watched: false, included: false, served: true },
       { pattern: 'docs/public/**/*.png', watched: false, included: false, served: true },
+      './test/setup.js',
       './test/tests.bundle.js',
     ],
     formatError,
