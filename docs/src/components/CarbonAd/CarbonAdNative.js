@@ -19,8 +19,7 @@ class CarbonAdNative extends PureComponent {
     this.getAd()
   }
 
-  // eslint-disable-next-line camelcase
-  UNSAFE_componentWillUpdate() {
+  componentDidUpdate() {
     const shouldGetAd = Date.now() - this.timeOfLastAd > 10000
     debug('componentWillUpdate', { mounted: this.mounted, shouldGetAd })
     if (shouldGetAd) {
