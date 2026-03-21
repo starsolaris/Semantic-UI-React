@@ -34,39 +34,55 @@ global.after = after
 // Configure global expect to work with both Chai and Jest matchers
 global.expect = (actual) => {
   const chaiExpect = chai.expect(actual)
-  const vitestExpectResult = vitestExpect(actual)
 
-  // Add Jest-like matchers to Chai
-  chaiExpect.toHaveClass = function (className) {
-    return this.hasClass(className)
+  const actualValue = actual
+
+  const checkHasClass = (className) => {
+    if (actualValue && typeof actualValue.hasClass === 'function') {
+      return actualValue.hasClass(className)
+    }
+    if (actualValue && actualValue.classList) {
+      return actualValue.classList.contains(className)
+    }
+    if (actualValue && typeof actualValue.className === 'string') {
+      const classes = actualValue.className.split(/\s+/)
+      return classes.includes(className)
+    }
+    return false
   }
 
-  chaiExpect.not.toHaveClass = function (className) {
-    return this.not.hasClass(className)
+  chaiExpect.toHaveClass = function (className) {
+    const hasClass = checkHasClass(className)
+    this.assert(
+      hasClass,
+      `expected #{this} to have class #{exp}`,
+      `expected #{this} to not have class #{exp}`,
+      className,
+    )
+    return this
+  }
+
+  chaiExpect.class = function (className) {
+    const hasClass = checkHasClass(className)
+    this.assert(
+      hasClass,
+      `expected #{this} to have class #{exp}`,
+      `expected #{this} to not have class #{exp}`,
+      className,
+    )
+    return this
   }
 
   chaiExpect.toHaveTextContent = function (text) {
     return this.to.have.deep.property('textContent', text)
   }
 
-  chaiExpect.not.toHaveTextContent = function (text) {
-    return this.to.not.have.deep.property('textContent', text)
-  }
-
   chaiExpect.toBeTruthy = function () {
     return this.to.be.true
   }
 
-  chaiExpect.not.toBeTruthy = function () {
-    return this.to.not.be.true
-  }
-
   chaiExpect.toBeFalsy = function () {
     return this.to.be.false
-  }
-
-  chaiExpect.not.toBeFalsy = function () {
-    return this.to.not.be.false
   }
 
   return chaiExpect
