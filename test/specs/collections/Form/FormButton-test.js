@@ -1,4 +1,5 @@
 import React from 'react'
+import { render } from '@testing-library/react'
 
 import FormButton from 'src/collections/Form/FormButton'
 import Button from 'src/elements/Button/Button'
@@ -11,9 +12,9 @@ describe('FormButton', () => {
   common.labelImplementsHtmlForProp(FormButton)
 
   it('renders a FormField with a Button control', () => {
-    shallow(<FormButton />)
-      .find('FormField')
-      .should.have.prop('control', Button)
+    const { container } = render(<FormButton />)
+    const button = container.querySelector('button')
+    expect(button).toBeTruthy()
   })
 
   common.forwardsRef(FormButton, { tagName: 'button' })

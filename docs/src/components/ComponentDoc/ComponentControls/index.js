@@ -1,1 +1,2 @@
-export default from './ComponentControls'
+import default from './ComponentControls';
+export { default };

@@ -1,5 +1,6 @@
 import React from 'react'
 import ReactDOMServer from 'react-dom/server'
+import { render, fireEvent } from '@testing-library/react'
 
 import Modal from 'src/modules/Modal/Modal'
 import ModalHeader from 'src/modules/Modal/ModalHeader'
@@ -26,8 +27,11 @@ let wrapper
 
 // we need to unmount the modal after every test to remove it from the document
 // wrap the render methods to update a global wrapper that is unmounted after each test
-const wrapperMount = (...args) => (wrapper = mount(...args))
-const wrapperShallow = (...args) => (wrapper = shallow(...args))
+const wrapperMount = (...args) => {
+  const result = render(...args)
+  wrapper = result
+  return result
+}
 
 describe('Modal', () => {
   beforeEach(() => {
@@ -80,9 +84,8 @@ describe('Modal', () => {
   // The Modal is wrapped in a Portal, so we manually test a few things here.
 
   it('renders a Portal', () => {
-    wrapperShallow(<Modal open />)
-      .type()
-      .should.equal(Portal)
+    const { container } = render(<Modal open />)
+    expect(container.querySelector('.ui.modal')).to.not.be.null()
   })
 
   it('renders to the document body', () => {
@@ -156,25 +159,18 @@ describe('Modal', () => {
     })
 
     it('is passed to Portal open', () => {
-      shallow(<Modal open />)
-        .find('Portal')
-        .should.have.prop('open', true)
+      const { container } = render(<Modal open />)
+      expect(container.querySelector('.ui.modal')).to.not.be.null()
 
-      shallow(<Modal open={false} />)
-        .find('Portal')
-        .should.have.prop('open', false)
+      const { container: container2 } = render(<Modal open={false} />)
+      expect(container2.querySelector('.ui.modal')).to.be.null()
     })
 
     it('is not passed to Modal', () => {
-      shallow(<Modal open />)
-        .find('Portal')
-        .children()
-        .should.not.have.prop('open')
-
-      shallow(<Modal open={false} />)
-        .find('Portal')
-        .children()
-        .should.not.have.prop('open')
+      const { container } = render(<Modal open />)
+      const modal = container.querySelector('.ui.modal')
+      expect(modal).to.not.be.null()
+      expect(modal.hasAttribute('open')).to.be.false()
     })
 
     it('does not show the modal when false', () => {
@@ -198,22 +194,22 @@ describe('Modal', () => {
     })
 
     it('shows the modal and dimmer on changing from false to true', () => {
-      wrapperMount(<Modal open={false} />)
+      const { rerender } = render(<Modal open={false} />)
       assertBodyContains('.ui.modal', false)
       assertBodyContains('.ui.dimmer', false)
 
-      wrapper.setProps({ open: true })
+      rerender(<Modal open />)
 
       assertBodyContains('.ui.modal')
       assertBodyContains('.ui.dimmer')
     })
 
     it('hides the modal and dimmer on changing from true to false', () => {
-      wrapperMount(<Modal open />)
+      const { rerender } = render(<Modal open />)
       assertBodyContains('.ui.modal')
       assertBodyContains('.ui.dimmer')
 
-      wrapper.setProps({ open: false })
+      rerender(<Modal open={false} />)
 
       assertBodyContains('.ui.modal', false)
       assertBodyContains('.ui.dimmer', false)
@@ -241,31 +237,31 @@ describe('Modal', () => {
   describe('dimmer', () => {
     it('renders ModalDimmer by default', () => {
       wrapperMount(<Modal open />)
-      wrapper.should.have.descendants('ModalDimmer')
+      expect(document.querySelector('.ui.dimmer')).to.not.be.null()
     })
 
     it('renders ModalDimmer when is "true"', () => {
       wrapperMount(<Modal open dimmer />)
-      wrapper.should.have.descendants('ModalDimmer')
+      expect(document.querySelector('.ui.dimmer')).to.not.be.null()
     })
 
     it('passes "blurring" to ModalDimmer', () => {
       wrapperMount(<Modal open dimmer='blurring' />)
-      wrapper.find('ModalDimmer').should.have.prop('blurring', true)
+      expect(document.querySelector('.ui.dimmer.blurring')).to.not.be.null()
     })
 
     it('passes "inverted" to ModalDimmer', () => {
       wrapperMount(<Modal open dimmer='inverted' />)
-      wrapper.find('ModalDimmer').should.have.prop('inverted', true)
+      expect(document.querySelector('.ui.dimmer.inverted')).to.not.be.null()
     })
 
     describe('object', () => {
       it('passes props to a dimmer element', () => {
         wrapperMount(<Modal open dimmer={{ className: 'bar', id: 'dimmer', inverted: true }} />)
 
-        wrapper.find('ModalDimmer').should.have.prop('inverted', true)
-        wrapper.find('.dimmer').should.have.className('bar')
-        wrapper.find('.dimmer').should.have.prop('id', 'dimmer')
+        expect(document.querySelector('.ui.dimmer.inverted')).to.not.be.null()
+        expect(document.querySelector('.dimmer.bar')).to.not.be.null()
+        expect(document.querySelector('.dimmer').id).to.equal('dimmer')
       })
     })
   })
@@ -275,7 +271,7 @@ describe('Modal', () => {
       const onOpen = sandbox.spy()
       wrapperMount(<Modal onOpen={onOpen} trigger={<div id='trigger' />} />)
 
-      wrapper.find('#trigger').simulate('click')
+      fireEvent.click(document.querySelector('#trigger'))
       onOpen.should.have.been.calledOnce()
       onOpen.should.have.been.calledWithMatch({ type: 'click' }, { open: true })
     })
@@ -342,17 +338,17 @@ describe('Modal', () => {
 
     it('is not called when the open prop changes to false', () => {
       const onClose = sandbox.spy()
-      wrapperMount(<Modal onClose={onClose} defaultOpen />)
+      const { rerender } = render(<Modal onClose={onClose} defaultOpen />)
 
-      wrapper.setProps({ open: false })
+      rerender(<Modal onClose={onClose} open={false} />)
       onClose.should.not.have.been.called()
     })
 
     it('is not called when open changes to false programmatically', () => {
       const onClose = sandbox.spy()
-      wrapperMount(<Modal onClose={onClose} defaultOpen />)
+      const { rerender } = render(<Modal onClose={onClose} defaultOpen />)
 
-      wrapper.setProps({ open: false })
+      rerender(<Modal onClose={onClose} open={false} />)
       onClose.should.not.have.been.called()
     })
 
@@ -506,7 +502,7 @@ describe('Modal', () => {
 
     it('does not pass "scrolling" by default', () => {
       wrapperMount(<Modal open />)
-      wrapper.find('ModalDimmer').should.have.prop('scrolling', false)
+      expect(document.querySelector('.ui.dimmer.scrolling')).to.be.null()
     })
 
     it('does not pass "scrolling" when equal to the window height', (done) => {
@@ -520,8 +516,7 @@ describe('Modal', () => {
       )
 
       requestAnimationFrame(() => {
-        wrapper.update()
-        wrapper.find('ModalDimmer').should.have.prop('scrolling', false)
+        expect(document.querySelector('.ui.dimmer.scrolling')).to.be.null()
 
         done()
       })
@@ -532,8 +527,7 @@ describe('Modal', () => {
       wrapperMount(<Modal open>foo</Modal>)
 
       requestAnimationFrame(() => {
-        wrapper.update()
-        wrapper.find('ModalDimmer').should.have.prop('scrolling', true)
+        expect(document.querySelector('.ui.dimmer.scrolling')).to.not.be.null()
 
         done()
       })
@@ -549,15 +543,13 @@ describe('Modal', () => {
 
       assertWithTimeout(
         () => {
-          wrapper.update()
-          wrapper.find('ModalDimmer').should.have.prop('scrolling', true)
+          expect(document.querySelector('.ui.dimmer.scrolling')).to.not.be.null()
 
           window.innerHeight = 10000
         },
         () =>
           assertWithTimeout(() => {
-            wrapper.update()
-            wrapper.find('ModalDimmer').should.have.prop('scrolling', false)
+            expect(document.querySelector('.ui.dimmer.scrolling')).to.be.null()
           }, done),
       )
     })

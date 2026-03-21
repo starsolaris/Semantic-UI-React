@@ -1,1 +1,2 @@
-export default from './DocumentationPage'
+import default from './DocumentationPage';
+export { default };

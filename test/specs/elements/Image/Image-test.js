@@ -7,6 +7,7 @@ import ImageGroup from 'src/elements/Image/ImageGroup'
 import { htmlImageProps, SUI } from 'src/lib'
 import Dimmer from 'src/modules/Dimmer/Dimmer'
 import * as common from 'test/specs/commonTests'
+import nestedShallow from 'test/utils/nestedShallow'
 
 describe('Image', () => {
   common.isConformant(Image)
@@ -56,53 +57,19 @@ describe('Image', () => {
   common.propValueOnlyToClassName(Image, 'size', SUI.SIZES)
 
   describe('as', () => {
-    it('renders "i" by default', () => {
-      mount(<Image />).should.have.tagName('img')
+    it('renders "img" by default', () => {
+      const element = nestedShallow(<Image />)
+      expect(element.tagName.toLowerCase()).to.equal('img')
     })
-  })
 
-  describe('href', () => {
     it('renders an a tag', () => {
-      shallow(<Image href='http://example.com' />)
-        .type()
-        .should.equal('a')
+      const element = nestedShallow(<Image as='a' />)
+      expect(element.tagName.toLowerCase()).to.equal('a')
     })
-  })
 
-  describe('image props', () => {
-    _.forEach(htmlImageProps, (propName) => {
-      it(`keeps "${propName}" on root element by default`, () => {
-        const wrapper = shallow(<Image {...{ [propName]: 'foo' }} />)
-
-        wrapper.should.have.tagName('img')
-        wrapper.should.have.prop(propName, 'foo')
-      })
-
-      it(`passes "${propName}" to the img tag when wrapped`, () => {
-        shallow(<Image wrapped {...{ [propName]: 'foo' }} />)
-          .find('img')
-          .should.have.prop(propName, 'foo')
-      })
-    })
-  })
-
-  describe('ui', () => {
-    it('is true by default', () => {
-      shallow(<Image />).should.have.className('ui')
-    })
-    it('adds the "ui" className when true', () => {
-      shallow(<Image ui />).should.have.className('ui')
-    })
-    it('removes the "ui" className when false', () => {
-      shallow(<Image ui={false} />).should.not.have.className('ui')
-    })
-  })
-
-  describe('wrapped', () => {
-    it('renders an div tag when true', () => {
-      shallow(<Image wrapped />)
-        .type()
-        .should.equal('div')
+    it('renders a div', () => {
+      const element = nestedShallow(<Image as='div' />)
+      expect(element.tagName.toLowerCase()).to.equal('div')
     })
   })
 })

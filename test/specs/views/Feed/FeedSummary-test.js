@@ -1,4 +1,6 @@
 import React from 'react'
+import { render } from '@testing-library/react'
+
 import FeedSummary from 'src/views/Feed/FeedSummary'
 import FeedDate from 'src/views/Feed/FeedDate'
 import FeedUser from 'src/views/Feed/FeedUser'
@@ -25,7 +27,9 @@ describe('FeedSummary', () => {
 
   describe('content', () => {
     it('inserts whitespace on both sides of the content', () => {
-      shallow(<FeedSummary content='test' />).should.contain.text(' test ')
+      const { container } = render(<FeedSummary content='test' />)
+
+      expect(container).toHaveTextContent(' test ')
     })
   })
 })

@@ -1,11 +1,13 @@
 import _ from 'lodash'
 import React from 'react'
+import { render, fireEvent } from '@testing-library/react'
 
 import Icon from 'src/elements/Icon/Icon'
 import IconGroup from 'src/elements/Icon/IconGroup'
 import { SUI } from 'src/lib'
 import * as common from 'test/specs/commonTests'
 import { sandbox } from 'test/utils'
+import nestedShallow from 'test/utils/nestedShallow'
 
 describe('Icon', () => {
   common.isConformant(Icon)
@@ -37,44 +39,50 @@ describe('Icon', () => {
   common.propValueOnlyToClassName(Icon, 'size', _.without(SUI.SIZES, 'medium'))
 
   it('renders as an <i> by default', () => {
-    shallow(<Icon />).should.have.tagName('i')
+    const element = nestedShallow(<Icon />)
+    expect(element.tagName.toLowerCase()).to.equal('i')
   })
 
   describe('aria-hidden', () => {
     it('should add aria-hidden by default', () => {
-      shallow(<Icon />).should.have.prop('aria-hidden', 'true')
+      const element = nestedShallow(<Icon />)
+      expect(element.getAttribute('aria-hidden')).to.equal('true')
     })
 
     it('should pass aria-hidden', () => {
-      shallow(<Icon aria-hidden='true' />).should.have.prop('aria-hidden', 'true')
-      shallow(<Icon aria-hidden='false' />).should.have.prop('aria-hidden', 'false')
+      let element = nestedShallow(<Icon aria-hidden='true' />)
+      expect(element.getAttribute('aria-hidden')).to.equal('true')
+
+      element = nestedShallow(<Icon aria-hidden='false' />)
+      expect(element.getAttribute('aria-hidden')).to.equal('false')
     })
 
     it('should passed aria-hidden with aria-label', () => {
-      shallow(<Icon aria-hidden='false' aria-label='icon' />).should.have.prop(
-        'aria-hidden',
-        'false',
-      )
+      const element = nestedShallow(<Icon aria-hidden='false' aria-label='icon' />)
+      expect(element.getAttribute('aria-hidden')).to.equal('false')
     })
   })
 
   describe('aria-label', () => {
     it('should not applied by default', () => {
-      shallow(<Icon />).should.have.not.prop('aria-label')
+      const element = nestedShallow(<Icon />)
+      expect(element.getAttribute('aria-label')).to.be.null()
     })
 
     it('should pass value and omit aria-hidden when is set', () => {
-      const wrapper = shallow(<Icon aria-label='icon' />)
+      const element = nestedShallow(<Icon aria-label='icon' />)
 
-      wrapper.should.not.have.prop('aria-hidden')
-      wrapper.should.have.prop('aria-label', 'icon')
+      expect(element.getAttribute('aria-hidden')).to.be.null()
+      expect(element.getAttribute('aria-label')).to.equal('icon')
     })
   })
 
   describe('onClick', () => {
     it('is called with (e, data) when clicked', () => {
       const onClick = sandbox.spy()
-      mount(<Icon onClick={onClick} />).simulate('click')
+      const { container } = render(<Icon onClick={onClick} />)
+
+      fireEvent.click(container.firstChild)
 
       onClick.should.have.been.calledOnce()
       onClick.should.have.been.calledWithMatch({ type: 'click' }, { onClick })
@@ -83,7 +91,9 @@ describe('Icon', () => {
     it('is not called when "disabled" is true', () => {
       const onClick = sandbox.spy()
       const preventDefault = sandbox.spy()
-      mount(<Icon disabled onClick={onClick} />).simulate('click', { preventDefault })
+      const { container } = render(<Icon disabled onClick={onClick} />)
+
+      fireEvent.click(container.firstChild, { preventDefault })
 
       onClick.should.have.not.been.called()
       preventDefault.should.have.calledOnce()

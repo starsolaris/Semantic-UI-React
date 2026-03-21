@@ -1,4 +1,5 @@
 import React from 'react'
+import { render, fireEvent } from '@testing-library/react'
 
 import PaginationItem from 'src/addons/Pagination/PaginationItem'
 import * as common from 'test/specs/commonTests'
@@ -11,47 +12,55 @@ describe('PaginationItem', () => {
 
   describe('active', () => {
     it('is "undefined" by default', () => {
-      shallow(<PaginationItem />).should.have.not.prop('active')
+      const { container } = render(<PaginationItem />)
+      const element = container.firstChild
+      expect(element.getAttribute('active')).to.be.null()
     })
 
     it('can pass its value', () => {
-      shallow(<PaginationItem active />).should.have.prop('active', true)
+      const { container } = render(<PaginationItem active />)
+      const element = container.firstChild
+      expect(element.getAttribute('active')).to.equal('true')
     })
   })
 
   describe('aria-current', () => {
     it('matches the values of "active" prop by default', () => {
-      shallow(<PaginationItem active />).should.have.prop('aria-current', true)
+      const { container } = render(<PaginationItem active />)
+      const element = container.firstChild
+      expect(element.getAttribute('aria-current')).to.equal('true')
     })
 
     it('can be overridden', () => {
-      shallow(<PaginationItem active aria-current={false} />).should.have.prop(
-        'aria-current',
-        false,
-      )
+      const { container } = render(<PaginationItem active aria-current={false} />)
+      const element = container.firstChild
+      expect(element.getAttribute('aria-current')).to.equal('false')
     })
   })
 
   describe('disabled', () => {
     it('is "false" by default', () => {
-      const wrapper = shallow(<PaginationItem />)
+      const { container } = render(<PaginationItem />)
+      const element = container.firstChild
 
-      wrapper.should.have.prop('disabled', false)
-      wrapper.should.have.prop('aria-disabled', false)
+      expect(element.getAttribute('disabled')).to.be.null()
+      expect(element.getAttribute('aria-disabled')).to.equal('false')
     })
 
     it('is "true" when "type" is "ellipsisItem"', () => {
-      const wrapper = shallow(<PaginationItem type='ellipsisItem' />)
+      const { container } = render(<PaginationItem type='ellipsisItem' />)
+      const element = container.firstChild
 
-      wrapper.should.have.prop('disabled', true)
-      wrapper.should.have.prop('aria-disabled', true)
+      expect(element.getAttribute('disabled')).to.equal('true')
+      expect(element.getAttribute('aria-disabled')).to.equal('true')
     })
 
     it('can be overridden', () => {
-      const wrapper = shallow(<PaginationItem disabled />)
+      const { container } = render(<PaginationItem disabled />)
+      const element = container.firstChild
 
-      wrapper.should.have.prop('disabled', true)
-      wrapper.should.have.prop('aria-disabled', true)
+      expect(element.getAttribute('disabled')).to.equal('true')
+      expect(element.getAttribute('aria-disabled')).to.equal('true')
     })
   })
 
@@ -60,7 +69,8 @@ describe('PaginationItem', () => {
       const event = { target: null }
       const onClick = sandbox.spy()
 
-      shallow(<PaginationItem onClick={onClick} />).simulate('click', event)
+      const { container } = render(<PaginationItem onClick={onClick} />)
+      fireEvent.click(container.firstChild, event)
 
       onClick.should.have.been.calledOnce()
       onClick.should.have.been.calledWithMatch(event, { onClick })
@@ -70,7 +80,8 @@ describe('PaginationItem', () => {
       const event = { key: 'Enter', target: null }
       const onClick = sandbox.spy()
 
-      shallow(<PaginationItem onClick={onClick} />).simulate('keyDown', event)
+      const { container } = render(<PaginationItem onClick={onClick} />)
+      fireEvent.keyDown(container.firstChild, event)
 
       onClick.should.have.been.calledOnce()
       onClick.should.have.been.calledWithMatch(event, { onClick })
@@ -82,7 +93,8 @@ describe('PaginationItem', () => {
       const event = { key: 'Enter', target: null }
       const onKeyDown = sandbox.spy()
 
-      shallow(<PaginationItem onKeyDown={onKeyDown} />).simulate('keyDown', event)
+      const { container } = render(<PaginationItem onKeyDown={onKeyDown} />)
+      fireEvent.keyDown(container.firstChild, event)
 
       onKeyDown.should.have.been.calledOnce()
       onKeyDown.should.have.been.calledWithMatch(event, { onKeyDown })
@@ -91,15 +103,21 @@ describe('PaginationItem', () => {
 
   describe('tabIndex', () => {
     it('is "0" by default', () => {
-      shallow(<PaginationItem />).should.have.prop('tabIndex', 0)
+      const { container } = render(<PaginationItem />)
+      const element = container.firstChild
+      expect(element.tabIndex).to.equal(0)
     })
 
     it('is "-1" when "type" is "ellipsisItem"', () => {
-      shallow(<PaginationItem type='ellipsisItem' />).should.have.prop('tabIndex', -1)
+      const { container } = render(<PaginationItem type='ellipsisItem' />)
+      const element = container.firstChild
+      expect(element.tabIndex).to.equal(-1)
     })
 
     it('can be overridden', () => {
-      shallow(<PaginationItem tabIndex={5} />).should.have.prop('tabIndex', 5)
+      const { container } = render(<PaginationItem tabIndex={5} />)
+      const element = container.firstChild
+      expect(element.tabIndex).to.equal(5)
     })
   })
 })

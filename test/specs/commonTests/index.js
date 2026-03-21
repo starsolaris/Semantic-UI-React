@@ -1,13 +1,42 @@
-export forwardsRef from './forwardsRef'
+import forwardsRef from './forwardsRef'
+export { forwardsRef }
 
-export hasSubcomponents from './hasSubcomponents'
-export hasValidTypings from './hasValidTypings'
-export hasUIClassName from './hasUIClassName'
+import hasSubcomponents from './hasSubcomponents'
+export { hasSubcomponents }
 
-export * from './implementsClassNameProps'
-export * from './implementsCommonProps'
-export implementsCreateMethod from './implementsCreateMethod'
-export implementsShorthandProp from './implementsShorthandProp'
+import hasValidTypings from './hasValidTypings'
+export { hasValidTypings }
 
-export isConformant from './isConformant'
-export rendersChildren from './rendersChildren'
+import hasUIClassName from './hasUIClassName'
+export { hasUIClassName }
+
+import * as implementsClassNameProps from './implementsClassNameProps'
+import {
+  propKeyAndValueToClassName,
+  propKeyOnlyToClassName,
+  propKeyOrValueAndKeyToClassName,
+  propValueOnlyToClassName,
+} from './implementsClassNameProps'
+export {
+  implementsClassNameProps,
+  propKeyAndValueToClassName,
+  propKeyOnlyToClassName,
+  propKeyOrValueAndKeyToClassName,
+  propValueOnlyToClassName,
+}
+
+import * as implementsCommonProps from './implementsCommonProps'
+import { implementsIconProp, implementsLabelProp } from './implementsCommonProps'
+export { implementsCommonProps, implementsIconProp, implementsLabelProp }
+
+import implementsCreateMethod from './implementsCreateMethod'
+export { implementsCreateMethod }
+
+import implementsShorthandProp from './implementsShorthandProp'
+export { implementsShorthandProp }
+
+import isConformant from './isConformant'
+export { isConformant }
+
+import rendersChildren from './rendersChildren'
+export { rendersChildren }

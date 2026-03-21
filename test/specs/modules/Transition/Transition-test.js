@@ -1,4 +1,5 @@
 import React from 'react'
+import { render, fireEvent } from '@testing-library/react'
 
 import { SUI } from 'src/lib'
 import Transition from 'src/modules/Transition/Transition'
@@ -12,21 +13,32 @@ import {
 import * as common from 'test/specs/commonTests'
 import { sandbox } from 'test/utils'
 
-let wrapper
+let container
+let rerenderFn
 
-const wrapperMount = (...args) => (wrapper = mount(...args))
-const wrapperShallow = (...args) => (wrapper = shallow(...args))
+const wrapperMount = (node, opts) => {
+  const result = render(node, opts)
+  container = result.container
+  rerenderFn = result.rerender
+  return result
+}
 
 describe('Transition', () => {
   common.hasSubcomponents(Transition, [TransitionGroup])
   common.hasValidTypings(Transition, { forwardsRef: false })
 
   beforeEach(() => {
-    wrapper = undefined
+    container = undefined
+    rerenderFn = undefined
   })
 
   afterEach(() => {
-    if (wrapper && wrapper.unmount) wrapper.unmount()
+    if (container) {
+      try {
+        container.remove()
+        // eslint-disable-next-line no-empty
+      } catch (e) {}
+    }
   })
 
   describe('animation', () => {
@@ -38,14 +50,18 @@ describe('Transition', () => {
           </Transition>,
         )
 
-        wrapper.find('p').should.have.data('test-status', TRANSITION_STATUS_ENTERING)
-        animation.split(' ').forEach((className) => wrapper.should.have.className(className))
-        wrapper.should.have.className('in')
+        expect(container.querySelector('p').dataset.testStatus).to.equal(TRANSITION_STATUS_ENTERING)
+        animation.split(' ').forEach((className) => expect(container.firstChild.classList.contains(className)).to.be.true())
+        expect(container.firstChild.classList.contains('in')).to.be.true()
 
-        wrapper.setProps({ visible: false })
-        wrapper.find('p').should.have.data('test-status', TRANSITION_STATUS_EXITING)
-        animation.split(' ').forEach((className) => wrapper.should.have.className(className))
-        wrapper.should.have.className('out')
+        rerenderFn(
+          <Transition animation={animation} visible={false}>
+            <p />
+          </Transition>,
+        )
+        expect(container.querySelector('p').dataset.testStatus).to.equal(TRANSITION_STATUS_EXITING)
+        animation.split(' ').forEach((className) => expect(container.firstChild.classList.contains(className)).to.be.true())
+        expect(container.firstChild.classList.contains('out')).to.be.true()
       })
     })
 
@@ -57,14 +73,18 @@ describe('Transition', () => {
           </Transition>,
         )
 
-        wrapper.find('p').should.have.data('test-status', TRANSITION_STATUS_ENTERING)
-        wrapper.should.have.className(animation)
-        wrapper.should.not.have.className('in')
+        expect(container.querySelector('p').dataset.testStatus).to.equal(TRANSITION_STATUS_ENTERING)
+        expect(container.firstChild.classList.contains(animation)).to.be.true()
+        expect(container.firstChild.classList.contains('in')).to.be.false()
 
-        wrapper.setProps({ visible: false })
-        wrapper.find('p').should.have.data('test-status', TRANSITION_STATUS_EXITING)
-        wrapper.should.have.className(animation)
-        wrapper.should.not.have.className('out')
+        rerenderFn(
+          <Transition animation={animation} visible={false}>
+            <p />
+          </Transition>,
+        )
+        expect(container.querySelector('p').dataset.testStatus).to.equal(TRANSITION_STATUS_EXITING)
+        expect(container.firstChild.classList.contains(animation)).to.be.true()
+        expect(container.firstChild.classList.contains('out')).to.be.false()
       })
     })
 
@@ -75,12 +95,16 @@ describe('Transition', () => {
         </Transition>,
       )
 
-      wrapper.find('p').should.have.data('test-status', TRANSITION_STATUS_ENTERING)
-      wrapper.should.have.className('jump')
+      expect(container.querySelector('p').dataset.testStatus).to.equal(TRANSITION_STATUS_ENTERING)
+      expect(container.firstChild.classList.contains('jump')).to.be.true()
 
-      wrapper.setProps({ visible: false })
-      wrapper.find('p').should.have.data('test-status', TRANSITION_STATUS_EXITING)
-      wrapper.should.have.className('jump')
+      rerenderFn(
+        <Transition animation='jump' visible={false}>
+          <p />
+        </Transition>,
+      )
+      expect(container.querySelector('p').dataset.testStatus).to.equal(TRANSITION_STATUS_EXITING)
+      expect(container.firstChild.classList.contains('jump')).to.be.true()
     })
   })
 
@@ -92,8 +116,8 @@ describe('Transition', () => {
         </Transition>,
       )
 
-      wrapper.should.have.className('foo')
-      wrapper.should.have.className('bar')
+      expect(container.firstChild.classList.contains('foo')).to.be.true()
+      expect(container.firstChild.classList.contains('bar')).to.be.true()
     })
 
     it('adds classes when ENTERED', () => {
@@ -103,8 +127,8 @@ describe('Transition', () => {
         </Transition>,
       )
 
-      wrapper.should.have.className('visible')
-      wrapper.should.have.className('transition')
+      expect(container.firstChild.classList.contains('visible')).to.be.true()
+      expect(container.firstChild.classList.contains('transition')).to.be.true()
     })
 
     it('adds classes when ENTERING', () => {
@@ -114,9 +138,9 @@ describe('Transition', () => {
         </Transition>,
       )
 
-      wrapper.should.have.className('animating')
-      wrapper.should.have.className('visible')
-      wrapper.should.have.className('transition')
+      expect(container.firstChild.classList.contains('animating')).to.be.true()
+      expect(container.firstChild.classList.contains('visible')).to.be.true()
+      expect(container.firstChild.classList.contains('transition')).to.be.true()
     })
 
     it('adds classes when EXITED', () => {
@@ -126,8 +150,8 @@ describe('Transition', () => {
         </Transition>,
       )
 
-      wrapper.should.have.className('hidden')
-      wrapper.should.have.className('transition')
+      expect(container.firstChild.classList.contains('hidden')).to.be.true()
+      expect(container.firstChild.classList.contains('transition')).to.be.true()
     })
 
     it('adds classes when EXITING', () => {
@@ -136,11 +160,15 @@ describe('Transition', () => {
           <p />
         </Transition>,
       )
-      wrapper.setProps({ visible: false })
+      rerenderFn(
+        <Transition transitionOnMount={false} visible={false}>
+          <p />
+        </Transition>,
+      )
 
-      wrapper.should.have.className('animating')
-      wrapper.should.have.className('visible')
-      wrapper.should.have.className('transition')
+      expect(container.firstChild.classList.contains('animating')).to.be.true()
+      expect(container.firstChild.classList.contains('visible')).to.be.true()
+      expect(container.firstChild.classList.contains('transition')).to.be.true()
     })
   })
 
@@ -152,12 +180,16 @@ describe('Transition', () => {
         </Transition>,
       )
 
-      wrapper.find('p').should.have.data('test-status', TRANSITION_STATUS_ENTERING)
-      wrapper.should.have.className('in')
+      expect(container.querySelector('p').dataset.testStatus).to.equal(TRANSITION_STATUS_ENTERING)
+      expect(container.firstChild.classList.contains('in')).to.be.true()
 
-      wrapper.setProps({ visible: false })
-      wrapper.find('p').should.have.data('test-status', TRANSITION_STATUS_EXITING)
-      wrapper.should.have.className('out')
+      rerenderFn(
+        <Transition directional visible={false}>
+          <p />
+        </Transition>,
+      )
+      expect(container.querySelector('p').dataset.testStatus).to.equal(TRANSITION_STATUS_EXITING)
+      expect(container.firstChild.classList.contains('out')).to.be.true()
     })
 
     it('do not add classes when is "false"', () => {
@@ -167,32 +199,36 @@ describe('Transition', () => {
         </Transition>,
       )
 
-      wrapper.find('p').should.have.data('test-status', TRANSITION_STATUS_ENTERING)
-      wrapper.should.have.not.className('in')
+      expect(container.querySelector('p').dataset.testStatus).to.equal(TRANSITION_STATUS_ENTERING)
+      expect(container.firstChild.classList.contains('in')).to.be.false()
 
-      wrapper.setProps({ visible: false })
-      wrapper.find('p').should.have.data('test-status', TRANSITION_STATUS_EXITING)
-      wrapper.should.have.not.className('out')
+      rerenderFn(
+        <Transition directional={false} visible={false}>
+          <p />
+        </Transition>,
+      )
+      expect(container.querySelector('p').dataset.testStatus).to.equal(TRANSITION_STATUS_EXITING)
+      expect(container.firstChild.classList.contains('out')).to.be.false()
     })
   })
 
   describe('children', () => {
     it('clones element', () => {
-      wrapperShallow(
+      wrapperMount(
         <Transition>
           <p className='foo' />
         </Transition>,
       )
-      wrapper.should.have.descendants('p.foo')
+      expect(container.querySelector('p.foo')).to.not.be.null()
     })
 
     it('returns null when UNMOUNTED', () => {
-      wrapperShallow(
+      wrapperMount(
         <Transition mountOnShow={false} unmountOnHide={false} visible={false}>
           <p className='foo bar' />
         </Transition>,
       )
-      wrapper.should.be.blank()
+      expect(container.innerHTML).to.equal('')
     })
   })
 
@@ -204,8 +240,8 @@ describe('Transition', () => {
         </Transition>,
       )
 
-      wrapper.find('p').should.have.data('test-status', TRANSITION_STATUS_ENTERED)
-      wrapper.find('p').should.not.have.data('test-next-status')
+      expect(container.querySelector('p').dataset.testStatus).to.equal(TRANSITION_STATUS_ENTERED)
+      expect(container.querySelector('p').dataset.testNextStatus).to.be.undefined()
     })
 
     it('sets statuses when `visible` is false', () => {
@@ -215,7 +251,7 @@ describe('Transition', () => {
         </Transition>,
       )
 
-      wrapper.should.have.not.descendants('p')
+      expect(container.querySelector('p')).to.be.null()
     })
 
     it('sets statuses when mount is disabled', () => {
@@ -225,8 +261,8 @@ describe('Transition', () => {
         </Transition>,
       )
 
-      wrapper.find('p').should.have.data('test-status', TRANSITION_STATUS_EXITED)
-      wrapper.find('p').should.not.have.data('test-next-status')
+      expect(container.querySelector('p').dataset.testStatus).to.equal(TRANSITION_STATUS_EXITED)
+      expect(container.querySelector('p').dataset.testNextStatus).to.be.undefined()
     })
   })
 
@@ -238,7 +274,7 @@ describe('Transition', () => {
         </Transition>,
       )
 
-      wrapper.should.not.have.style('animation-duration')
+      expect(container.firstChild.style.animationDuration).to.equal('')
     })
 
     it('applies default value to style when ENTERING', () => {
@@ -248,8 +284,8 @@ describe('Transition', () => {
         </Transition>,
       )
 
-      wrapper.find('p').should.have.data('test-status', TRANSITION_STATUS_ENTERING)
-      wrapper.should.have.style('animation-duration', '500ms')
+      expect(container.querySelector('p').dataset.testStatus).to.equal(TRANSITION_STATUS_ENTERING)
+      expect(container.firstChild.style.animationDuration).to.equal('500ms')
     })
 
     it('applies numeric value to style when ENTERING', () => {
@@ -259,8 +295,8 @@ describe('Transition', () => {
         </Transition>,
       )
 
-      wrapper.find('p').should.have.data('test-status', TRANSITION_STATUS_ENTERING)
-      wrapper.should.have.style('animation-duration', '1000ms')
+      expect(container.querySelector('p').dataset.testStatus).to.equal(TRANSITION_STATUS_ENTERING)
+      expect(container.firstChild.style.animationDuration).to.equal('1000ms')
     })
 
     it('applies object value to style when ENTERING', () => {
@@ -270,8 +306,8 @@ describe('Transition', () => {
         </Transition>,
       )
 
-      wrapper.find('p').should.have.data('test-status', TRANSITION_STATUS_ENTERING)
-      wrapper.should.have.style('animation-duration', '2000ms')
+      expect(container.querySelector('p').dataset.testStatus).to.equal(TRANSITION_STATUS_ENTERING)
+      expect(container.firstChild.style.animationDuration).to.equal('2000ms')
     })
 
     it('does not apply to style when EXITED', () => {
@@ -281,8 +317,8 @@ describe('Transition', () => {
         </Transition>,
       )
 
-      wrapper.find('p').should.have.data('test-status', TRANSITION_STATUS_EXITED)
-      wrapper.should.not.have.style('animation-duration')
+      expect(container.querySelector('p').dataset.testStatus).to.equal(TRANSITION_STATUS_EXITED)
+      expect(container.firstChild.style.animationDuration).to.equal('')
     })
 
     it('applies default value to style when EXITING', () => {
@@ -292,20 +328,24 @@ describe('Transition', () => {
         </Transition>,
       )
 
-      wrapper.setProps({ visible: false })
-      wrapper.find('p').should.have.data('test-status', TRANSITION_STATUS_EXITING)
-      wrapper.should.have.style('animation-duration')
+      rerenderFn(
+        <Transition visible={false}>
+          <p />
+        </Transition>,
+      )
+      expect(container.querySelector('p').dataset.testStatus).to.equal(TRANSITION_STATUS_EXITING)
+      expect(container.firstChild.style.animationDuration).to.not.equal('')
     })
 
     it('applies numeric value to style when EXITING', () => {
-      wrapperShallow(
+      wrapperMount(
         <Transition duration={1000} transitionOnMount>
           <p />
         </Transition>,
       )
 
-      wrapper.find('p').should.have.data('test-status', TRANSITION_STATUS_ENTERING)
-      wrapper.should.have.style('animation-duration', '1000ms')
+      expect(container.querySelector('p').dataset.testStatus).to.equal(TRANSITION_STATUS_ENTERING)
+      expect(container.firstChild.style.animationDuration).to.equal('1000ms')
     })
 
     it('applies object value to style when EXITING', () => {
@@ -315,9 +355,13 @@ describe('Transition', () => {
         </Transition>,
       )
 
-      wrapper.setProps({ visible: false })
-      wrapper.find('p').should.have.data('test-status', TRANSITION_STATUS_EXITING)
-      wrapper.should.have.style('animation-duration', '1000ms')
+      rerenderFn(
+        <Transition duration={{ hide: 1000, show: 2000 }} visible={false}>
+          <p />
+        </Transition>,
+      )
+      expect(container.querySelector('p').dataset.testStatus).to.equal(TRANSITION_STATUS_EXITING)
+      expect(container.firstChild.style.animationDuration).to.equal('1000ms')
     })
   })
 
@@ -329,11 +373,15 @@ describe('Transition', () => {
         </Transition>,
       )
 
-      wrapper.find('p').should.have.data('test-status', TRANSITION_STATUS_ENTERING)
+      expect(container.querySelector('p').dataset.testStatus).to.equal(TRANSITION_STATUS_ENTERING)
 
-      wrapper.setProps({ visible: false })
-      wrapper.find('p').should.have.data('test-status', TRANSITION_STATUS_EXITING)
-      wrapper.find('p').should.have.data('test-next-status', TRANSITION_STATUS_EXITED)
+      rerenderFn(
+        <Transition visible={false}>
+          <p />
+        </Transition>,
+      )
+      expect(container.querySelector('p').dataset.testStatus).to.equal(TRANSITION_STATUS_EXITING)
+      expect(container.querySelector('p').dataset.testNextStatus).to.equal(TRANSITION_STATUS_EXITED)
     })
 
     it('updates status when set to false while ENTERED', () => {
@@ -342,11 +390,15 @@ describe('Transition', () => {
           <p />
         </Transition>,
       )
-      wrapper.find('p').should.have.data('test-status', TRANSITION_STATUS_ENTERED)
+      expect(container.querySelector('p').dataset.testStatus).to.equal(TRANSITION_STATUS_ENTERED)
 
-      wrapper.setProps({ visible: false })
-      wrapper.find('p').should.have.data('test-status', TRANSITION_STATUS_EXITING)
-      wrapper.find('p').should.have.data('test-next-status', TRANSITION_STATUS_EXITED)
+      rerenderFn(
+        <Transition transitionOnMount={false} visible={false}>
+          <p />
+        </Transition>,
+      )
+      expect(container.querySelector('p').dataset.testStatus).to.equal(TRANSITION_STATUS_EXITING)
+      expect(container.querySelector('p').dataset.testNextStatus).to.equal(TRANSITION_STATUS_EXITED)
     })
 
     it('updates status when set to true while UNMOUNTED', () => {
@@ -355,11 +407,15 @@ describe('Transition', () => {
           <p />
         </Transition>,
       )
-      wrapper.should.have.not.descendants('p')
+      expect(container.querySelector('p')).to.be.null()
 
-      wrapper.setProps({ visible: true })
-      wrapper.find('p').should.have.data('test-status', TRANSITION_STATUS_ENTERING)
-      wrapper.find('p').should.have.data('test-next-status', TRANSITION_STATUS_ENTERED)
+      rerenderFn(
+        <Transition visible>
+          <p />
+        </Transition>,
+      )
+      expect(container.querySelector('p').dataset.testStatus).to.equal(TRANSITION_STATUS_ENTERING)
+      expect(container.querySelector('p').dataset.testNextStatus).to.equal(TRANSITION_STATUS_ENTERED)
     })
 
     it('updates next status when set to true while performs an ENTERING transition', (done) => {
@@ -369,11 +425,15 @@ describe('Transition', () => {
         </Transition>,
       )
 
-      wrapper.find('p').should.have.data('test-status', TRANSITION_STATUS_ENTERING)
+      expect(container.querySelector('p').dataset.testStatus).to.equal(TRANSITION_STATUS_ENTERING)
 
-      wrapper.setProps({ visible: false })
-      wrapper.find('p').should.have.data('test-status', TRANSITION_STATUS_EXITING)
-      wrapper.find('p').should.have.data('test-next-status', TRANSITION_STATUS_EXITED)
+      rerenderFn(
+        <Transition duration={10} visible={false} onHide={done}>
+          <p />
+        </Transition>,
+      )
+      expect(container.querySelector('p').dataset.testStatus).to.equal(TRANSITION_STATUS_EXITING)
+      expect(container.querySelector('p').dataset.testNextStatus).to.equal(TRANSITION_STATUS_EXITED)
     })
 
     it('updates next status when set to true while performs an EXITING transition', (done) => {
@@ -383,15 +443,23 @@ describe('Transition', () => {
         </Transition>,
       )
 
-      wrapper.find('p').should.have.data('test-status', TRANSITION_STATUS_ENTERED)
+      expect(container.querySelector('p').dataset.testStatus).to.equal(TRANSITION_STATUS_ENTERED)
 
-      wrapper.setProps({ visible: false })
-      wrapper.find('p').should.have.data('test-status', TRANSITION_STATUS_EXITING)
-      wrapper.find('p').should.have.data('test-next-status', TRANSITION_STATUS_EXITED)
+      rerenderFn(
+        <Transition duration={10} onShow={done} visible={false}>
+          <p />
+        </Transition>,
+      )
+      expect(container.querySelector('p').dataset.testStatus).to.equal(TRANSITION_STATUS_EXITING)
+      expect(container.querySelector('p').dataset.testNextStatus).to.equal(TRANSITION_STATUS_EXITED)
 
-      wrapper.setProps({ visible: true })
-      wrapper.find('p').should.have.data('test-status', TRANSITION_STATUS_ENTERING)
-      wrapper.find('p').should.have.data('test-next-status', TRANSITION_STATUS_ENTERED)
+      rerenderFn(
+        <Transition duration={10} onShow={done} visible>
+          <p />
+        </Transition>,
+      )
+      expect(container.querySelector('p').dataset.testStatus).to.equal(TRANSITION_STATUS_ENTERING)
+      expect(container.querySelector('p').dataset.testNextStatus).to.equal(TRANSITION_STATUS_ENTERED)
     })
   })
 
@@ -430,7 +498,11 @@ describe('Transition', () => {
       )
 
       setTimeout(() => {
-        wrapper.setProps({})
+        rerenderFn(
+          <Transition duration={200} onComplete={onComplete} transitionOnMount>
+            <p />
+          </Transition>,
+        )
       }, 100)
       setTimeout(() => {
         onComplete.should.have.been.calledOnce()
@@ -459,7 +531,11 @@ describe('Transition', () => {
           <p />
         </Transition>,
       )
-      wrapper.setProps({ visible: false })
+      rerenderFn(
+        <Transition duration={0} onHide={handleHide} transitionOnMount={false} visible={false}>
+          <p />
+        </Transition>,
+      )
     })
 
     it('depends on the specified duration', (done) => {
@@ -470,15 +546,19 @@ describe('Transition', () => {
         </Transition>,
       )
 
-      wrapper.setProps({ visible: false })
-      wrapper.find('p').should.have.data('test-status', TRANSITION_STATUS_EXITING)
+      rerenderFn(
+        <Transition duration={{ hide: 200 }} onHide={onHide} transitionOnMount={false} visible={false}>
+          <p />
+        </Transition>,
+      )
+      expect(container.querySelector('p').dataset.testStatus).to.equal(TRANSITION_STATUS_EXITING)
 
       setTimeout(() => {
-        wrapper.find('p').should.have.data('test-status', TRANSITION_STATUS_EXITING)
+        expect(container.querySelector('p').dataset.testStatus).to.equal(TRANSITION_STATUS_EXITING)
       }, 100)
       setTimeout(() => {
         onHide.should.have.been.calledOnce()
-        wrapper.find('p').should.have.data('test-status', TRANSITION_STATUS_EXITED)
+        expect(container.querySelector('p').dataset.testStatus).to.equal(TRANSITION_STATUS_EXITED)
 
         done()
       }, 200)
@@ -493,15 +573,23 @@ describe('Transition', () => {
         </Transition>,
       )
 
-      wrapper.setProps({ visible: false })
+      rerenderFn(
+        <Transition duration={200} onStart={onStart} visible={false}>
+          <p />
+        </Transition>,
+      )
 
-      wrapper.find('p').should.have.data('test-status', TRANSITION_STATUS_EXITING)
-      wrapper.find('p').should.have.data('test-next-status', TRANSITION_STATUS_EXITED)
+      expect(container.querySelector('p').dataset.testStatus).to.equal(TRANSITION_STATUS_EXITING)
+      expect(container.querySelector('p').dataset.testNextStatus).to.equal(TRANSITION_STATUS_EXITED)
 
-      wrapper.setProps({})
+      rerenderFn(
+        <Transition duration={200} onStart={onStart} visible={false}>
+          <p />
+        </Transition>,
+      )
 
-      wrapper.find('p').should.have.data('test-status', TRANSITION_STATUS_EXITING)
-      wrapper.find('p').should.have.data('test-next-status', TRANSITION_STATUS_EXITED)
+      expect(container.querySelector('p').dataset.testStatus).to.equal(TRANSITION_STATUS_EXITING)
+      expect(container.querySelector('p').dataset.testNextStatus).to.equal(TRANSITION_STATUS_EXITED)
 
       onStart.should.have.been.calledOnce()
       done()
@@ -538,14 +626,14 @@ describe('Transition', () => {
         </Transition>,
       )
 
-      wrapper.find('p').should.have.data('test-status', TRANSITION_STATUS_ENTERING)
+      expect(container.querySelector('p').dataset.testStatus).to.equal(TRANSITION_STATUS_ENTERING)
 
       setTimeout(() => {
-        wrapper.find('p').should.have.data('test-status', TRANSITION_STATUS_ENTERING)
+        expect(container.querySelector('p').dataset.testStatus).to.equal(TRANSITION_STATUS_ENTERING)
       }, 100)
       setTimeout(() => {
         onShow.should.have.been.calledOnce()
-        wrapper.find('p').should.have.data('test-status', TRANSITION_STATUS_ENTERED)
+        expect(container.querySelector('p').dataset.testStatus).to.equal(TRANSITION_STATUS_ENTERED)
         done()
       }, 200)
     })
@@ -582,13 +670,17 @@ describe('Transition', () => {
         </Transition>,
       )
 
-      wrapper.find('p').should.have.data('test-status', TRANSITION_STATUS_ENTERING)
-      wrapper.find('p').should.have.data('test-next-status', TRANSITION_STATUS_ENTERED)
+      expect(container.querySelector('p').dataset.testStatus).to.equal(TRANSITION_STATUS_ENTERING)
+      expect(container.querySelector('p').dataset.testNextStatus).to.equal(TRANSITION_STATUS_ENTERED)
 
-      wrapper.setProps({})
+      rerenderFn(
+        <Transition duration={200} onStart={onStart} transitionOnMount>
+          <p />
+        </Transition>,
+      )
 
-      wrapper.find('p').should.have.data('test-status', TRANSITION_STATUS_ENTERING)
-      wrapper.find('p').should.have.data('test-next-status', TRANSITION_STATUS_ENTERED)
+      expect(container.querySelector('p').dataset.testStatus).to.equal(TRANSITION_STATUS_ENTERING)
+      expect(container.querySelector('p').dataset.testNextStatus).to.equal(TRANSITION_STATUS_ENTERED)
 
       onStart.should.have.been.calledOnce()
       done()
@@ -597,27 +689,27 @@ describe('Transition', () => {
 
   describe('style', () => {
     it("passes element's style", () => {
-      wrapperShallow(
+      wrapperMount(
         <Transition>
           <p style={{ bottom: 5, top: 10 }} />
         </Transition>,
       )
 
-      wrapper.should.have.style('bottom', '5px')
-      wrapper.should.have.style('top', '10px')
+      expect(container.firstChild.style.bottom).to.equal('5px')
+      expect(container.firstChild.style.top).to.equal('10px')
     })
   })
 
   describe('transitionOnMount', () => {
     it('sets statuses when is true', () => {
-      wrapperShallow(
+      wrapperMount(
         <Transition transitionOnMount>
           <p />
         </Transition>,
       )
 
-      wrapper.find('p').should.have.data('test-status', TRANSITION_STATUS_ENTERING)
-      wrapper.find('p').should.have.data('test-next-status', TRANSITION_STATUS_ENTERED)
+      expect(container.querySelector('p').dataset.testStatus).to.equal(TRANSITION_STATUS_ENTERING)
+      expect(container.querySelector('p').dataset.testNextStatus).to.equal(TRANSITION_STATUS_ENTERED)
     })
   })
 
@@ -629,9 +721,12 @@ describe('Transition', () => {
         </Transition>,
       )
 
-      wrapper.setProps({ visible: false })
-      wrapper.update()
-      wrapper.should.have.not.descendants('p')
+      rerenderFn(
+        <Transition duration={0} transitionOnMount={false} unmountOnHide visible={false}>
+          <p />
+        </Transition>,
+      )
+      expect(container.querySelector('p')).to.be.null()
     })
 
     it('lefts mounted when false', () => {
@@ -641,9 +736,12 @@ describe('Transition', () => {
         </Transition>,
       )
 
-      wrapper.setProps({ visible: false })
-      wrapper.update()
-      wrapper.find('p').should.have.data('test-status', TRANSITION_STATUS_EXITED)
+      rerenderFn(
+        <Transition duration={0} transitionOnMount={false} unmountOnHide={false} visible={false}>
+          <p />
+        </Transition>,
+      )
+      expect(container.querySelector('p').dataset.testStatus).to.equal(TRANSITION_STATUS_EXITED)
     })
   })
 })

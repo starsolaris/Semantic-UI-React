@@ -1,1 +1,2 @@
-export default from './Rail'
+import Rail from './Rail';
+export default Rail;

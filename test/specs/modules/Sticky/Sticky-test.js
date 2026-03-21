@@ -1,19 +1,20 @@
 import _ from 'lodash'
 import React from 'react'
+import { render, fireEvent } from '@testing-library/react'
 
 import Sticky from 'src/modules/Sticky/Sticky'
 import * as common from 'test/specs/commonTests'
 import { domEvent, sandbox } from 'test/utils'
 
 let contextEl
-let wrapper
+let container
+let rerenderFn
 let positions
 
 const mockContextEl = (values = {}) => (contextEl = { getBoundingClientRect: () => values })
 
 const mockTriggerEl = (values = {}) => {
-  const wrapperEl = wrapper.getDOMNode()
-  const triggerEl = wrapperEl.childNodes[0]
+  const triggerEl = container.firstChild.childNodes[0]
 
   // try to remove any existing spy in case it exists
   try {
@@ -24,8 +25,7 @@ const mockTriggerEl = (values = {}) => {
 }
 
 const mockStickyEl = (values = {}) => {
-  const wrapperEl = wrapper.getDOMNode()
-  const stickyEl = wrapperEl.childNodes[1]
+  const stickyEl = container.firstChild.childNodes[1]
 
   // try to remove any existing spy in case it exists
   try {
@@ -42,15 +42,20 @@ const mockPositions = ({ bottomOffset = 5, offset = 5, height = 5 } = {}) =>
     offset,
   })
 
-const wrapperMount = (...args) => (wrapper = mount(...args))
+const wrapperMount = (node, opts) => {
+  const result = render(node, opts)
+  container = result.container
+  rerenderFn = result.rerender
+  return result
+}
 
 // Scroll to the top of the screen
 const scrollToTop = () => {
   const { bottomOffset, height, offset } = positions
 
-  wrapper.setProps({
-    context: { getBoundingClientRect: () => ({ bottom: height + offset + bottomOffset }) },
-  })
+  rerenderFn(
+    <Sticky {...positions} context={{ getBoundingClientRect: () => ({ bottom: height + offset + bottomOffset }) }} />,
+  )
 
   mockTriggerEl({ top: offset })
   mockStickyEl({ height, top: offset })
@@ -62,9 +67,9 @@ const scrollToTop = () => {
 const scrollAfterTrigger = () => {
   const { bottomOffset, height, offset } = positions
 
-  wrapper.setProps({
-    context: { getBoundingClientRect: () => ({ bottom: window.innerHeight - bottomOffset + 1 }) },
-  })
+  rerenderFn(
+    <Sticky {...positions} context={{ getBoundingClientRect: () => ({ bottom: window.innerHeight - bottomOffset + 1 }) }} />,
+  )
 
   mockTriggerEl({ top: offset - 1 })
   mockStickyEl({ height })
@@ -76,7 +81,9 @@ const scrollAfterTrigger = () => {
 const scrollAfterContext = () => {
   const { height, offset } = positions
 
-  wrapper.setProps({ context: { getBoundingClientRect: () => ({ bottom: -1 }) } })
+  rerenderFn(
+    <Sticky {...positions} context={{ getBoundingClientRect: () => ({ bottom: -1 }) }} />,
+  )
 
   mockTriggerEl({ top: offset - 1 })
   mockStickyEl({ height })
@@ -88,7 +95,9 @@ const scrollAfterContext = () => {
 const scrollToContextBottom = () => {
   const { height, offset } = positions
 
-  wrapper.setProps({ context: { getBoundingClientRect: () => ({ bottom: height + 1 }) } })
+  rerenderFn(
+    <Sticky {...positions} context={{ getBoundingClientRect: () => ({ bottom: height + 1 }) }} />,
+  )
 
   mockTriggerEl({ top: offset - 1 })
   mockStickyEl({ height })
@@ -105,13 +114,14 @@ describe('Sticky', () => {
 
   beforeEach(() => {
     sandbox.stub(window, 'requestAnimationFrame').callsArg(0)
-    wrapper = undefined
+    container = undefined
+    rerenderFn = undefined
   })
 
   afterEach(() => {
-    if (wrapper && wrapper.unmount) {
+    if (container) {
       try {
-        wrapper.unmount()
+        container.remove()
         // eslint-disable-next-line no-empty
       } catch (e) {}
     }
@@ -119,17 +129,20 @@ describe('Sticky', () => {
 
   describe('children', () => {
     it('should create two divs', () => {
-      const children = shallow(<Sticky />).children()
+      const { container: c } = render(<Sticky />)
+      const children = c.firstChild.childNodes
 
-      children.should.have.length(2)
-      children.everyWhere((child) => child.should.have.tagName('div'))
+      expect(children.length).to.equal(2)
+      Array.from(children).forEach((child) => {
+        expect(child.tagName.toLowerCase()).to.equal('div')
+      })
     })
   })
 
   describe('active', () => {
     it('should handle update on mount when active', () => {
       const onTop = sandbox.spy()
-      mount(<Sticky context={mockContextEl()} onTop={onTop} />)
+      render(<Sticky context={mockContextEl()} onTop={onTop} />)
 
       onTop.should.have.been.calledOnce()
     })
@@ -147,7 +160,7 @@ describe('Sticky', () => {
       wrapperMount(<Sticky active={false} context={mockContextEl()} onTop={onTop} />)
       onTop.should.have.not.been.called()
 
-      wrapper.setProps({ active: true })
+      rerenderFn(<Sticky active context={mockContextEl()} onTop={onTop} />)
       onTop.should.have.been.calledOnce()
     })
 
@@ -163,15 +176,15 @@ describe('Sticky', () => {
       )
 
       _.forEach(['ui', 'sticky', 'fixed', 'top'], (className) =>
-        wrapper.childAt(0).childAt(1).should.have.className(className),
+        expect(container.firstChild.childNodes[0].childNodes[1].classList.contains(className)).to.be.true(),
       )
 
       onStick.should.have.been.calledOnce()
       onStick.should.have.been.calledWithMatch(undefined, positions)
 
-      wrapper.setProps({ active: false })
+      rerenderFn(<Sticky {...positions} context={contextEl} active={false} onStick={onStick} onUnstick={onUnStick} />)
       scrollToTop()
-      wrapper.childAt(0).childAt(1).should.have.not.className('fixed')
+      expect(container.firstChild.childNodes[0].childNodes[1].classList.contains('fixed')).to.be.false()
       onUnStick.should.not.have.been.called()
     })
   })
@@ -180,7 +193,7 @@ describe('Sticky', () => {
     it('should handle React refs', () => {
       const contextRef = { current: mockContextEl() }
       const onTop = sandbox.spy()
-      mount(<Sticky context={contextRef} onTop={onTop} />)
+      render(<Sticky context={contextRef} onTop={onTop} />)
 
       onTop.should.have.been.calledOnce()
     })
@@ -197,10 +210,10 @@ describe('Sticky', () => {
       scrollAfterTrigger()
 
       _.forEach(['ui', 'sticky', 'fixed', 'top'], (className) =>
-        wrapper.childAt(0).childAt(1).should.have.className(className),
+        expect(container.firstChild.childNodes[0].childNodes[1].classList.contains(className)).to.be.true(),
       )
 
-      wrapper.childAt(0).childAt(1).should.have.style('top', '12px')
+      expect(container.firstChild.childNodes[0].childNodes[1].style.top).to.equal('12px')
     })
 
     it('should stick to bottom of context', () => {
@@ -210,9 +223,9 @@ describe('Sticky', () => {
 
       scrollAfterContext()
       _.forEach(['ui', 'sticky', 'bound', 'bottom'], (className) =>
-        wrapper.childAt(0).childAt(1).should.have.className(className),
+        expect(container.firstChild.childNodes[0].childNodes[1].classList.contains(className)).to.be.true(),
       )
-      wrapper.childAt(0).childAt(1).should.have.style('bottom', '0px')
+      expect(container.firstChild.childNodes[0].childNodes[1].style.bottom).to.equal('0px')
     })
 
     it('should preserve sticky element height', () => {
@@ -223,7 +236,7 @@ describe('Sticky', () => {
       // Scroll after trigger
       scrollAfterTrigger()
 
-      wrapper.childAt(0).childAt(0).should.have.style('height', '100px')
+      expect(container.firstChild.childNodes[0].childNodes[0].style.height).to.equal('100px')
     })
   })
   describe('onBottom', () => {
@@ -302,24 +315,24 @@ describe('Sticky', () => {
 
       // Scroll back: component should still stick to context bottom
       scrollToContextBottom()
-      wrapper.setProps({ context: mockContextEl({ bottom: 0 }) })
+      rerenderFn(<Sticky {...positions} context={mockContextEl({ bottom: 0 })} pushing />)
       domEvent.scroll(window)
 
       _.forEach(['ui', 'sticky', 'bound', 'bottom'], (className) =>
-        wrapper.childAt(0).childAt(1).should.have.className(className),
+        expect(container.firstChild.childNodes[0].childNodes[1].classList.contains(className)).to.be.true(),
       )
-      wrapper.childAt(0).childAt(1).should.have.style('bottom', '0px')
+      expect(container.firstChild.childNodes[0].childNodes[1].style.bottom).to.equal('0px')
 
       // Scroll a bit before the top: component should stick to screen bottom
       scrollAfterTrigger()
 
-      wrapper.childAt(0).childAt(1).should.have.style('bottom', '30px')
+      expect(container.firstChild.childNodes[0].childNodes[1].style.bottom).to.equal('30px')
 
       _.forEach(['ui', 'sticky', 'fixed', 'bottom'], (className) =>
-        wrapper.childAt(0).childAt(1).should.have.className(className),
+        expect(container.firstChild.childNodes[0].childNodes[1].classList.contains(className)).to.be.true(),
       )
 
-      wrapper.childAt(0).childAt(1).should.not.have.style('top')
+      expect(container.firstChild.childNodes[0].childNodes[1].style.top).to.equal('')
     })
 
     it('should stop pushing when reaching top', () => {
@@ -335,10 +348,10 @@ describe('Sticky', () => {
 
       // Component should stick again to the top
       _.forEach(['ui', 'sticky', 'fixed', 'top'], (className) =>
-        wrapper.childAt(0).childAt(1).should.have.className(className),
+        expect(container.firstChild.childNodes[0].childNodes[1].classList.contains(className)).to.be.true(),
       )
 
-      wrapper.childAt(0).childAt(1).should.have.style('top', '10px')
+      expect(container.firstChild.childNodes[0].childNodes[1].style.top).to.equal('10px')
     })
   })
 
@@ -396,7 +409,7 @@ describe('Sticky', () => {
       const onStick = sandbox.spy()
       wrapperMount(<Sticky scrollContext={null} onStick={onStick} />)
 
-      wrapper.setProps({ scrollContext: div })
+      rerenderFn(<Sticky scrollContext={div} onStick={onStick} />)
       mockTriggerEl({ top: -1 })
 
       domEvent.scroll(div)
@@ -407,9 +420,8 @@ describe('Sticky', () => {
   describe('styleElement', () => {
     it('is passed to macthing element', () => {
       wrapperMount(<Sticky styleElement={{ zIndex: 10 }} />)
-      const element = wrapper.childAt(0).childAt(1)
 
-      element.should.have.style('z-index', '10')
+      expect(container.firstChild.childNodes[0].childNodes[1].style.zIndex).to.equal('10')
     })
   })
 })

@@ -1,4 +1,5 @@
 import React from 'react'
+import { render } from '@testing-library/react'
 
 import FormCheckbox from 'src/collections/Form/FormCheckbox'
 import Checkbox from 'src/modules/Checkbox/Checkbox'
@@ -10,9 +11,9 @@ describe('FormCheckbox', () => {
   })
 
   it('renders a FormField with a Checkbox control', () => {
-    shallow(<FormCheckbox />)
-      .find('FormField')
-      .should.have.prop('control', Checkbox)
+    const { container } = render(<FormCheckbox />)
+    const checkbox = container.querySelector('.ui.checkbox')
+    expect(checkbox).toBeTruthy()
   })
 
   common.forwardsRef(FormCheckbox, { tagName: 'input' })

@@ -1,15 +1,20 @@
+import _ from 'lodash'
 import React from 'react'
+import { render, fireEvent } from '@testing-library/react'
 
+import { SUI } from 'src/lib'
 import Embed from 'src/modules/Embed/Embed'
 import * as common from 'test/specs/commonTests'
+import { sandbox } from 'test/utils'
+import nestedShallow from 'test/utils/nestedShallow'
 
 const assertIframeSrc = (props, srcPart) => {
   const { id = 'default-test-id', source = 'youtube', ...rest } = props
 
-  shallow(<Embed active id={id} source={source} {...rest} />)
-    .find('iframe')
-    .should.have.attr('src')
-    .which.contains(srcPart)
+  const { container } = render(<Embed active id={id} source={source} {...rest} />)
+  const iframe = container.querySelector('iframe')
+  expect(iframe).toBeTruthy()
+  expect(iframe.getAttribute('src')).toContain(srcPart)
 }
 
 describe('Embed', () => {
@@ -47,21 +52,21 @@ describe('Embed', () => {
 
   describe('active', () => {
     it('defaults to false', () => {
-      mount(<Embed />).should.have.not.className('active')
+      const { container } = render(<Embed />)
+      expect(container.firstChild.classList.contains('active')).to.equal(false)
     })
 
     it('applies className', () => {
-      mount(<Embed active />).should.have.className('active')
+      const { container } = render(<Embed active />)
+      expect(container.firstChild.classList.contains('active')).to.equal(true)
     })
-
     it('renders nothing when false', () => {
-      const wrapper = mount(
+      const { container } = render(
         <Embed>
           <p id='foo' />
         </Embed>,
       )
-
-      wrapper.should.not.have.descendants('#foo')
+      expect(container.querySelector('#foo')).toBeFalsy()
     })
   })
 
@@ -77,7 +82,6 @@ describe('Embed', () => {
       assertIframeSrc({ brandedUI: true }, '&amp;modestbranding=true')
       assertIframeSrc({ brandedUI: false }, '&amp;modestbranding=false')
     })
-
     it('generates "rel" url parameter', () => {
       assertIframeSrc({ brandedUI: true }, '&amp;rel=0')
       assertIframeSrc({ brandedUI: false }, '&amp;rel=1')
@@ -93,8 +97,10 @@ describe('Embed', () => {
 
   describe('defaultActive', () => {
     it('sets the initial active state', () => {
-      mount(<Embed defaultActive />).should.have.className('active')
-      mount(<Embed defaultActive={false} />).should.have.not.className('active')
+      const { container } = render(<Embed defaultActive />)
+      expect(container.firstChild.classList.contains('active')).to.equal(true)
+      const { container: c2 } = render(<Embed defaultActive={false} />)
+      expect(c2.firstChild.classList.contains('active')).to.equal(false)
     })
   })
 
@@ -107,55 +113,54 @@ describe('Embed', () => {
 
   describe('placeholder', () => {
     it('omitted by default', () => {
-      shallow(<Embed />)
-        .find('img.placeholder')
-        .should.have.length(0)
+      const { container } = render(<Embed active id='test' source='youtube' />)
+      expect(container.querySelector('img.placeholder')).toBeFalsy()
     })
-
     it('renders img when defined', () => {
       const url = '/images/wireframe/image.png'
-
-      shallow(<Embed placeholder={url} />).should.contain(<img className='placeholder' src={url} />)
+      const { container } = render(<Embed active id='test' placeholder={url} source='youtube' />)
+      const img = container.querySelector('img.placeholder')
+      expect(img).toBeTruthy()
+      expect(img).toHaveAttribute('src', url)
     })
   })
 
   describe('onClick', () => {
     it('sets to active state', () => {
-      const wrapper = mount(<Embed />)
-
-      wrapper.simulate('click')
-      wrapper.should.have.className('active')
+      const { container } = render(<Embed active={false} id='test' source='youtube' />)
+      const wrapper = container.firstChild
+      expect(wrapper.classList.contains('active')).to.equal(false)
+      fireEvent.click(wrapper)
+      expect(wrapper.classList.contains('active')).to.equal(true)
     })
 
     it('skips state update if active', () => {
-      const wrapper = mount(<Embed active />)
-
-      wrapper.simulate('click')
-      wrapper.should.have.className('active')
+      const { container } = render(<Embed active id='test' source='youtube' />)
+      const wrapper = container.firstChild
+      expect(wrapper.classList.contains('active')).to.equal(true)
+      fireEvent.click(wrapper)
+      expect(wrapper.classList.contains('active')).to.equal(true)
     })
   })
 
   describe('source', () => {
     it('generates url for YouTube', () => {
       const id = 'foo'
-
       assertIframeSrc({ id }, `//www.youtube.com/embed/${id}`)
     })
 
     it('generates url for Vimeo', () => {
       const id = 'foo'
-
       assertIframeSrc({ source: 'vimeo', id }, `//player.vimeo.com/video/${id}`)
     })
 
     it('sets the iframe title', () => {
       const sources = ['youtube', 'vimeo']
-
       sources.forEach((source) => {
-        shallow(<Embed active id='foo' source={source} />)
-          .find('iframe')
-          .should.have.attr('title')
-          .which.equals(`Embedded content from ${source}.`)
+        const { container } = render(<Embed active id='foo' source={source} />)
+        const iframe = container.querySelector('iframe')
+        expect(iframe).toBeTruthy()
+        expect(iframe.getAttribute('title')).to.equal(`Embedded content from ${source}.`)
       })
     })
   })
@@ -163,10 +168,10 @@ describe('Embed', () => {
   describe('url', () => {
     it('passes url to iframe', () => {
       const url = 'https://example.com'
-
-      shallow(<Embed active url={url} />)
-        .find('iframe')
-        .should.have.attr('src', url)
+      const { container } = render(<Embed active url={url} />)
+      const iframe = container.querySelector('iframe')
+      expect(iframe).toBeTruthy()
+      expect(iframe).toHaveAttribute('src', url)
     })
   })
 })

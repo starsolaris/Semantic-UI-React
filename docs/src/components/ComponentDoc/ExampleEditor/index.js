@@ -1,1 +1,2 @@
-export default from './ExampleEditor'
+import default from './ExampleEditor';
+export { default };

@@ -1,4 +1,5 @@
 import React from 'react'
+import { render, fireEvent } from '@testing-library/react'
 
 import AccordionContent from 'src/modules/Accordion/AccordionContent'
 import AccordionPanel from 'src/modules/Accordion/AccordionPanel'
@@ -28,19 +29,22 @@ describe('AccordionPanel', () => {
 
   describe('active', () => {
     it('should passed to children', () => {
-      const wrapper = shallow(<AccordionPanel active content='Content' title='Title' />)
+      const { container } = render(<AccordionPanel active content='Content' title='Title' />)
 
-      wrapper.childAt(0).should.have.prop('active', true)
-      wrapper.childAt(1).should.have.prop('active', true)
+      const title = container.querySelector('.title')
+      const content = container.querySelector('.content')
+
+      expect(title).toHaveClass('active')
+      expect(content).toHaveClass('active')
     })
   })
 
   describe('index', () => {
     it('should passed to title', () => {
-      const wrapper = shallow(<AccordionPanel content='Content' index={5} title='Title' />)
+      const { container } = render(<AccordionPanel content='Content' index={5} title='Title' />)
 
-      wrapper.childAt(0).should.have.prop('index', 5)
-      wrapper.childAt(1).should.have.not.prop('index')
+      const title = container.querySelector('.title')
+      expect(title).toHaveAttribute('data-index', '5')
     })
   })
 
@@ -50,16 +54,16 @@ describe('AccordionPanel', () => {
       const onClick = sandbox.spy()
       const onTitleClick = sandbox.spy()
 
-      mount(
+      const { container } = render(
         <AccordionPanel
           content='Content'
           onTitleClick={onTitleClick}
           title={{ content: 'Title', onClick }}
         />,
       )
-        .find(AccordionTitle)
-        .at(0)
-        .simulate('click', event)
+
+      const title = container.querySelector('.title')
+      fireEvent.click(title, event)
 
       onClick.should.have.been.calledOnce()
       onClick.should.have.been.calledWithMatch(event, { content: 'Title' })

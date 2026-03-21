@@ -2,6 +2,7 @@ import React from 'react'
 
 import Divider from 'src/elements/Divider/Divider'
 import * as common from 'test/specs/commonTests'
+import nestedShallow from 'test/utils/nestedShallow'
 
 describe('Divider', () => {
   common.isConformant(Divider)
@@ -18,10 +19,12 @@ describe('Divider', () => {
   common.propKeyOnlyToClassName(Divider, 'clearing')
 
   it('renders a <div /> element', () => {
-    shallow(<Divider />).should.have.tagName('div')
+    const element = nestedShallow(<Divider />)
+    expect(element.tagName.toLowerCase()).to.equal('div')
   })
 
   it('adds the "divider" class', () => {
-    shallow(<Divider />).should.have.className('divider')
+    const element = nestedShallow(<Divider />)
+    expect(element).toHaveClass('divider')
   })
 })

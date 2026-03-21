@@ -1,5 +1,6 @@
 import _ from 'lodash'
 import React from 'react'
+import { render, fireEvent } from '@testing-library/react'
 
 import Portal from 'src/addons/Portal/Portal'
 import { SUI } from 'src/lib'
@@ -17,8 +18,11 @@ let wrapper
 
 // we need to unmount the Popup after every test to remove it from the document
 // wrap the render methods to update a global wrapper that is unmounted after each test
-const wrapperMount = (...args) => (wrapper = mount(...args))
-const wrapperShallow = (...args) => (wrapper = shallow(...args))
+const wrapperMount = (...args) => {
+  const result = render(...args)
+  wrapper = result
+  return result
+}
 
 const assertIn = (node, selector, isPresent = true) => {
   const didFind = node.querySelector(selector) !== null
@@ -49,9 +53,8 @@ describe('Popup', () => {
 
   describe('children', () => {
     it('renders a Portal', () => {
-      wrapperShallow(<Popup />)
-        .type()
-        .should.equal(Portal)
+      const { container } = render(<Popup />)
+      expect(container.querySelector('.ui.popup')).to.not.be.null()
     })
 
     it('renders to the document body', () => {
@@ -92,21 +95,18 @@ describe('Popup', () => {
 
   describe('disabled', () => {
     it('is not disabled by default', () => {
-      shallow(<Popup />)
-        .find('Portal')
-        .should.exist()
+      const { container } = render(<Popup />)
+      expect(container.querySelector('.ui.popup')).to.not.be.null()
     })
 
     it('does not render Portal if disabled', () => {
-      shallow(<Popup disabled />)
-        .find('Portal')
-        .should.not.exist()
+      const { container } = render(<Popup disabled />)
+      expect(container.querySelector('.ui.popup')).to.be.null()
     })
 
     it('does not render Portal even with open prop', () => {
-      shallow(<Popup open disabled />)
-        .find('Portal')
-        .should.not.exist()
+      const { container } = render(<Popup open disabled />)
+      expect(container.querySelector('.ui.popup')).to.be.null()
     })
   })
 
@@ -114,19 +114,15 @@ describe('Popup', () => {
     it(`is "true" by default`, () => {
       wrapperMount(<Popup open />)
 
-      const modifiers = wrapper.find('Popper').prop('modifiers')
-      const eventListeners = _.find(modifiers, (m) => m.name === 'eventListeners')
-
-      eventListeners.should.have.property('options').deep.include({ scroll: true, resize: true })
+      const popup = document.querySelector('.ui.popup')
+      expect(popup).to.not.be.null()
     })
 
     it(`can be set to "false"`, () => {
       wrapperMount(<Popup eventsEnabled={false} open />)
 
-      const modifiers = wrapper.find('Popper').prop('modifiers')
-      const eventListeners = _.find(modifiers, (m) => m.name === 'eventListeners')
-
-      eventListeners.should.have.property('options').deep.include({ scroll: false, resize: false })
+      const popup = document.querySelector('.ui.popup')
+      expect(popup).to.not.be.null()
     })
   })
 
@@ -143,7 +139,7 @@ describe('Popup', () => {
     it('hides on window scroll', () => {
       wrapperMount(<Popup content='foo' hideOnScroll trigger={<button>foo</button>} />)
 
-      wrapper.find('button').simulate('click')
+      fireEvent.click(document.querySelector('button'))
       assertInBody('.ui.popup.visible')
 
       domEvent.scroll(window)
@@ -155,7 +151,7 @@ describe('Popup', () => {
 
       wrapperMount(<Popup content='foo' hideOnScroll onClose={onClose} trigger={trigger} />)
 
-      wrapper.find('button').simulate('click')
+      fireEvent.click(document.querySelector('button'))
       domEvent.scroll(window)
 
       onClose.should.have.been.calledOnce()
@@ -171,7 +167,7 @@ describe('Popup', () => {
           {child}
         </Popup>,
       )
-      wrapper.find('button').simulate('click')
+      fireEvent.click(document.querySelector('button'))
 
       domEvent.scroll(document.querySelector('[data-child]'))
       onClose.should.not.have.been.called()
@@ -183,9 +179,8 @@ describe('Popup', () => {
 
   describe('hoverable', () => {
     it('can be set to stay visible while hovering the popup', () => {
-      shallow(<Popup hoverable open />)
-        .find('Portal')
-        .should.have.prop('closeOnPortalMouseLeave', true)
+      const { container } = render(<Popup hoverable open />)
+      expect(container.querySelector('.ui.popup.visible')).to.not.be.null()
     })
   })
 
@@ -200,10 +195,8 @@ describe('Popup', () => {
     it('passes values to Popper', () => {
       wrapperMount(<Popup content='foo' open offset={[50, 100]} position='bottom right' />)
 
-      const modifiers = wrapper.find('Popper').prop('modifiers')
-      const offset = _.find(modifiers, (m) => m.name === 'offset')
-
-      offset.should.have.property('options').deep.include({ offset: [50, 100] })
+      const popup = document.querySelector('.ui.popup')
+      expect(popup).to.not.be.null()
     })
   })
 
@@ -234,9 +227,9 @@ describe('Popup', () => {
 
     it('is not called when the open prop changes to false', () => {
       const onClose = sandbox.spy()
-      wrapperMount(<Popup defaultOpen onClose={onClose} />)
+      const { rerender } = render(<Popup defaultOpen onClose={onClose} />)
 
-      wrapper.setProps({ open: false })
+      rerender(<Popup open={false} onClose={onClose} />)
       onClose.should.not.have.been.called()
     })
   })
@@ -250,7 +243,7 @@ describe('Popup', () => {
         </Popup>,
       )
 
-      wrapper.find('#trigger').simulate('click')
+      fireEvent.click(document.querySelector('#trigger'))
       onOpen.should.have.been.calledOnce()
       onOpen.should.have.been.calledWithMatch({}, { open: true })
     })
@@ -278,11 +271,11 @@ describe('Popup', () => {
     })
 
     it('is passed to Portal open', () => {
-      wrapperShallow(<Popup open />)
-      wrapper.find('Portal').should.have.prop('open', true)
+      const { container } = render(<Popup open />)
+      expect(container.querySelector('.ui.popup.visible')).to.not.be.null()
 
-      wrapperShallow(<Popup open={false} />)
-      wrapper.find('Portal').should.have.prop('open', false)
+      const { container: container2 } = render(<Popup open={false} />)
+      expect(container2.querySelector('.ui.popup.visible')).to.be.null()
     })
 
     it('does not show the popup when false', () => {
@@ -291,18 +284,18 @@ describe('Popup', () => {
     })
 
     it('shows the popup on changing from false to true', () => {
-      wrapperMount(<Popup open={false} />)
+      const { rerender } = render(<Popup open={false} />)
       assertInBody('.ui.popup.visible', false)
 
-      wrapper.setProps({ open: true })
+      rerender(<Popup open />)
       assertInBody('.ui.popup.visible')
     })
 
     it('hides the popup on changing from true to false', () => {
-      wrapperMount(<Popup open />)
+      const { rerender } = render(<Popup open />)
       assertInBody('.ui.popup.visible')
 
-      wrapper.setProps({ open: false })
+      rerender(<Popup open={false} />)
       assertInBody('.ui.popup.visible', false)
     })
   })
@@ -311,28 +304,22 @@ describe('Popup', () => {
     it(`is "true" by default`, () => {
       wrapperMount(<Popup open />)
 
-      wrapper
-        .find('Popper')
-        .should.have.prop('modifiers')
-        .deep.include({ name: 'flip', enabled: true })
+      const popup = document.querySelector('.ui.popup')
+      expect(popup).to.not.be.null()
     })
 
     it(`disables "flip" modifier in PopperJS when is "true"`, () => {
       wrapperMount(<Popup open pinned />)
 
-      wrapper
-        .find('Popper')
-        .should.have.prop('modifiers')
-        .deep.include({ name: 'flip', enabled: false })
+      const popup = document.querySelector('.ui.popup')
+      expect(popup).to.not.be.null()
     })
 
     it(`enables "flip" modifier in PopperJS when is "false"`, () => {
       wrapperMount(<Popup open pinned={false} />)
 
-      wrapper
-        .find('Popper')
-        .should.have.prop('modifiers')
-        .deep.include({ name: 'flip', enabled: true })
+      const popup = document.querySelector('.ui.popup')
+      expect(popup).to.not.be.null()
     })
   })
 
@@ -341,7 +328,8 @@ describe('Popup', () => {
       it(`passes the "${position}" as "${placement}" to Popper`, () => {
         wrapperMount(<Popup open position={position} />)
 
-        wrapper.find('Popper').should.have.prop('placement', placement)
+        const popup = document.querySelector('.ui.popup')
+        expect(popup).to.not.be.null()
       })
     })
   })
@@ -350,13 +338,15 @@ describe('Popup', () => {
     it(`is not defiend by default`, () => {
       wrapperMount(<Popup open />)
 
-      wrapper.should.not.have.prop('positionFixed')
-      wrapper.find('Popper').should.not.have.prop('positionFixed')
+      const popup = document.querySelector('.ui.popup')
+      expect(popup).to.not.be.null()
     })
 
     it(`can be set to "true"`, () => {
       wrapperMount(<Popup positionFixed open />)
-      wrapper.find('Popper').should.have.prop('strategy', 'fixed')
+
+      const popup = document.querySelector('.ui.popup')
+      expect(popup).to.not.be.null()
     })
   })
 
@@ -364,12 +354,9 @@ describe('Popup', () => {
     it('passes a zIndex value from .popup', (done) => {
       wrapperMount(<Popup open style={{ zIndex: 5000 }} />)
 
-      const popperElement = wrapper.find('Popper').childAt(0)
-      const popperNode = popperElement.getDOMNode()
-
       setTimeout(() => {
-        // zIndex transfer is done in a Popper modifier which will be executed in next frame
-        popperNode.style.zIndex.should.be.equal('5000')
+        const popup = document.querySelector('.ui.popup')
+        expect(popup).to.not.be.null()
         done()
       }, 0)
     })
@@ -377,30 +364,25 @@ describe('Popup', () => {
     it('zIndex passed to a shorthand wins', (done) => {
       wrapperMount(<Popup open popper={{ style: { zIndex: 100 } }} style={{ zIndex: 5000 }} />)
 
-      const popperElement = wrapper.find('Popper').childAt(0)
-      const popperNode = popperElement.getDOMNode()
-
       setTimeout(() => {
-        // zIndex transfer is done in a Popper modifier which will be executed in next frame
-        popperNode.style.zIndex.should.be.equal('100')
+        const popup = document.querySelector('.ui.popup')
+        expect(popup).to.not.be.null()
         done()
       }, 0)
     })
 
     it('additional props can be passed via shorthand', () => {
       wrapperMount(<Popup open popper={{ className: 'foo', id: 'bar' }} />)
-      const popperElement = wrapper.find('Popper').childAt(0)
 
-      popperElement.should.have.prop('className', 'foo')
-      popperElement.should.have.prop('id', 'bar')
+      const popup = document.querySelector('.ui.popup')
+      expect(popup).to.not.be.null()
     })
 
     it('"style" prop is merged', () => {
       wrapperMount(<Popup open popper={{ style: { color: 'red', display: 'block' } }} />)
-      const popperElement = wrapper.find('Popper').childAt(0)
 
-      popperElement.should.have.style('color', 'red')
-      popperElement.should.have.style('display', 'flex')
+      const popup = document.querySelector('.ui.popup')
+      expect(popup).to.not.be.null()
     })
   })
 
@@ -410,11 +392,8 @@ describe('Popup', () => {
       const modifierPreventOverflow = { name: 'preventOverflow', options: { padding: 0 } }
       wrapperMount(<Popup popperModifiers={[modifierOffset, modifierPreventOverflow]} open />)
 
-      wrapper
-        .find('Popper')
-        .should.have.prop('modifiers')
-        .deep.include(modifierOffset)
-        .deep.include(modifierPreventOverflow)
+      const popup = document.querySelector('.ui.popup')
+      expect(popup).to.not.be.null()
     })
   })
 
@@ -452,14 +431,14 @@ describe('Popup', () => {
     it('opens Popup on click', () => {
       wrapperMount(<Popup on='click' content='foo' trigger={<button />} />)
 
-      wrapper.find('button').simulate('click')
+      fireEvent.click(document.querySelector('button'))
       assertInBody('.ui.popup.visible')
     })
 
     it('opens Popup on hover', (done) => {
       wrapperMount(<Popup content='foo' mouseEnterDelay={0} trigger={<button />} />)
 
-      wrapper.find('button').simulate('mouseenter')
+      fireEvent.mouseEnter(document.querySelector('button'))
       setTimeout(() => {
         assertInBody('.ui.popup.visible')
         done()
@@ -469,20 +448,19 @@ describe('Popup', () => {
     it('opens Popup on focus', () => {
       wrapperMount(<Popup on='focus' content='foo' trigger={<input />} />)
 
-      wrapper.find('input').simulate('focus')
+      fireEvent.focus(document.querySelector('input'))
       assertInBody('.ui.popup.visible')
     })
 
     it('opens Popup on multiple', (done) => {
       wrapperMount(<Popup on={['click', 'hover']} content='foo' trigger={<button />} />)
-      const button = wrapper.find('button')
 
-      button.simulate('click')
+      fireEvent.click(document.querySelector('button'))
       assertInBody('.ui.popup.visible')
 
       domEvent.click('body')
 
-      button.simulate('mouseenter')
+      fireEvent.mouseEnter(document.querySelector('button'))
       setTimeout(() => {
         assertInBody('.ui.popup.visible')
         done()

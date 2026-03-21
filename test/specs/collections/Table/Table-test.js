@@ -1,4 +1,5 @@
 import React from 'react'
+import { render } from '@testing-library/react'
 
 import Table from 'src/collections/Table/Table'
 import TableBody from 'src/collections/Table/TableBody'
@@ -66,23 +67,12 @@ describe('Table', () => {
 
   describe('as', () => {
     it('renders as a table by default', () => {
-      shallow(<Table />).should.have.tagName('table')
+      const { container } = render(<Table />)
+      expect(container.firstChild.tagName).toBe('TABLE')
     })
   })
 
   describe('shorthand', () => {
-    let wrapper
-    let thead
-    let tbody
-    let tfoot
-
-    beforeEach(() => {
-      wrapper = undefined
-      thead = undefined
-      tbody = undefined
-      tfoot = undefined
-    })
-
     const headerRow = ['Name', 'Status', 'Notes']
 
     const renderBodyRow = ({ name, status, notes }, index) => ({
@@ -121,56 +111,68 @@ describe('Table', () => {
       { key: 1, cells: ['First Name', 'Last Name'] },
     ]
 
-    const wrapperMount = (props) => {
-      wrapper = mount(<Table {...props} />)
-
-      thead = wrapper.find('thead')
-      tbody = wrapper.find('tbody')
-      tfoot = wrapper.find('tfoot')
-    }
-
     it('renders empty tbody with no shorthand', () => {
-      wrapperMount()
+      const { container } = render(<Table />)
 
-      thead.should.have.lengthOf(0)
-
-      tbody.should.have.lengthOf(1)
-      tbody.find('tr').should.have.lengthOf(0)
-
-      tfoot.should.have.lengthOf(0)
+      expect(container.querySelectorAll('thead')).toHaveLength(0)
+      expect(container.querySelectorAll('tbody')).toHaveLength(1)
+      expect(container.querySelectorAll('tbody tr')).toHaveLength(0)
+      expect(container.querySelectorAll('tfoot')).toHaveLength(0)
     })
 
     it('renders the table', () => {
-      wrapperMount({ headerRow, renderBodyRow, footerRow, tableData })
+      const { container } = render(
+        <Table
+          headerRow={headerRow}
+          renderBodyRow={renderBodyRow}
+          footerRow={footerRow}
+          tableData={tableData}
+        />,
+      )
 
-      thead.should.have.lengthOf(1)
-      thead.find('tr').should.have.lengthOf(1)
-      thead.find('tr').find('th').should.have.lengthOf(headerRow.length)
+      const thead = container.querySelectorAll('thead')
+      const tbody = container.querySelectorAll('tbody')
+      const tfoot = container.querySelectorAll('tfoot')
 
-      tbody.should.have.lengthOf(1)
-      tbody.find('tr').should.have.lengthOf(tableData.length)
-      tbody.find('tr').first().find('td').should.have.lengthOf(3)
+      expect(thead).toHaveLength(1)
+      expect(container.querySelectorAll('thead tr')).toHaveLength(1)
+      expect(container.querySelectorAll('thead tr th')).toHaveLength(headerRow.length)
 
-      tfoot.should.have.lengthOf(1)
-      tfoot.find('tr').should.have.lengthOf(1)
-      tfoot.find('tr').find('td').should.have.lengthOf(footerRow.length)
+      expect(tbody).toHaveLength(1)
+      expect(container.querySelectorAll('tbody tr')).toHaveLength(tableData.length)
+      expect(container.querySelectorAll('tbody tr:first-child td')).toHaveLength(3)
+
+      expect(tfoot).toHaveLength(1)
+      expect(container.querySelectorAll('tfoot tr')).toHaveLength(1)
+      expect(container.querySelectorAll('tfoot tr td')).toHaveLength(footerRow.length)
     })
 
     it('renders the table with 2 lines header', () => {
-      wrapperMount({ renderBodyRow: renderBodyRowWithSpan, footerRow, tableData, headerRows })
+      const { container } = render(
+        <Table
+          renderBodyRow={renderBodyRowWithSpan}
+          footerRow={footerRow}
+          tableData={tableData}
+          headerRows={headerRows}
+        />,
+      )
 
-      thead.should.have.lengthOf(1)
-      thead.find('tr').should.have.lengthOf(2)
-      thead.find('tr').at(0).find('th').should.have.lengthOf(3)
-      thead.find('tr').at(1).find('th').should.have.lengthOf(2)
+      const thead = container.querySelectorAll('thead')
+      const tbody = container.querySelectorAll('tbody')
+      const tfoot = container.querySelectorAll('tfoot')
 
-      tbody.should.have.lengthOf(1)
-      tbody.find('tr').should.have.lengthOf(tableData.length)
-      tbody.find('tr').first().find('td').should.have.lengthOf(4)
+      expect(thead).toHaveLength(1)
+      expect(container.querySelectorAll('thead tr')).toHaveLength(2)
+      expect(container.querySelectorAll('thead tr:nth-child(1) th')).toHaveLength(3)
+      expect(container.querySelectorAll('thead tr:nth-child(2) th')).toHaveLength(2)
 
-      tfoot.should.have.lengthOf(1)
-      tfoot.find('tr').should.have.lengthOf(1)
-      tfoot.find('tr').find('td').should.have.lengthOf(footerRow.length)
+      expect(tbody).toHaveLength(1)
+      expect(container.querySelectorAll('tbody tr')).toHaveLength(tableData.length)
+      expect(container.querySelectorAll('tbody tr:first-child td')).toHaveLength(4)
+
+      expect(tfoot).toHaveLength(1)
+      expect(container.querySelectorAll('tfoot tr')).toHaveLength(1)
+      expect(container.querySelectorAll('tfoot tr td')).toHaveLength(footerRow.length)
     })
   })
 })

@@ -1,4 +1,5 @@
 import React from 'react'
+import { render, fireEvent } from '@testing-library/react'
 
 import SearchResult from 'src/modules/Search/SearchResult'
 import * as common from 'test/specs/commonTests'
@@ -14,7 +15,8 @@ describe('SearchResult', () => {
   describe('onClick', () => {
     it('is called with (e, data) when clicked', () => {
       const onClick = sandbox.spy()
-      mount(<SearchResult onClick={onClick} {...requiredProps} />).simulate('click')
+      const { container } = render(<SearchResult onClick={onClick} {...requiredProps} />)
+      fireEvent.click(container.firstChild)
 
       onClick.should.have.been.calledOnce()
       onClick.should.have.been.calledWithMatch({ type: 'click' }, requiredProps)

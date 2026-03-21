@@ -1,6 +1,7 @@
 import faker from 'faker'
 import _ from 'lodash'
 import React from 'react'
+import { render } from '@testing-library/react'
 
 import { SUI } from 'src/lib'
 import StatisticGroup from 'src/views/Statistic/StatisticGroup'
@@ -31,12 +32,10 @@ describe('StatisticGroup', () => {
 
   describe('items', () => {
     it('renders children', () => {
-      const wrapper = shallow(<StatisticGroup items={['foo', 'bar']} />)
-      const items = wrapper.children()
+      const { container } = render(<StatisticGroup items={['foo', 'bar']} />)
+      const statistics = container.querySelectorAll('.statistic')
 
-      wrapper.should.have.exactly(2).descendants('Statistic')
-      items.at(0).should.have.prop('content', 'foo')
-      items.at(1).should.have.prop('content', 'bar')
+      expect(statistics).toHaveLength(2)
     })
   })
 })

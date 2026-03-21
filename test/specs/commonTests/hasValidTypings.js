@@ -1,7 +1,6 @@
 import _ from 'lodash'
 
 import { customPropTypes } from 'src/lib'
-import { componentInfoContext } from 'docs/src/utils'
 import { getComponentName, getComponentProps } from 'test/utils'
 import {
   getNodes,
@@ -36,7 +35,6 @@ const shorthandMap = {
  * @param {Object} [options.forwardsRef=true] Indicates if component forwards refs.
  */
 export default function hasValidTypings(Component, options = {}) {
-  const { displayName, repoPath } = componentInfoContext.byDisplayName[getComponentName(Component)]
   const { ignoredTypingsProps = [], forwardsRef = true, requiredProps } = options
 
   const tsFile = repoPath.replace('src/', '').replace('.js', '.d.ts')

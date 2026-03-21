@@ -1,1 +1,2 @@
-export default from './ComponentSidebar'
+import default from './ComponentSidebar';
+export { default };

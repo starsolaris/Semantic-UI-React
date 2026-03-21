@@ -1,5 +1,6 @@
 import faker from 'faker'
 import React from 'react'
+import { render, fireEvent } from '@testing-library/react'
 
 import List from 'src/elements/List/List'
 import ListContent from 'src/elements/List/ListContent'
@@ -11,6 +12,7 @@ import ListList from 'src/elements/List/ListList'
 import { SUI } from 'src/lib'
 import * as common from 'test/specs/commonTests'
 import { sandbox } from 'test/utils'
+import nestedShallow from 'test/utils/nestedShallow'
 
 describe('List', () => {
   common.isConformant(List)
@@ -57,10 +59,10 @@ describe('List', () => {
       const callbackData = { content: 'Notes', 'data-foo': 'bar' }
       const itemProps = { key: 'notes', content: 'Notes', 'data-foo': 'bar', onClick }
 
-      mount(<List items={[itemProps]} onItemClick={onItemClick} />)
-        .find('ListItem')
-        .first()
-        .simulate('click', event)
+      const { container } = render(<List items={[itemProps]} onItemClick={onItemClick} />)
+      const listItem = container.querySelector('.list > .item')
+
+      fireEvent.click(listItem, event)
 
       onClick.should.have.been.calledOnce()
       onClick.should.have.been.calledWithMatch(event, callbackData)
@@ -72,46 +74,48 @@ describe('List', () => {
 
   describe('role', () => {
     it('is accessibile with no items', () => {
-      const wrapper = shallow(<List />)
-      wrapper.should.have.prop('role', 'list')
+      const element = nestedShallow(<List />)
+      expect(element.getAttribute('role')).to.equal('list')
     })
 
     it('is accessibile with items', () => {
-      const wrapper = shallow(<List items={items} />)
-      wrapper.should.have.prop('role', 'list')
+      const element = nestedShallow(<List items={items} />)
+      expect(element.getAttribute('role')).to.equal('list')
     })
 
     it('allows overriding with no items', () => {
-      const wrapper = shallow(<List role='listbox' />)
-      wrapper.should.have.prop('role', 'listbox')
+      const element = nestedShallow(<List role='listbox' />)
+      expect(element.getAttribute('role')).to.equal('listbox')
     })
 
     it('allows overriding with items', () => {
-      const wrapper = shallow(<List role='listbox' items={items} />)
-      wrapper.should.have.prop('role', 'listbox')
+      const element = nestedShallow(<List role='listbox' items={items} />)
+      expect(element.getAttribute('role')).to.equal('listbox')
     })
 
     it('allows overriding with children', () => {
-      const wrapper = shallow(
+      const element = nestedShallow(
         <List role='listbox'>
           <ListItem />
         </List>,
       )
-      wrapper.should.have.prop('role', 'listbox')
+      expect(element.getAttribute('role')).to.equal('listbox')
     })
   })
 
   describe('shorthand', () => {
     it('renders empty tr with no shorthand', () => {
-      const wrapper = shallow(<List />)
+      const element = nestedShallow(<List />)
+      const listItems = element.querySelectorAll('.item')
 
-      wrapper.find('ListItem').should.have.lengthOf(0)
+      expect(listItems.length).to.equal(0)
     })
 
     it('renders the items', () => {
-      const wrapper = shallow(<List items={items} />)
+      const element = nestedShallow(<List items={items} />)
+      const listItems = element.querySelectorAll('.item')
 
-      wrapper.find('ListItem').should.have.lengthOf(items.length)
+      expect(listItems.length).to.equal(items.length)
     })
   })
 })

@@ -3,6 +3,7 @@ import React from 'react'
 import ButtonGroup from 'src/elements/Button/ButtonGroup'
 import { SUI } from 'src/lib'
 import * as common from 'test/specs/commonTests'
+import nestedShallow from 'test/utils/nestedShallow'
 
 describe('ButtonGroup', () => {
   common.isConformant(ButtonGroup)
@@ -43,12 +44,12 @@ describe('ButtonGroup', () => {
 
   describe('buttons', () => {
     it('renders shorthand collection', () => {
-      const wrapper = shallow(<ButtonGroup buttons={['one', 'two']} />)
-      const buttons = wrapper.children()
+      const element = nestedShallow(<ButtonGroup buttons={['one', 'two']} />)
+      const buttons = element.querySelectorAll('.ui.button')
 
-      wrapper.should.have.exactly(2).descendants('Button')
-      buttons.at(0).should.have.prop('content', 'one')
-      buttons.at(1).should.have.prop('content', 'two')
+      expect(buttons.length).to.equal(2)
+      expect(buttons[0].textContent).to.equal('one')
+      expect(buttons[1].textContent).to.equal('two')
     })
   })
 })

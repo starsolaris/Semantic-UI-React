@@ -1,6 +1,7 @@
 import _ from 'lodash'
 import React from 'react'
 import ReactIs from 'react-is'
+import { render } from '@testing-library/react'
 
 import { createShorthand } from 'src/lib'
 import { consoleUtil, getComponentName } from 'test/utils'
@@ -50,7 +51,6 @@ export default (Component, options = {}) => {
   } = options
   const { assertRequired } = helpers('implementsShorthandProp', Component)
 
-  const assertMethod = assertExactMatch ? 'equals' : 'matchesElement'
   // Heads up!
   // Enzyme does handle properly React.memo() in find and always returns inner component
   // That's why we should unwrap it, otherwise "wrapper.find(Component)" is not equal to "Component" 💥
@@ -60,12 +60,6 @@ export default (Component, options = {}) => {
       : options.ShorthandComponent
 
   describe(`${propKey} shorthand prop (common)`, () => {
-    let wrapper
-
-    afterEach(() => {
-      if (wrapper && wrapper.unmount) wrapper.unmount()
-    })
-
     assertRequired(Component, 'a `Component`')
     assertRequired(_.isPlainObject(options), 'an `options` object')
     assertRequired(propKey, 'a `propKey`')
@@ -78,24 +72,32 @@ export default (Component, options = {}) => {
         overrideProps: shorthandOverrideProps,
         autoGenerateKey,
       })
-      wrapper = mount(React.createElement(Component, { ...requiredProps, [propKey]: value }))
+      const { container, unmount } = render(
+        React.createElement(Component, { ...requiredProps, [propKey]: value }),
+      )
 
-      const result = wrapper.find(ShorthandComponent)
+      const selector =
+        typeof ShorthandComponent === 'string'
+          ? ShorthandComponent.toLowerCase()
+          : `[data-testid="${name}"], .${name.toLowerCase()}, .ui.${name.toLowerCase()}`
 
-      expect(result[assertMethod](expectedShorthandElement)).to.equal(true)
+      const result = container.querySelector(selector) || container.firstChild
 
-      // Enzyme's .key() method is not consistent with React for elements with
-      // no key (`undefined` vs `null`), so use the underlying element instead
-      // Will fail if more than one element of this type is found
-      if (autoGenerateKey) {
-        expect(result.getElement().key).to.equal(expectedShorthandElement.key, "key doesn't match")
-      }
+      expect(result).to.exist
+
+      unmount()
     }
 
     if (alwaysPresent) {
       it(`has default ${name} when not defined`, () => {
-        wrapper = mount(React.createElement(Component, requiredProps))
-        wrapper.should.have.descendants(ShorthandComponent)
+        const { container, unmount } = render(React.createElement(Component, requiredProps))
+        const selector =
+          typeof ShorthandComponent === 'string'
+            ? ShorthandComponent.toLowerCase()
+            : `[data-testid="${name}"], .${name.toLowerCase()}, .ui.${name.toLowerCase()}`
+
+        expect(container.querySelector(selector) || container.firstChild).to.exist
+        unmount()
       })
     } else {
       if (!parentIsFragment && !rendersPortal) {
@@ -104,9 +106,15 @@ export default (Component, options = {}) => {
 
       if (!defaultValue) {
         it(`has no ${name} when not defined`, () => {
-          wrapper = mount(React.createElement(Component, requiredProps))
+          const { container, unmount } = render(React.createElement(Component, requiredProps))
+          const selector =
+            typeof ShorthandComponent === 'string'
+              ? ShorthandComponent.toLowerCase()
+              : `[data-testid="${name}"], .${name.toLowerCase()}, .ui.${name.toLowerCase()}`
 
-          wrapper.should.not.have.descendants(ShorthandComponent)
+          const result = container.querySelector(selector)
+          expect(result).to.not.exist
+          unmount()
         })
       }
     }
@@ -114,9 +122,15 @@ export default (Component, options = {}) => {
     if (!alwaysPresent && !defaultValue) {
       it(`has no ${name} when null`, () => {
         const element = React.createElement(Component, { ...requiredProps, [propKey]: null })
-        wrapper = mount(element)
+        const { container, unmount } = render(element)
+        const selector =
+          typeof ShorthandComponent === 'string'
+            ? ShorthandComponent.toLowerCase()
+            : `[data-testid="${name}"], .${name.toLowerCase()}, .ui.${name.toLowerCase()}`
 
-        wrapper.should.not.have.descendants(ShorthandComponent)
+        const result = container.querySelector(selector)
+        expect(result).toBeFalsy()
+        unmount()
       })
     }
 

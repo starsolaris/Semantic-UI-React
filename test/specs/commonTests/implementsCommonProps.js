@@ -1,4 +1,5 @@
 import React, { createElement } from 'react'
+import { render } from '@testing-library/react'
 
 import Button from 'src/elements/Button'
 import Icon from 'src/elements/Icon'
@@ -9,18 +10,6 @@ import implementsShorthandProp from './implementsShorthandProp'
 import { noClassNameFromBoolProps, noDefaultClassNameFromProp } from './classNameHelpers'
 import helpers from './commonHelpers'
 
-/**
- * Assert that a Component correctly implements a Button shorthand prop.
- *
- * @param {function} Component The component to test.
- * @param {object} [options={}]
- * @param {string} [options.propKey='button'] The name of the shorthand prop.
- * @param {string|function} [options.ShorthandComponent] The component that should be rendered from the shorthand value.
- * @param {function} [options.mapValueToProps] A function that maps a primitive value to the Component props
- * @param {Object} [options.requiredProps={}] Props required to render the component.
- * @param {Object} [options.shorthandDefaultProps] Default props for the shorthand component.
- * @param {Object} [options.shorthandOverrideProps] Override props for the shorthand component.
- */
 export const implementsButtonProp = (Component, options = {}) => {
   implementsShorthandProp(Component, {
     propKey: 'button',
@@ -30,18 +19,6 @@ export const implementsButtonProp = (Component, options = {}) => {
   })
 }
 
-/**
- * Assert that a Component correctly implements an HTML iframe shorthand prop.
- *
- * @param {function} Component The component to test.
- * @param {object} [options={}]
- * @param {string} [options.propKey='icon'] The name of the shorthand prop.
- * @param {string|function} [options.ShorthandComponent] The component that should be rendered from the shorthand value.
- * @param {function} [options.mapValueToProps] A function that maps a primitive value to the Component props
- * @param {Object} [options.requiredProps={}] Props required to render the component.
- * @param {Object} [options.shorthandDefaultProps] Default props for the shorthand component.
- * @param {Object} [options.shorthandOverrideProps] Override props for the shorthand component.
- */
 export const implementsHTMLIFrameProp = (Component, options = {}) => {
   implementsShorthandProp(Component, {
     propKey: 'iframe',
@@ -51,18 +28,6 @@ export const implementsHTMLIFrameProp = (Component, options = {}) => {
   })
 }
 
-/**
- * Assert that a Component correctly implements an HTML input shorthand prop.
- *
- * @param {function} Component The component to test.
- * @param {object} [options={}]
- * @param {string} [options.propKey='icon'] The name of the shorthand prop.
- * @param {string|function} [options.ShorthandComponent] The component that should be rendered from the shorthand value.
- * @param {function} [options.mapValueToProps] A function that maps a primitive value to the Component props
- * @param {Object} [options.requiredProps={}] Props required to render the component.
- * @param {Object} [options.shorthandDefaultProps] Default props for the shorthand component.
- * @param {Object} [options.shorthandOverrideProps] Override props for the shorthand component.
- */
 export const implementsHTMLInputProp = (Component, options = {}) => {
   implementsShorthandProp(Component, {
     propKey: 'input',
@@ -72,18 +37,6 @@ export const implementsHTMLInputProp = (Component, options = {}) => {
   })
 }
 
-/**
- * Assert that a Component correctly implements an HTML label shorthand prop.
- *
- * @param {function} Component The component to test.
- * @param {object} [options={}]
- * @param {string} [options.propKey='icon'] The name of the shorthand prop.
- * @param {string|function} [options.ShorthandComponent] The component that should be rendered from the shorthand value.
- * @param {function} [options.mapValueToProps] A function that maps a primitive value to the Component props
- * @param {Object} [options.requiredProps={}] Props required to render the component.
- * @param {Object} [options.shorthandDefaultProps] Default props for the shorthand component.
- * @param {Object} [options.shorthandOverrideProps] Override props for the shorthand component.
- */
 export const implementsHTMLLabelProp = (Component, options = {}) => {
   implementsShorthandProp(Component, {
     propKey: 'label',
@@ -93,22 +46,6 @@ export const implementsHTMLLabelProp = (Component, options = {}) => {
   })
 }
 
-/**
- * Assert that a Component correctly implements an Icon shorthand prop.
- *
- * @param {function} Component The component to test.
- * @param {object} [options={}]
- * @param {boolean} [options.alwaysPresent] Whether or not the shorthand exists by default.
- * @param {boolean} [options.autoGenerateKey=false] Whether or not automatic key generation is
- *   allowed for the shorthand component.
- * @param {string} [options.propKey='icon'] The name of the shorthand prop.
- * @param {string|function} [options.ShorthandComponent] The component that should be rendered from the shorthand value.
- * @param {function} [options.mapValueToProps] A function that maps a primitive value to the Component props
- * @param {Object} [options.requiredProps={}] Props required to render the component.
- * @param {boolean|string} [options.defaultValue] The default value for the shorthand prop.
- * @param {Object} [options.shorthandDefaultProps] Default props for the shorthand component.
- * @param {Object} [options.shorthandOverrideProps] Override props for the shorthand component.
- */
 export const implementsIconProp = (Component, options = {}) => {
   implementsShorthandProp(Component, {
     assertExactMatch: false,
@@ -119,20 +56,6 @@ export const implementsIconProp = (Component, options = {}) => {
   })
 }
 
-/**
- * Assert that a Component correctly implements an Image shorthand prop.
- *
- * @param {function} Component The component to test.
- * @param {object} [options={}]
- * @param {boolean} [options.autoGenerateKey=false] Whether or not automatic key generation is
- *   allowed for the shorthand component.
- * @param {string} [options.propKey='image'] The name of the shorthand prop.
- * @param {string|function} [options.ShorthandComponent] The component that should be rendered from the shorthand value.
- * @param {function} [options.mapValueToProps] A function that maps a primitive value to the Component props
- * @param {Object} [options.requiredProps={}] Props required to render the component.
- * @param {Object} [options.shorthandDefaultProps] Default props for the shorthand component.
- * @param {Object} [options.shorthandOverrideProps] Override props for the shorthand component.
- */
 export const implementsImageProp = (Component, options = {}) => {
   implementsShorthandProp(Component, {
     propKey: 'image',
@@ -142,20 +65,6 @@ export const implementsImageProp = (Component, options = {}) => {
   })
 }
 
-/**
- * Assert that a Component correctly implements a Label shorthand prop.
- *
- * @param {function} Component The component to test.
- * @param {object} [options={}]
- * @param {boolean} [options.autoGenerateKey=false] Whether or not automatic key generation is
- *   allowed for the shorthand component.
- * @param {string} [options.propKey='label'] The name of the shorthand prop.
- * @param {string|function} [options.ShorthandComponent] The component that should be rendered from the shorthand value.
- * @param {function} [options.mapValueToProps] A function that maps a primitive value to the Component props
- * @param {Object} [options.requiredProps={}] Props required to render the component.
- * @param {Object} [options.shorthandDefaultProps] Default props for the shorthand component.
- * @param {Object} [options.shorthandOverrideProps] Override props for the shorthand component.
- */
 export const implementsLabelProp = (Component, options = {}) => {
   implementsShorthandProp(Component, {
     propKey: 'label',
@@ -165,11 +74,6 @@ export const implementsLabelProp = (Component, options = {}) => {
   })
 }
 
-/**
- * Assert that a Component correctly implements the "only" prop.
- * @param {React.Component|Function} Component The component to test.
- * @param {String} propKey A props key.
- */
 export const implementsMultipleProp = (Component, propKey, propValues) => {
   const { assertRequired } = helpers('propKeyAndValueToClassName', Component)
 
@@ -181,9 +85,8 @@ export const implementsMultipleProp = (Component, propKey, propValues) => {
 
     propValues.forEach((propVal) => {
       it(`adds "${propVal} ${propKey}" to className`, () => {
-        shallow(createElement(Component, { [propKey]: propVal })).should.have.className(
-          `${propVal} ${propKey}`,
-        )
+        const { container } = render(createElement(Component, { [propKey]: propVal }))
+        expect(container.firstChild.className).to.include(`${propVal} ${propKey}`)
       })
     })
 
@@ -191,18 +94,12 @@ export const implementsMultipleProp = (Component, propKey, propValues) => {
       const className = propValues.map((prop) => `${prop} ${propKey}`).join(' ')
       const propValue = propValues.join(' ')
 
-      shallow(createElement(Component, { [propKey]: propValue })).should.have.className(className)
+      const { container } = render(createElement(Component, { [propKey]: propValue }))
+      expect(container.firstChild.className).to.include(className)
     })
   })
 }
 
-/**
- * Assert that a Component correctly implements the "textAlign" prop.
- * @param {React.Component|Function} Component The component to test.
- * @param {array} [alignments] Array of possible alignment positions.
- * @param {Object} [options={}]
- * @param {Object} [options.requiredProps={}] Props required to render the component.
- */
 export const implementsTextAlignProp = (
   Component,
   alignments = SUI.TEXT_ALIGNMENTS,
@@ -220,32 +117,20 @@ export const implementsTextAlignProp = (
     alignments.forEach((propVal) => {
       if (propVal === 'justified') {
         it('adds "justified" without "aligned" to className', () => {
-          shallow(<Component {...requiredProps} textAlign='justified' />).should.have.className(
-            'justified',
-          )
-
-          shallow(<Component {...requiredProps} textAlign='justified' />).should.not.have.className(
-            'aligned',
-          )
+          const { container } = render(<Component {...requiredProps} textAlign='justified' />)
+          expect(container.firstChild.className).to.include('justified')
+          expect(container.firstChild.className).to.not.include('aligned')
         })
       } else {
         it(`adds "${propVal} aligned" to className`, () => {
-          shallow(<Component {...requiredProps} textAlign={propVal} />).should.have.className(
-            `${propVal} ${'aligned'}`,
-          )
+          const { container } = render(<Component {...requiredProps} textAlign={propVal} />)
+          expect(container.firstChild.className).to.include(`${propVal} ${'aligned'}`)
         })
       }
     })
   })
 }
 
-/**
- * Assert that a Component correctly implements the "verticalAlign" prop.
- * @param {React.Component|Function} Component The component to test.
- * @param {array} [alignments] Array of possible alignment positions.
- * @param {Object} [options={}]
- * @param {Object} [options.requiredProps={}] Props required to render the component.
- */
 export const implementsVerticalAlignProp = (
   Component,
   alignments = SUI.VERTICAL_ALIGNMENTS,
@@ -262,27 +147,13 @@ export const implementsVerticalAlignProp = (
 
     alignments.forEach((propVal) => {
       it(`adds "${propVal} aligned" to className`, () => {
-        const wrapper = shallow(<Component {...requiredProps} verticalAlign={propVal} />, {
-          autoNesting: true,
-        })
-
-        wrapper.should.have.className(`${propVal} ${'aligned'}`)
+        const { container } = render(<Component {...requiredProps} verticalAlign={propVal} />)
+        expect(container.firstChild).toHaveClass(`${propVal} ${'aligned'}`)
       })
     })
   })
 }
 
-/**
- * Assert that a Component correctly implements a width prop.
- * @param {React.Component|Function} Component The component to test.
- * @param {array} [widths] Array of possible widths.
- * @param {object} [options={}]
- * @param {string} [options.propKey] The prop name that accepts a width value.
- * @param {string} [options.widthClass] The className that follows the wordToNumber className.
- *   Examples: one WIDE column, two COLUMN grid, three [none] fields, etc.
- * @param {boolean} [options.canEqual=true] Whether or not to test 'equal width' usage.
- * @param {Object} [options.requiredProps={}] Props required to render the component.
- */
 export const implementsWidthProp = (Component, widths = SUI.WIDTHS, options = {}) => {
   const { canEqual = true, propKey, requiredProps, widthClass } = options
   const { assertRequired } = helpers('implementsWidthProp', Component)
@@ -300,29 +171,24 @@ export const implementsWidthProp = (Component, widths = SUI.WIDTHS, options = {}
           ? `${numberToWord(width)} ${widthClass}`
           : numberToWord(width)
 
-        shallow(
+        const { container } = render(
           createElement(Component, { ...requiredProps, [propKey]: width }),
-        ).should.have.className(expectClass)
+        )
+        expect(container.firstChild.className).to.include(expectClass)
       })
     })
 
     if (canEqual) {
       it('adds "equal width" to className', () => {
-        shallow(
+        const { container } = render(
           createElement(Component, { ...requiredProps, [propKey]: 'equal' }),
-        ).should.have.className('equal width')
+        )
+        expect(container.firstChild.className).to.include('equal width')
       })
     }
   })
 }
 
-/**
- * Assert that a Components with a label correctly implements the "id" and "htmlFor" props.
- *
- * @param {React.Component|Function} Component The component to test.
- * @param {Object} [options={}]
- * @param {Object} [options.requiredProps={}] Props required to render the component.
- */
 export const labelImplementsHtmlForProp = (Component, options = {}) => {
   const { requiredProps = {} } = options
   const { assertRequired } = helpers('labelImplementsHtmlForProp', Component)
@@ -334,11 +200,12 @@ export const labelImplementsHtmlForProp = (Component, options = {}) => {
       const id = 'id-for-test'
       const label = 'label-for-test'
 
-      const wrapper = mount(<Component {...requiredProps} id={id} label={label} />)
-      const labelNode = wrapper.find('label')
+      const { container } = render(<Component {...requiredProps} id={id} label={label} />)
+      const labelNode = container.querySelector('label')
+      const idElement = container.querySelector(`#${id}`)
 
-      wrapper.should.to.have.descendants(`#${id}`)
-      labelNode.should.have.prop('htmlFor', id)
+      expect(idElement).to.exist
+      expect(labelNode).to.have.attribute('htmlFor', id)
     })
   })
 }

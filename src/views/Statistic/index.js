@@ -1,1 +1,2 @@
-export default from './Statistic'
+import Statistic from './Statistic';
+export default Statistic;

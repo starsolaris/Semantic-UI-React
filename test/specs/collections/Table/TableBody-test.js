@@ -1,4 +1,5 @@
 import React from 'react'
+import { render } from '@testing-library/react'
 
 import * as common from 'test/specs/commonTests'
 import TableBody from 'src/collections/Table/TableBody'
@@ -11,6 +12,7 @@ describe('TableBody', () => {
   })
 
   it('renders as a tbody by default', () => {
-    shallow(<TableBody />).should.have.tagName('tbody')
+    const { container } = render(<TableBody />)
+    expect(container.firstChild.tagName).toBe('TBODY')
   })
 })

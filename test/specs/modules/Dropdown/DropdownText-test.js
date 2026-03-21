@@ -1,4 +1,5 @@
 import React from 'react'
+import { render } from '@testing-library/react'
 
 import DropdownText from 'src/modules/Dropdown/DropdownText'
 import * as common from 'test/specs/commonTests'
@@ -9,10 +10,11 @@ describe('DropdownText', () => {
   common.rendersChildren(DropdownText)
 
   it('aria attributes', () => {
-    const wrapper = shallow(<DropdownText />)
+    const { container } = render(<DropdownText />)
+    const element = container.firstChild
 
-    wrapper.should.have.prop('aria-live', 'polite')
-    wrapper.should.have.prop('aria-atomic', true)
-    wrapper.should.have.prop('role', 'alert')
+    expect(element).toHaveAttribute('aria-live', 'polite')
+    expect(element).toHaveAttribute('aria-atomic', 'true')
+    expect(element).toHaveAttribute('role', 'alert')
   })
 })

@@ -1,4 +1,5 @@
 import React from 'react'
+import { render } from '@testing-library/react'
 
 import SearchCategory from 'src/modules/Search/SearchCategory'
 import * as common from 'test/specs/commonTests'
@@ -10,15 +11,17 @@ describe('SearchCategory', () => {
 
   describe('children', () => {
     it('should be a child with a "name" className', () => {
-      shallow(<SearchCategory />)
-        .childAt(0)
-        .should.have.className('name')
+      const { container } = render(<SearchCategory />)
+      const children = container.firstChild.children
+
+      expect(children[0].classList.contains('name')).to.be.true()
     })
 
     it('should be wrapped with a "results" className', () => {
-      shallow(<SearchCategory />)
-        .childAt(1)
-        .should.have.className('results')
+      const { container } = render(<SearchCategory />)
+      const children = container.firstChild.children
+
+      expect(children[1].classList.contains('results')).to.be.true()
     })
   })
 })

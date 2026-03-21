@@ -7,6 +7,7 @@ import HeaderContent from 'src/elements/Header/HeaderContent'
 import HeaderSubheader from 'src/elements/Header/HeaderSubheader'
 import { SUI } from 'src/lib'
 import * as common from 'test/specs/commonTests'
+import nestedShallow from 'test/utils/nestedShallow'
 
 describe('Header', () => {
   common.hasUIClassName(Header)
@@ -40,57 +41,59 @@ describe('Header', () => {
 
   describe('icon', () => {
     it('adds an icon class when true', () => {
-      shallow(<Header icon />).should.have.className('icon')
+      const element = nestedShallow(<Header icon />)
+      expect(element).toHaveClass('icon')
     })
     it('does not add an icon class given a name', () => {
-      shallow(<Header icon='user' />).should.not.have.className('icon')
+      const element = nestedShallow(<Header icon='user' />)
+      expect(element).to.not.have.class('icon')
     })
   })
 
   describe('image', () => {
     it('adds an image class when true', () => {
-      shallow(<Header image />).should.have.className('image')
+      const element = nestedShallow(<Header image />)
+      expect(element).toHaveClass('image')
     })
     it('does not add an Image when true', () => {
-      shallow(<Header image />).should.not.have.descendants('Image')
+      const element = nestedShallow(<Header image />)
+      expect(element.querySelector('img')).to.be.null()
     })
   })
 
   describe('content', () => {
     it('is wrapped in HeaderContent when there is an image src', () => {
-      shallow(<Header image='/images/wireframe/image.png' content='Bar' />)
-        .find('HeaderContent')
-        .shallow()
-        .should.contain.text('Bar')
+      const element = nestedShallow(<Header image='/images/wireframe/image.png' content='Bar' />)
+      const headerContent = element.querySelector('.content')
+      expect(headerContent.textContent).to.include('Bar')
     })
     it('is wrapped in HeaderContent when there is an icon name', () => {
-      shallow(<Header icon='users' content='Friends' />)
-        .find('HeaderContent')
-        .shallow()
-        .should.contain.text('Friends')
+      const element = nestedShallow(<Header icon='users' content='Friends' />)
+      const headerContent = element.querySelector('.content')
+      expect(headerContent.textContent).to.include('Friends')
     })
     it('is not wrapped in HeaderContent when icon is true', () => {
-      const wrapper = shallow(<Header icon content='Friends' />)
+      const element = nestedShallow(<Header icon content='Friends' />)
 
-      wrapper.should.contain.text('Friends')
-      wrapper.should.not.have.descendants('HeaderContent')
+      expect(element.textContent).to.include('Friends')
+      expect(element.querySelector('.content')).to.be.null()
     })
   })
 
   describe('subheader', () => {
     it('adds HeaderSubheader as child when there is an icon', () => {
       const text = faker.hacker.phrase()
+      const element = nestedShallow(<Header icon='user' subheader={text} />)
+      const subheader = element.querySelector('.sub.header')
 
-      shallow(<Header icon='user' subheader={text} />)
-        .find('HeaderSubheader')
-        .should.have.prop('content', text)
+      expect(subheader.textContent).to.equal(text)
     })
     it('adds HeaderSubheader as child when there is an image', () => {
       const text = faker.hacker.phrase()
+      const element = nestedShallow(<Header image='/images/wireframe/image.png' subheader={text} />)
+      const subheader = element.querySelector('.sub.header')
 
-      shallow(<Header image='/images/wireframe/image.png' subheader={text} />)
-        .find('HeaderSubheader')
-        .should.have.prop('content', text)
+      expect(subheader.textContent).to.equal(text)
     })
   })
 })

@@ -1,1 +1,2 @@
-export default from './Image'
+import Image from './Image';
+export default Image;

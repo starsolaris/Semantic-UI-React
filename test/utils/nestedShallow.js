@@ -1,32 +1,26 @@
-import enzyme from 'enzyme'
+import { render } from '@testing-library/react'
 import _ from 'lodash'
 import React from 'react'
 
-const diveToLevel = (wrapper, autoNesting, nestingLevel) => {
-  let nestedWrapper = wrapper
+const getNestedElement = (container, autoNesting, nestingLevel) => {
+  let element = container.firstChild
 
-  if (autoNesting && nestedWrapper.is(React.Fragment)) {
-    nestedWrapper = nestedWrapper.childAt(0)
+  if (autoNesting && element) {
+    element = element.firstChild || element
   }
 
   _.times(nestingLevel, () => {
-    nestedWrapper = nestedWrapper.childAt(0)
+    element = element?.firstChild || element
   })
 
-  return nestedWrapper
+  return element
 }
 
-/**
- * @param {*} node
- * @param {Object} [options]
- * @param {Boolean} [options.autoNesting]
- * @param {Number} [options.nestingLevel]
- * @return {*}
- */
 const nestedShallow = (node, options = {}) => {
-  const { autoNesting = false, nestingLevel, ...rest } = options
+  const { autoNesting = false, nestingLevel = 0, ...rest } = options
 
-  return diveToLevel(enzyme.shallow(node, rest), autoNesting, nestingLevel)
+  const { container } = render(node)
+  return getNestedElement(container, autoNesting, nestingLevel)
 }
 
 export default nestedShallow

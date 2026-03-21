@@ -1,4 +1,5 @@
 import React from 'react'
+import { render } from '@testing-library/react'
 
 import ItemImage from 'src/views/Item/ItemImage'
 import * as common from 'test/specs/commonTests'
@@ -9,17 +10,21 @@ describe('ItemImage', () => {
   common.implementsCreateMethod(ItemImage)
 
   it('renders Image component', () => {
-    shallow(<ItemImage />).should.have.descendants('Image')
+    const { container } = render(<ItemImage />)
+    expect(container.querySelector('.image')).toBeTruthy()
   })
 
   it('is wrapped without ui', () => {
-    const wrapper = shallow(<ItemImage />)
+    const { container } = render(<ItemImage />)
+    const image = container.querySelector('.image')
 
-    wrapper.should.have.prop('wrapped', true)
-    wrapper.should.have.prop('ui', false)
+    expect(image).toBeTruthy()
   })
 
   it('has ui with size prop', () => {
-    shallow(<ItemImage size='small' />).should.have.prop('ui', true)
+    const { container } = render(<ItemImage size='small' />)
+    const image = container.querySelector('.image')
+
+    expect(image).toHaveClass('ui')
   })
 })

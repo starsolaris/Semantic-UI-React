@@ -4,6 +4,7 @@ import React from 'react'
 import Rail from 'src/elements/Rail/Rail'
 import { SUI } from 'src/lib'
 import * as common from 'test/specs/commonTests'
+import nestedShallow from 'test/utils/nestedShallow'
 
 const requiredProps = { position: 'left' }
 
@@ -23,6 +24,7 @@ describe('Rail', () => {
   common.propValueOnlyToClassName(Rail, 'size', _.without(SUI.SIZES, 'medium'), { requiredProps })
 
   it('renders an div element', () => {
-    shallow(<Rail {...requiredProps} />).should.have.tagName('div')
+    const element = nestedShallow(<Rail {...requiredProps} />)
+    expect(element.tagName.toLowerCase()).to.equal('div')
   })
 })

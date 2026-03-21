@@ -4,6 +4,7 @@ import React from 'react'
 import ListContent from 'src/elements/List/ListContent'
 import { SUI } from 'src/lib'
 import * as common from 'test/specs/commonTests'
+import nestedShallow from 'test/utils/nestedShallow'
 
 describe('ListContent', () => {
   common.isConformant(ListContent)
@@ -24,11 +25,14 @@ describe('ListContent', () => {
     }
 
     it('renders content without wrapping ListContent', () => {
-      const wrapper = shallow(<ListContent {...baseProps} />)
+      const element = nestedShallow(<ListContent {...baseProps} />)
 
-      wrapper.find('ListHeader').should.have.prop('content', baseProps.header)
-      wrapper.find('ListDescription').should.have.prop('content', baseProps.description)
-      wrapper.should.contain.text(baseProps.content)
+      const header = element.querySelector('.header')
+      const description = element.querySelector('.description')
+
+      expect(header.textContent).to.equal(baseProps.header)
+      expect(description.textContent).to.equal(baseProps.description)
+      expect(element.textContent).to.include(baseProps.content)
     })
   })
 })

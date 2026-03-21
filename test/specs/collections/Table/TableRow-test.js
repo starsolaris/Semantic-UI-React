@@ -1,4 +1,5 @@
 import React from 'react'
+import { render } from '@testing-library/react'
 
 import * as common from 'test/specs/commonTests'
 import TableRow from 'src/collections/Table/TableRow'
@@ -23,32 +24,28 @@ describe('TableRow', () => {
   common.propKeyOnlyToClassName(TableRow, 'warning')
 
   it('renders as a tr by default', () => {
-    shallow(<TableRow />).should.have.tagName('tr')
+    const { container } = render(<TableRow />)
+    expect(container.firstChild.tagName).toBe('TR')
   })
 
   describe('shorthand', () => {
     const cells = ['Name', 'Status', 'Notes']
 
     it('renders empty tr with no shorthand', () => {
-      shallow(<TableRow />)
-        .find('td')
-        .should.have.lengthOf(0)
+      const { container } = render(<TableRow />)
+      expect(container.querySelectorAll('td')).toHaveLength(0)
     })
 
     it('renders the cells', () => {
-      shallow(<TableRow cells={cells} />)
-        .find('TableCell')
-        .should.have.lengthOf(cells.length)
+      const { container } = render(<TableRow cells={cells} />)
+      expect(container.querySelectorAll('td')).toHaveLength(cells.length)
     })
 
     it('renders the cells using cellAs', () => {
-      const cellWrappers = shallow(<TableRow cells={cells} cellAs='th' />).find('TableCell')
+      const { container } = render(<TableRow cells={cells} cellAs='th' />)
+      const headerCells = container.querySelectorAll('th')
 
-      cellWrappers.should.have.lengthOf(cells.length)
-
-      cellWrappers.forEach((wrapper) => {
-        wrapper.shallow().should.have.tagName('th')
-      })
+      expect(headerCells).toHaveLength(cells.length)
     })
   })
 })

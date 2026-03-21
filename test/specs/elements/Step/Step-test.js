@@ -1,5 +1,6 @@
 import faker from 'faker'
 import React from 'react'
+import { render, fireEvent } from '@testing-library/react'
 
 import Step from 'src/elements/Step/Step'
 import StepContent from 'src/elements/Step/StepContent'
@@ -24,30 +25,34 @@ describe('Step', () => {
   common.propKeyOnlyToClassName(Step, 'link')
 
   it('renders as a div by default', () => {
-    shallow(<Step />).should.have.tagName('div')
+    const { container } = render(<Step />)
+    expect(container.firstChild.tagName.toLowerCase()).to.equal('div')
   })
 
   describe('children', () => {
-    shallow(<Step>{faker.hacker.phrase()}</Step>).should.not.have.descendants('StepContent')
+    it('does not have StepContent when children are provided', () => {
+      const { container } = render(<Step>{faker.hacker.phrase()}</Step>)
+      expect(container.querySelector('.step-content')).to.be.null()
+    })
   })
 
   describe('description', () => {
     it('passes prop to StepContent', () => {
       const description = faker.hacker.phrase()
 
-      shallow(<Step description={description} />)
-        .find('StepContent')
-        .should.have.prop('description', description)
+      const { container } = render(<Step description={description} />)
+      const stepContent = container.querySelector('.step-content')
+      expect(stepContent.textContent).to.include(description)
     })
   })
 
   describe('href', () => {
     it('renders as `a` when defined', () => {
       const url = faker.internet.url()
-      const wrapper = shallow(<Step href={url} />)
+      const { container } = render(<Step href={url} />)
 
-      wrapper.should.have.tagName('a')
-      wrapper.should.have.attr('href', url)
+      expect(container.firstChild.tagName.toLowerCase()).to.equal('a')
+      expect(container.firstChild.getAttribute('href')).to.equal(url)
     })
   })
 
@@ -56,7 +61,8 @@ describe('Step', () => {
       const event = { target: null }
       const onClick = sandbox.spy()
 
-      mount(<Step onClick={onClick} />).simulate('click', event)
+      const { container } = render(<Step onClick={onClick} />)
+      fireEvent.click(container.firstChild, event)
 
       onClick.should.have.been.calledOnce()
       onClick.should.have.been.calledWithMatch(event, { onClick })
@@ -65,12 +71,14 @@ describe('Step', () => {
     it('is not called when is disabled', () => {
       const onClick = sandbox.spy()
 
-      mount(<Step disabled onClick={onClick} />).simulate('click')
+      const { container } = render(<Step disabled onClick={onClick} />)
+      fireEvent.click(container.firstChild)
       onClick.should.have.not.been.called()
     })
 
     it('renders as `a` when defined', () => {
-      shallow(<Step onClick={() => null} />).should.have.tagName('a')
+      const { container } = render(<Step onClick={() => null} />)
+      expect(container.firstChild.tagName.toLowerCase()).to.equal('a')
     })
   })
 
@@ -78,9 +86,9 @@ describe('Step', () => {
     it('passes prop to StepContent', () => {
       const title = faker.hacker.phrase()
 
-      shallow(<Step title={title} />)
-        .find('StepContent')
-        .should.have.prop('title', title)
+      const { container } = render(<Step title={title} />)
+      const stepContent = container.querySelector('.step-content')
+      expect(stepContent.textContent).to.include(title)
     })
   })
 })

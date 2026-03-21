@@ -1,4 +1,5 @@
 import React from 'react'
+import { render } from '@testing-library/react'
 
 import FeedExtra from 'src/views/Feed/FeedExtra'
 import * as common from 'test/specs/commonTests'
@@ -14,9 +15,10 @@ describe('FeedExtra', () => {
 
   describe('images', () => {
     it('renders <img> with images prop', () => {
-      shallow(<FeedExtra images={['a', 'b', 'c']} />)
-        .should.have.exactly(3)
-        .descendants('img')
+      const { container } = render(<FeedExtra images={['a', 'b', 'c']} />)
+      const images = container.querySelectorAll('img')
+
+      expect(images).toHaveLength(3)
     })
   })
 })

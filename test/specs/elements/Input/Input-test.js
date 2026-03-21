@@ -1,10 +1,12 @@
 import React from 'react'
+import { render, fireEvent } from '@testing-library/react'
 
 import Icon from 'src/elements/Icon/Icon'
 import Input from 'src/elements/Input/Input'
 import { htmlInputProps } from 'src/lib'
 import * as common from 'test/specs/commonTests'
 import { sandbox } from 'test/utils'
+import nestedShallow from 'test/utils/nestedShallow'
 
 describe('Input', () => {
   common.isConformant(Input, {
@@ -107,49 +109,53 @@ describe('Input', () => {
   ])
 
   it('renders with conditional children', () => {
-    shallow(
+    const { container } = render(
       <Input>
         {true && <span />}
         {false && <div />}
       </Input>,
     )
-      .should.contain(<span />)
-      .should.not.contain(<div />)
+
+    expect(container.querySelector('span')).to.not.be.null()
+    expect(container.querySelector('div')).to.be.null()
   })
 
   it('renders a text <input> by default', () => {
-    shallow(<Input />)
-      .find('input')
-      .should.have.prop('type', 'text')
+    const element = nestedShallow(<Input />)
+    const input = element.querySelector('input')
+
+    expect(input.type).to.equal('text')
   })
 
   describe('input props', () => {
     htmlInputProps.forEach((propName) => {
       it(`passes \`${propName}\` to the <input>`, () => {
         const propValue = propName === 'onChange' ? () => null : 'foo'
-        const wrapper = shallow(<Input {...{ [propName]: propValue }} />)
+        const element = nestedShallow(<Input {...{ [propName]: propValue }} />)
+        const input = element.querySelector('input')
 
         // account for overloading the onChange prop
         if (propName === 'onChange') {
-          wrapper.find('input').should.have.prop(propName).to.be.a('function')
+          expect(input[propName]).to.be.a('function')
         } else {
-          wrapper.find('input').should.have.prop(propName, propValue)
+          expect(input[propName]).to.equal(propValue)
         }
       })
 
       it(`passes \`${propName}\` to the <input> when using children`, () => {
         const propValue = propName === 'onChange' ? () => null : 'foo'
-        const wrapper = shallow(
+        const element = nestedShallow(
           <Input {...{ [propName]: propValue }}>
             <input />
           </Input>,
         )
+        const input = element.querySelector('input')
 
         // account for overloading the onChange prop
         if (propName === 'onChange') {
-          wrapper.find('input').should.have.prop(propName).to.be.a('function')
+          expect(input[propName]).to.be.a('function')
         } else {
-          wrapper.find('input').should.have.prop(propName, propValue)
+          expect(input[propName]).to.equal(propValue)
         }
       })
     })
@@ -157,15 +163,17 @@ describe('Input', () => {
 
   describe('loading', () => {
     it("don't add icon if it's defined", () => {
-      shallow(<Input icon='user' loading />)
-        .find(Icon)
-        .should.have.prop('name', 'user')
+      const element = nestedShallow(<Input icon='user' loading />)
+      const icon = element.querySelector('i.icon')
+
+      expect(icon.className).to.include('user')
     })
 
     it("adds icon if it's not defined", () => {
-      shallow(<Input loading />)
-        .find(Icon)
-        .should.have.prop('name', 'spinner')
+      const element = nestedShallow(<Input loading />)
+      const icon = element.querySelector('i.icon')
+
+      expect(icon.className).to.include('spinner')
     })
   })
 
@@ -175,9 +183,10 @@ describe('Input', () => {
       const e = { target: { value: 'name' } }
       const props = { 'data-foo': 'bar', onChange }
 
-      const wrapper = shallow(<Input {...props} />)
+      const element = nestedShallow(<Input {...props} />)
+      const input = element.querySelector('input')
 
-      wrapper.find('input').simulate('change', e)
+      fireEvent.change(input, e)
 
       onChange.should.have.been.calledOnce()
       onChange.should.have.been.calledWithMatch(e, { ...props, value: e.target.value })
@@ -188,13 +197,14 @@ describe('Input', () => {
       const e = { target: { value: 'name' } }
       const props = { 'data-foo': 'bar', onChange }
 
-      const wrapper = shallow(
+      const element = nestedShallow(
         <Input {...props}>
           <input />
         </Input>,
       )
+      const input = element.querySelector('input')
 
-      wrapper.find('input').simulate('change', e)
+      fireEvent.change(input, e)
 
       onChange.should.have.been.calledOnce()
       onChange.should.have.been.calledWithMatch(e, { ...props, value: e.target.value })
@@ -207,13 +217,12 @@ describe('Input', () => {
       const mountNode = document.createElement('div')
       document.body.appendChild(mountNode)
 
-      const wrapper = mount(<Input ref={inputRef} />, { attachTo: mountNode })
+      render(<Input ref={inputRef} />, { container: mountNode })
       inputRef.current.focus()
 
       const input = document.querySelector('.ui.input input')
       document.activeElement.should.equal(input)
 
-      wrapper.detach()
       document.body.removeChild(mountNode)
     })
 
@@ -223,12 +232,11 @@ describe('Input', () => {
       document.body.appendChild(mountNode)
 
       const value = 'expect this text to be selected'
-      const wrapper = mount(<Input ref={inputRef} value={value} />, { attachTo: mountNode })
+      render(<Input ref={inputRef} value={value} />, { container: mountNode })
       inputRef.current.select()
 
       window.getSelection().toString().should.equal(value)
 
-      wrapper.detach()
       document.body.removeChild(mountNode)
     })
 
@@ -239,11 +247,11 @@ describe('Input', () => {
       const mountNode = document.createElement('div')
       document.body.appendChild(mountNode)
 
-      const wrapper = mount(
+      render(
         <Input ref={inputRef}>
           <input ref={elementRef} />
         </Input>,
-        { attachTo: mountNode },
+        { container: mountNode },
       )
       const input = document.querySelector('.ui.input input')
 
@@ -251,83 +259,88 @@ describe('Input', () => {
       elementRef.should.have.been.calledWithMatch(input)
       inputRef.should.have.been.calledWithMatch(input)
 
-      wrapper.detach()
       document.body.removeChild(mountNode)
     })
   })
 
   describe('disabled', () => {
     it('is applied to the underlying html input element', () => {
-      shallow(<Input disabled />)
-        .find('input')
-        .should.have.prop('disabled', true)
+      let element = nestedShallow(<Input disabled />)
+      let input = element.querySelector('input')
+      expect(input.disabled).to.equal(true)
 
-      shallow(<Input disabled={false} />)
-        .find('input')
-        .should.have.prop('disabled', false)
+      element = nestedShallow(<Input disabled={false} />)
+      input = element.querySelector('input')
+      expect(input.disabled).to.equal(false)
     })
   })
 
   describe('tabIndex', () => {
     it('is not set by default', () => {
-      shallow(<Input />)
-        .find('input')
-        .should.not.have.prop('tabIndex')
+      const element = nestedShallow(<Input />)
+      const input = element.querySelector('input')
+
+      expect(input.tabIndex).to.equal(0)
     })
 
     it('defaults to -1 when disabled', () => {
-      shallow(<Input disabled />)
-        .find('input')
-        .should.have.prop('tabIndex', -1)
+      const element = nestedShallow(<Input disabled />)
+      const input = element.querySelector('input')
+
+      expect(input.tabIndex).to.equal(-1)
     })
 
     it('can be set explicitly', () => {
-      shallow(<Input tabIndex={123} />)
-        .find('input')
-        .should.have.prop('tabIndex', 123)
+      const element = nestedShallow(<Input tabIndex={123} />)
+      const input = element.querySelector('input')
+
+      expect(input.tabIndex).to.equal(123)
     })
 
     it('can be set explicitly when disabled', () => {
-      shallow(<Input tabIndex={123} disabled />)
-        .find('input')
-        .should.have.prop('tabIndex', 123)
+      const element = nestedShallow(<Input tabIndex={123} disabled />)
+      const input = element.querySelector('input')
+
+      expect(input.tabIndex).to.equal(123)
     })
   })
 
   describe('icon', () => {
     it('is second child', () => {
-      shallow(<Input icon='search' />)
-        .childAt(1)
-        .is(Icon)
-        .should.be.true()
+      const element = nestedShallow(<Input icon='search' />)
+      const children = element.children
+
+      expect(children[1].tagName.toLowerCase()).to.equal('i')
     })
 
     it('is third child with action positioned left', () => {
-      shallow(<Input icon='search' action='foo' actionPosition='left' />)
-        .childAt(2)
-        .is(Icon)
-        .should.be.true()
+      const element = nestedShallow(<Input icon='search' action='foo' actionPosition='left' />)
+      const children = element.children
+
+      expect(children[2].tagName.toLowerCase()).to.equal('i')
     })
 
     it('is third child with label', () => {
-      shallow(<Input icon='search' label='foo' />)
-        .childAt(2)
-        .is(Icon)
-        .should.be.true()
+      const element = nestedShallow(<Input icon='search' label='foo' />)
+      const children = element.children
+
+      expect(children[2].tagName.toLowerCase()).to.equal('i')
     })
 
     it('is second child with action', () => {
-      shallow(<Input icon='search' iconPosition='left' action='foo' />)
-        .childAt(1)
-        .is(Icon)
-        .should.be.true()
+      const element = nestedShallow(<Input icon='search' iconPosition='left' action='foo' />)
+      const children = element.children
+
+      expect(children[1].tagName.toLowerCase()).to.equal('i')
     })
 
     it('is second child with label positioned right', () => {
-      shallow(<Input icon='search' iconPosition='left' label='foo' labelPosition='right' />)
-        .childAt(1)
-        .is(Icon)
-        .should.be.true()
+      const element = nestedShallow(
+        <Input icon='search' iconPosition='left' label='foo' labelPosition='right' />,
+      )
+      const children = element.children
+
+      expect(children[1].tagName.toLowerCase()).to.equal('i')
     })
   })
 })

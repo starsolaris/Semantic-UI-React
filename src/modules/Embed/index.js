@@ -1,1 +1,2 @@
-export default from './Embed'
+import Embed from './Embed';
+export default Embed;

@@ -1,4 +1,5 @@
 import React from 'react'
+import { render } from '@testing-library/react'
 
 import FormDropdown from 'src/collections/Form/FormDropdown'
 import Dropdown from 'src/modules/Dropdown/Dropdown'
@@ -10,8 +11,8 @@ describe('FormDropdown', () => {
   common.forwardsRef(FormDropdown)
 
   it('renders a FormField with a Dropdown control', () => {
-    shallow(<FormDropdown />)
-      .find('FormField')
-      .should.have.prop('control', Dropdown)
+    const { container } = render(<FormDropdown />)
+    const dropdown = container.querySelector('.ui.dropdown')
+    expect(dropdown).toBeTruthy()
   })
 })

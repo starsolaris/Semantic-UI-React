@@ -1,7 +1,9 @@
 import * as React from 'react'
 import * as ReactIs from 'react-is'
+import { render } from '@testing-library/react'
+import sinon from 'sinon'
 
-import { consoleUtil, sandbox } from 'test/utils'
+import { sandbox } from 'test/utils'
 
 /**
  * Assert a Component correctly implements a shorthand create method.
@@ -25,12 +27,11 @@ export default function forwardsRef(Component, options = {}) {
     it(`forwards ref to "${tagName}"`, () => {
       const ref = sandbox.spy()
 
-      // mount() can produce "validateNesting" error from React when elements like "td" are mounted
-      consoleUtil.disableOnce()
-      mount(<Component {...requiredProps} ref={ref} />)
+      render(<Component {...requiredProps} ref={ref} />)
 
-      ref.should.have.been.calledOnce()
-      ref.should.have.been.calledWithMatch({ tagName: tagName.toUpperCase() })
+      sinon.assert.calledOnce(ref)
+      const callArgs = ref.getCall(0).args[0]
+      expect(callArgs.tagName).to.equal(tagName.toUpperCase())
     })
   })
 }

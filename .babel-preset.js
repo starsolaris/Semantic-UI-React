@@ -87,7 +87,11 @@ module.exports = () => ({
       plugins: ['react-hot-loader/babel'],
     },
     test: {
-      plugins: [['istanbul', { include: ['src'] }]],
+      plugins: [
+        ['istanbul', { include: ['src'] }],
+        '@babel/plugin-transform-nullish-coalescing-operator',
+        '@babel/plugin-transform-optional-chaining',
+      ],
     },
   },
   overrides: [

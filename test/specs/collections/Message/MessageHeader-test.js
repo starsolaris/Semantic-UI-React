@@ -1,4 +1,5 @@
 import React from 'react'
+import { render } from '@testing-library/react'
 
 import MessageHeader from 'src/collections/Message/MessageHeader'
 import * as common from 'test/specs/commonTests'
@@ -10,10 +11,12 @@ describe('MessageHeader', () => {
   common.rendersChildren(MessageHeader)
 
   it('renders an div tag', () => {
-    shallow(<MessageHeader />).should.have.tagName('div')
+    const { container } = render(<MessageHeader />)
+    expect(container.firstChild.tagName).toBe('DIV')
   })
 
   it('has className header', () => {
-    shallow(<MessageHeader />).should.have.className('header')
+    const { container } = render(<MessageHeader />)
+    expect(container.firstChild).toHaveClass('header')
   })
 })

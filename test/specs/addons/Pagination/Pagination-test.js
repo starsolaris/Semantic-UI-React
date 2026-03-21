@@ -1,4 +1,5 @@
 import React from 'react'
+import { render, fireEvent } from '@testing-library/react'
 
 import Pagination from 'src/addons/Pagination/Pagination'
 import PaginationItem from 'src/addons/Pagination/PaginationItem'
@@ -16,10 +17,12 @@ describe('Pagination', () => {
 
   describe('disabled', () => {
     it('is passed to an each item', () => {
-      const wrapper = shallow(<Pagination activePage={1} disabled totalPages={3} />)
-      const items = wrapper.find('PaginationItem')
+      const { container } = render(<Pagination activePage={1} disabled totalPages={3} />)
+      const items = container.querySelectorAll('.pagination-item')
 
-      items.everyWhere((item) => item.prop('disabled', true)).should.to.equal(true)
+      items.forEach((item) => {
+        expect(item.getAttribute('disabled')).to.equal('true')
+      })
     })
   })
 
@@ -28,7 +31,7 @@ describe('Pagination', () => {
       const onPageChange = sandbox.spy()
       const onPageItemClick = sandbox.spy()
 
-      const wrapper = mount(
+      const { container } = render(
         <Pagination
           activePage={1}
           onPageChange={onPageChange}
@@ -37,7 +40,8 @@ describe('Pagination', () => {
         />,
       )
 
-      wrapper.find('PaginationItem').at(4).simulate('click')
+      const items = container.querySelectorAll('.pagination-item')
+      fireEvent.click(items[4])
 
       onPageChange.should.have.been.calledOnce()
       onPageChange.should.have.been.calledWithMatch({ type: 'click' }, { activePage: 3 })
@@ -47,7 +51,7 @@ describe('Pagination', () => {
 
     it('will be omitted if occurred for the same pagination item as the current', () => {
       const onPageChange = sandbox.spy()
-      const wrapper = mount(
+      const { container } = render(
         <Pagination
           activePage={1}
           firstItem={null}
@@ -57,13 +61,14 @@ describe('Pagination', () => {
         />,
       )
 
-      wrapper.find('PaginationItem').at(0).simulate('click')
+      const items = container.querySelectorAll('.pagination-item')
+      fireEvent.click(items[0])
       onPageChange.should.have.not.been.called()
     })
 
     it('will be omitted when item "type" is "ellipsisItem"', () => {
       const onPageChange = sandbox.spy()
-      const wrapper = mount(
+      const { container } = render(
         <Pagination
           activePage={5}
           firstItem={null}
@@ -73,29 +78,33 @@ describe('Pagination', () => {
         />,
       )
 
-      wrapper.find('PaginationItem').at(1).simulate('click')
+      const items = container.querySelectorAll('.pagination-item')
+      fireEvent.click(items[1])
       onPageChange.should.have.not.been.called()
     })
   })
 
   describe('activePage', () => {
     it('defaults to "1"', () => {
-      const wrapper = mount(<Pagination totalPages={3} />)
+      const { container } = render(<Pagination totalPages={3} />)
+      const items = container.querySelectorAll('.pagination-item')
 
-      wrapper.find('PaginationItem').at(1).prop('value').should.equal(1)
-      wrapper.find('PaginationItem').at(5).prop('value').should.equal(2)
+      expect(items[1].textContent).to.equal('1')
+      expect(items[5].textContent).to.equal('2')
     })
 
     it('can be set via "defaultActivePage"', () => {
-      const wrapper = mount(<Pagination defaultActivePage={2} totalPages={3} />)
+      const { container } = render(<Pagination defaultActivePage={2} totalPages={3} />)
+      const items = container.querySelectorAll('.pagination-item')
 
-      wrapper.find('PaginationItem').at(3).should.have.prop('active')
+      expect(items[3].classList.contains('active')).to.be.true()
     })
 
     it('can be set via "activePage"', () => {
-      const wrapper = mount(<Pagination activePage={2} totalPages={3} />)
+      const { container } = render(<Pagination activePage={2} totalPages={3} />)
+      const items = container.querySelectorAll('.pagination-item')
 
-      wrapper.find('PaginationItem').at(3).should.have.prop('active')
+      expect(items[3].classList.contains('active')).to.be.true()
     })
   })
 })

@@ -1,4 +1,5 @@
 import React from 'react'
+import { render } from '@testing-library/react'
 
 import Radio from 'src/addons/Radio/Radio'
 import FormRadio from 'src/collections/Form/FormRadio'
@@ -11,8 +12,8 @@ describe('FormRadio', () => {
   common.forwardsRef(FormRadio, { tagName: 'input' })
 
   it('renders a FormField with a Radio control', () => {
-    shallow(<FormRadio />)
-      .find('FormField')
-      .should.have.prop('control', Radio)
+    const { container } = render(<FormRadio />)
+    const radio = container.querySelector('.ui.radio.checkbox')
+    expect(radio).toBeTruthy()
   })
 })

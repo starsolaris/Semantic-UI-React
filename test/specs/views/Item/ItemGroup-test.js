@@ -1,5 +1,6 @@
 import faker from 'faker'
 import React from 'react'
+import { render } from '@testing-library/react'
 
 import ItemGroup from 'src/views/Item/ItemGroup'
 import * as common from 'test/specs/commonTests'
@@ -24,12 +25,12 @@ describe('ItemGroup', () => {
       const secondText = faker.hacker.phrase()
       const items = [{ content: firstText }, { content: secondText }]
 
-      const wrapper = mount(<ItemGroup items={items} />)
-      const itemWrappers = wrapper.find('Item')
+      const { container } = render(<ItemGroup items={items} />)
+      const itemElements = container.querySelectorAll('.item')
 
-      wrapper.should.have.exactly(2).descendants('Item')
-      itemWrappers.first().find('ItemContent').should.contain.text(firstText)
-      itemWrappers.last().find('ItemContent').should.contain.text(secondText)
+      expect(itemElements).toHaveLength(2)
+      expect(itemElements[0]).toHaveTextContent(firstText)
+      expect(itemElements[1]).toHaveTextContent(secondText)
     })
   })
 })

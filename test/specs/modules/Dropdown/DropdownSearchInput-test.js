@@ -1,5 +1,6 @@
 import faker from 'faker'
 import React from 'react'
+import { render, fireEvent } from '@testing-library/react'
 
 import * as common from 'test/specs/commonTests'
 import { sandbox } from 'test/utils'
@@ -11,17 +12,20 @@ describe('DropdownSearchInput', () => {
 
   describe('aria', () => {
     it('should have aria-autocomplete', () => {
-      shallow(<DropdownSearchInput />).should.have.prop('aria-autocomplete', 'list')
+      const { container } = render(<DropdownSearchInput />)
+      expect(container.firstChild).toHaveAttribute('aria-autocomplete', 'list')
     })
   })
 
   describe('autoComplete', () => {
     it('should have autoComplete by default', () => {
-      shallow(<DropdownSearchInput />).should.have.prop('autoComplete', 'off')
+      const { container } = render(<DropdownSearchInput />)
+      expect(container.firstChild).toHaveAttribute('autoComplete', 'off')
     })
 
     it('should pass a defined value', () => {
-      shallow(<DropdownSearchInput autoComplete='on' />).should.have.prop('autoComplete', 'on')
+      const { container } = render(<DropdownSearchInput autoComplete='on' />)
+      expect(container.firstChild).toHaveAttribute('autoComplete', 'on')
     })
   })
 
@@ -30,9 +34,8 @@ describe('DropdownSearchInput', () => {
       const onChange = sandbox.spy()
       const e = { target: { value: 'value' } }
 
-      shallow(<DropdownSearchInput onChange={onChange} />)
-        .find('input')
-        .simulate('change', e)
+      const { container } = render(<DropdownSearchInput onChange={onChange} />)
+      fireEvent.change(container.firstChild, e)
 
       onChange.should.have.been.calledOnce()
       onChange.should.have.been.calledWithMatch(e, { value: e.target.value })
@@ -41,35 +44,39 @@ describe('DropdownSearchInput', () => {
 
   describe('tabIndex', () => {
     it('is not set by default', () => {
-      shallow(<DropdownSearchInput />).should.not.have.prop('tabIndex')
+      const { container } = render(<DropdownSearchInput />)
+      expect(container.firstChild).not.toHaveAttribute('tabIndex')
     })
 
     it('can be set explicitly', () => {
-      shallow(<DropdownSearchInput tabIndex={123} />).should.have.prop('tabIndex', 123)
+      const { container } = render(<DropdownSearchInput tabIndex={123} />)
+      expect(container.firstChild).toHaveAttribute('tabIndex', '123')
     })
   })
 
   describe('type', () => {
     it('should have text by default', () => {
-      shallow(<DropdownSearchInput />).should.have.prop('type', 'text')
+      const { container } = render(<DropdownSearchInput />)
+      expect(container.firstChild).toHaveAttribute('type', 'text')
     })
 
     it('can be set explicitly', () => {
       const type = faker.random.word()
-
-      shallow(<DropdownSearchInput type={type} />).should.have.prop('type', type)
+      const { container } = render(<DropdownSearchInput type={type} />)
+      expect(container.firstChild).toHaveAttribute('type', type)
     })
   })
 
   describe('value', () => {
     it('is not set by default', () => {
-      shallow(<DropdownSearchInput />).should.not.have.prop('value')
+      const { container } = render(<DropdownSearchInput />)
+      expect(container.firstChild).not.toHaveAttribute('value')
     })
 
     it('can be set explicitly', () => {
       const value = faker.random.word()
-
-      shallow(<DropdownSearchInput value={value} />).should.have.prop('value', value)
+      const { container } = render(<DropdownSearchInput value={value} />)
+      expect(container.firstChild).toHaveAttribute('value', value)
     })
   })
 })

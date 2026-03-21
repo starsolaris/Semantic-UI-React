@@ -2,6 +2,7 @@ import React from 'react'
 
 import Container from 'src/elements/Container/Container'
 import * as common from 'test/specs/commonTests'
+import nestedShallow from 'test/utils/nestedShallow'
 
 describe('Container', () => {
   common.isConformant(Container)
@@ -15,6 +16,7 @@ describe('Container', () => {
   common.implementsTextAlignProp(Container)
 
   it('renders a <div /> element', () => {
-    shallow(<Container />).should.have.tagName('div')
+    const element = nestedShallow(<Container />)
+    expect(element.tagName.toLowerCase()).to.equal('div')
   })
 })

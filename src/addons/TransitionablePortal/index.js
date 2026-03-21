@@ -1,1 +1,2 @@
-export default from './TransitionablePortal'
+import TransitionablePortal from './TransitionablePortal';
+export default TransitionablePortal;

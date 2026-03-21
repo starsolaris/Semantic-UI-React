@@ -1,9 +1,7 @@
 import makeDebugger from './makeDebugger'
-
-export ModernAutoControlledComponent from './ModernAutoControlledComponent'
-export * as childrenUtils from './childrenUtils'
-
-export {
+import ModernAutoControlledComponent from './ModernAutoControlledComponent'
+import * as childrenUtils from './childrenUtils'
+import {
   getKeyOnly,
   getKeyOrValueAndKey,
   getValueAndKey,
@@ -12,44 +10,75 @@ export {
   getVerticalAlignProp,
   getWidthProp,
 } from './classNameBuilders'
-
-export * as customPropTypes from './customPropTypes'
-export eventStack from './eventStack'
-
-export * from './factories'
-export getComponentType from './getComponentType'
-export getUnhandledProps from './getUnhandledProps'
-
-export {
+import * as customPropTypes from './customPropTypes'
+import eventStack from './eventStack'
+import * as factories from './factories'
+import { createShorthand, createShorthandFactory } from './factories'
+import getComponentType from './getComponentType'
+import getUnhandledProps from './getUnhandledProps'
+import {
   htmlInputAttrs,
   htmlInputEvents,
   htmlInputProps,
   htmlImageProps,
   partitionHTMLProps,
 } from './htmlPropsUtils'
+import isBrowser from './isBrowser'
+import doesNodeContainClick from './doesNodeContainClick'
+import leven from './leven'
+import createPaginationItems from './createPaginationItems'
+import * as SUI from './SUI'
+import { numberToWordMap, numberToWord } from './numberToWord'
+import normalizeTransitionDuration from './normalizeTransitionDuration'
+import objectDiff from './objectDiff'
+import isRefObject from './isRefObject'
+import useAutoControlledValue from './hooks/useAutoControlledValue'
+import useClassNamesOnNode from './hooks/useClassNamesOnNode'
+import useEventCallback from './hooks/useEventCallback'
+import useForceUpdate from './hooks/useForceUpdate'
+import useIsomorphicLayoutEffect from './hooks/useIsomorphicLayoutEffect'
+import useMergedRefs, { setRef } from './hooks/useMergedRefs'
+import usePrevious from './hooks/usePrevious'
 
-export isBrowser from './isBrowser'
-export doesNodeContainClick from './doesNodeContainClick'
-export leven from './leven'
-export createPaginationItems from './createPaginationItems'
-export * as SUI from './SUI'
-
-export { numberToWordMap, numberToWord } from './numberToWord'
-export normalizeTransitionDuration from './normalizeTransitionDuration'
-export objectDiff from './objectDiff'
-export isRefObject from './isRefObject'
-
-// Heads up! We import/export for this module to safely remove it with "babel-plugin-filter-imports"
-export { makeDebugger }
-
-//
-// Hooks
-//
-
-export useAutoControlledValue from './hooks/useAutoControlledValue'
-export useClassNamesOnNode from './hooks/useClassNamesOnNode'
-export useEventCallback from './hooks/useEventCallback'
-export useForceUpdate from './hooks/useForceUpdate'
-export useIsomorphicLayoutEffect from './hooks/useIsomorphicLayoutEffect'
-export useMergedRefs, { setRef } from './hooks/useMergedRefs'
-export usePrevious from './hooks/usePrevious'
+export {
+  makeDebugger,
+  ModernAutoControlledComponent,
+  childrenUtils,
+  getKeyOnly,
+  getKeyOrValueAndKey,
+  getValueAndKey,
+  getMultipleProp,
+  getTextAlignProp,
+  getVerticalAlignProp,
+  getWidthProp,
+  customPropTypes,
+  eventStack,
+  factories,
+  createShorthand,
+  createShorthandFactory,
+  getComponentType,
+  getUnhandledProps,
+  htmlInputAttrs,
+  htmlInputEvents,
+  htmlInputProps,
+  htmlImageProps,
+  partitionHTMLProps,
+  isBrowser,
+  doesNodeContainClick,
+  leven,
+  createPaginationItems,
+  SUI,
+  numberToWordMap,
+  numberToWord,
+  normalizeTransitionDuration,
+  objectDiff,
+  isRefObject,
+  useAutoControlledValue,
+  useClassNamesOnNode,
+  useEventCallback,
+  useForceUpdate,
+  useIsomorphicLayoutEffect,
+  useMergedRefs,
+  setRef,
+  usePrevious,
+}

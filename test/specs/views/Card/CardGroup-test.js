@@ -1,6 +1,7 @@
 import faker from 'faker'
 import _ from 'lodash'
 import React from 'react'
+import { render } from '@testing-library/react'
 
 import { SUI } from 'src/lib'
 import CardGroup from 'src/views/Card/CardGroup'
@@ -30,10 +31,11 @@ describe('CardGroup', () => {
     it('with `items` prop', () => {
       const items = [{ header: firstText }, { header: secondText }]
 
-      const wrapper = mount(<CardGroup items={items} />).find('Card')
+      const { container } = render(<CardGroup items={items} />)
+      const cards = container.querySelectorAll('.ui.card')
 
-      wrapper.first().find('CardHeader').should.contain.text(firstText)
-      wrapper.last().find('CardHeader').should.contain.text(secondText)
+      expect(cards[0]).toHaveTextContent(firstText)
+      expect(cards[1]).toHaveTextContent(secondText)
     })
   })
 })

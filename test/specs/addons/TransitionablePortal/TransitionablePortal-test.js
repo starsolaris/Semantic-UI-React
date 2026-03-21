@@ -1,4 +1,5 @@
 import React from 'react'
+import { render, fireEvent } from '@testing-library/react'
 
 import TransitionablePortal from 'src/addons/TransitionablePortal/TransitionablePortal'
 import * as common from 'test/specs/commonTests'
@@ -18,16 +19,16 @@ describe('TransitionablePortal', () => {
 
   describe('children', () => {
     it('renders a Transition', () => {
-      const wrapper = mount(<TransitionablePortal {...requiredProps} open />)
+      const { container } = render(<TransitionablePortal {...requiredProps} open />)
 
-      wrapper.should.have.descendants('.transition')
+      expect(container.querySelector('.transition')).to.exist()
     })
   })
 
   describe('onClose', () => {
     it('is called with (null, data) on a click outside', (done) => {
       const onClose = sandbox.spy()
-      const wrapper = mount(
+      const { container, unmount } = render(
         <TransitionablePortal
           {...requiredProps}
           onClose={onClose}
@@ -36,33 +37,34 @@ describe('TransitionablePortal', () => {
         />,
       )
 
-      wrapper.find('button').simulate('click')
+      const button = container.querySelector('button')
+      fireEvent.click(button)
       domEvent.click(document.body)
 
       assertWithTimeout(() => {
         onClose.should.have.been.calledOnce()
         onClose.should.have.been.calledWithMatch(null, { portalOpen: false })
 
-        wrapper.unmount()
+        unmount()
       }, done)
     })
 
     it('hides contents on a click outside', () => {
-      const wrapper = mount(<TransitionablePortal {...requiredProps} trigger={<button />} />)
+      const { container } = render(<TransitionablePortal {...requiredProps} trigger={<button />} />)
 
-      wrapper.find('button').simulate('click')
-      wrapper.should.have.descendants('.in#children')
+      const button = container.querySelector('button')
+      fireEvent.click(button)
+      expect(container.querySelector('.in#children')).to.exist()
 
       domEvent.click(document.body)
-      wrapper.update()
-      wrapper.should.have.descendants('.out#children')
+      expect(container.querySelector('.out#children')).to.exist()
     })
   })
 
   describe('onHide', () => {
     it('is called with (null, data) when exiting transition finished', (done) => {
       const onHide = sandbox.spy()
-      const wrapper = mount(
+      const { rerender, unmount } = render(
         <TransitionablePortal
           {...requiredProps}
           onHide={onHide}
@@ -72,7 +74,15 @@ describe('TransitionablePortal', () => {
         />,
       )
 
-      wrapper.setProps({ open: false })
+      rerender(
+        <TransitionablePortal
+          {...requiredProps}
+          onHide={onHide}
+          open={false}
+          transition={quickTransition}
+          trigger={<button />}
+        />,
+      )
       assertWithTimeout(() => {
         onHide.should.have.been.calledOnce()
         onHide.should.have.been.calledWithMatch(null, {
@@ -81,7 +91,7 @@ describe('TransitionablePortal', () => {
           transitionVisible: false,
         })
 
-        wrapper.unmount()
+        unmount()
       }, done)
     })
   })
@@ -89,48 +99,50 @@ describe('TransitionablePortal', () => {
   describe('onOpen', () => {
     it('is called with (null, data) when opens', () => {
       const onOpen = sandbox.spy()
-      const wrapper = mount(
+      const { container } = render(
         <TransitionablePortal {...requiredProps} onOpen={onOpen} trigger={<button />} />,
       )
 
-      wrapper.find('button').simulate('click')
+      const button = container.querySelector('button')
+      fireEvent.click(button)
       onOpen.should.have.been.calledOnce()
       onOpen.should.have.been.calledWithMatch(null, { portalOpen: true })
     })
 
     it('renders contents', () => {
-      const wrapper = mount(<TransitionablePortal {...requiredProps} trigger={<button />} />)
+      const { container } = render(<TransitionablePortal {...requiredProps} trigger={<button />} />)
 
-      wrapper.find('button').simulate('click')
-      wrapper.should.have.descendants('.in#children')
+      const button = container.querySelector('button')
+      fireEvent.click(button)
+      expect(container.querySelector('.in#children')).to.exist()
     })
   })
 
   describe('open', () => {
     it('blocks update of state on a portal close', () => {
-      const wrapper = mount(<TransitionablePortal {...requiredProps} open />)
-      wrapper.find('#children').should.have.className('in')
+      const { container } = render(<TransitionablePortal {...requiredProps} open />)
+      expect(container.querySelector('#children').classList.contains('in')).to.be.true()
 
       domEvent.click(document.body)
-      wrapper.find('#children').should.have.className('in')
+      expect(container.querySelector('#children').classList.contains('in')).to.be.true()
     })
 
     it('passes `open` prop to Transition when defined', () => {
-      const wrapper = mount(<TransitionablePortal {...requiredProps} />)
+      const { container, rerender } = render(<TransitionablePortal {...requiredProps} />)
 
-      wrapper.setProps({ open: true })
-      wrapper.find('#children').should.have.className('in')
+      rerender(<TransitionablePortal {...requiredProps} open />)
+      expect(container.querySelector('#children').classList.contains('in')).to.be.true()
 
-      wrapper.setProps({ open: false })
-      wrapper.find('#children').should.have.className('out')
+      rerender(<TransitionablePortal {...requiredProps} open={false} />)
+      expect(container.querySelector('#children').classList.contains('out')).to.be.true()
     })
 
     it('does not pass `open` prop to Transition when not defined', () => {
-      const wrapper = mount(<TransitionablePortal {...requiredProps} />)
-      wrapper.should.have.not.descendants('#children')
+      const { container } = render(<TransitionablePortal {...requiredProps} />)
+      expect(container.querySelector('#children')).to.be.null()
 
-      wrapper.setProps({ transition: {} })
-      wrapper.should.have.not.descendants('#children')
+      const { container: container2 } = render(<TransitionablePortal {...requiredProps} transition={{}} />)
+      expect(container2.querySelector('#children')).to.be.null()
     })
   })
 })

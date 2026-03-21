@@ -1,6 +1,7 @@
 import faker from 'faker'
 import _ from 'lodash'
 import React from 'react'
+import { render } from '@testing-library/react'
 
 import StepGroup from 'src/elements/Step/StepGroup'
 import { numberToWordMap } from 'src/lib'
@@ -35,12 +36,12 @@ describe('StepGroup', () => {
 
   describe('items', () => {
     it('renders children', () => {
-      const wrapper = shallow(<StepGroup items={['foo', 'bar']} />)
-      const items = wrapper.children()
+      const { container } = render(<StepGroup items={['foo', 'bar']} />)
+      const steps = container.querySelectorAll('.step')
 
-      wrapper.should.have.exactly(2).descendants('Step')
-      items.at(0).should.have.prop('content', 'foo')
-      items.at(1).should.have.prop('content', 'bar')
+      expect(steps.length).to.equal(2)
+      expect(steps[0].textContent).to.include('foo')
+      expect(steps[1].textContent).to.include('bar')
     })
   })
 })

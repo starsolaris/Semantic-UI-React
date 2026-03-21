@@ -1,4 +1,5 @@
 import React from 'react'
+import { render, fireEvent } from '@testing-library/react'
 
 import ModalActions from 'src/modules/Modal/ModalActions'
 import * as common from 'test/specs/commonTests'
@@ -18,27 +19,30 @@ describe('ModalActions', () => {
   ]
 
   describe('actions', () => {
-    const buttons = mount(<ModalActions actions={actions} />).find('Button')
-
     it('renders children', () => {
-      buttons.at(0).should.have.prop('content', 'Cancel')
-      buttons.at(1).should.have.prop('content', 'OK')
+      const { container } = render(<ModalActions actions={actions} />)
+      const buttons = container.querySelectorAll('button')
+
+      expect(buttons[0].textContent).to.include('Cancel')
+      expect(buttons[1].textContent).to.include('OK')
     })
 
     it('passes arbitrary props', () => {
-      buttons.everyWhere((action) => action.should.have.prop('data-foo', 'something'))
+      const { container } = render(<ModalActions actions={actions} />)
+      const buttons = container.querySelectorAll('button')
+
+      buttons.forEach((button) => {
+        expect(button.getAttribute('data-foo')).to.equal('something')
+      })
     })
   })
 
   describe('onActionClick', () => {
     it('can be omitted', () => {
-      const click = () =>
-        mount(<ModalActions actions={actions} />)
-          .find('Button')
-          .first()
-          .simulate('click')
+      const { container } = render(<ModalActions actions={actions} />)
+      const button = container.querySelector('button')
 
-      expect(click).to.not.throw()
+      expect(() => fireEvent.click(button)).to.not.throw()
     })
 
     it('is called with (e, actionProps) when clicked', () => {
@@ -49,10 +53,11 @@ describe('ModalActions', () => {
       const action = { key: 'users', content: 'Disable', onClick: onButtonClick }
       const matchProps = { content: 'Disable' }
 
-      mount(<ModalActions actions={[...actions, action]} onActionClick={onActionClick} />)
-        .find('Button')
-        .last()
-        .simulate('click', event)
+      const { container } = render(<ModalActions actions={[...actions, action]} onActionClick={onActionClick} />)
+      const buttons = container.querySelectorAll('button')
+      const lastButton = buttons[buttons.length - 1]
+
+      fireEvent.click(lastButton, event)
 
       onActionClick.should.have.been.calledOnce()
       onActionClick.should.have.been.calledWithMatch(event, matchProps)

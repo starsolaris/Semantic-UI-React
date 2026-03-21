@@ -1,5 +1,6 @@
 import React from 'react'
 import _ from 'lodash'
+import { render } from '@testing-library/react'
 
 import { consoleUtil } from 'test/utils'
 import {
@@ -55,11 +56,9 @@ export const propKeyOnlyToClassName = (Component, propKey, options = {}) => {
       consoleUtil.disableOnce()
 
       const element = React.createElement(Component, { ...requiredProps, [propKey]: true })
-      const wrapper = mount(element)
-      const elementClassName = wrapper.childAt(0).getDOMNode().className
+      const { container } = render(element)
+      const elementClassName = container.firstChild.className
 
-      // ".should.have.className" with "mount" renderer does not handle properly cases when "className" contains
-      // multiple classes.
       expect(elementClassName).include(className)
     })
 
@@ -68,9 +67,9 @@ export const propKeyOnlyToClassName = (Component, propKey, options = {}) => {
 
       const value = 'foo-bar-baz'
       const element = React.createElement(Component, { ...requiredProps, [propKey]: value })
-      const wrapper = mount(element)
+      const { container } = render(element)
 
-      wrapper.childAt(0).should.not.have.className(value)
+      expect(container.firstChild.className).to.not.include(value)
     })
   })
 }
@@ -101,20 +100,24 @@ export const propKeyOrValueAndKeyToClassName = (Component, propKey, propValues, 
     })
 
     it('adds only the name to className when true', () => {
-      const wrapper = mount(React.createElement(Component, { ...requiredProps, [propKey]: true }))
+      const { container } = render(
+        React.createElement(Component, { ...requiredProps, [propKey]: true }),
+      )
 
-      wrapper.should.have.className(className)
+      expect(container.firstChild.className).to.include(className)
     })
 
     it('adds no className when false', () => {
-      const wrapper = mount(React.createElement(Component, { ...requiredProps, [propKey]: false }))
+      const { container } = render(
+        React.createElement(Component, { ...requiredProps, [propKey]: false }),
+      )
 
-      wrapper.should.not.have.className(className)
-      wrapper.should.not.have.className('true')
-      wrapper.should.not.have.className('false')
+      expect(container.firstChild.className).to.not.include(className)
+      expect(container.firstChild.className).to.not.include('true')
+      expect(container.firstChild.className).to.not.include('false')
 
       _.each(propValues, (propVal) => {
-        wrapper.should.not.have.className(propVal)
+        expect(container.firstChild.className).to.not.include(propVal)
       })
     })
   })
@@ -132,7 +135,7 @@ export const propKeyOrValueAndKeyToClassName = (Component, propKey, propValues, 
  * @param {Object} [options.requiredProps={}] Props required to render the component.
  */
 export const propValueOnlyToClassName = (Component, propKey, propValues, options = {}) => {
-  const { nestingLevel = 0, requiredProps = {} } = options
+  const { requiredProps = {} } = options
   const { assertRequired } = helpers('propValueOnlyToClassName', Component)
 
   describe(`${propKey} (common)`, () => {
@@ -144,10 +147,11 @@ export const propValueOnlyToClassName = (Component, propKey, propValues, options
 
     it('adds prop value to className', () => {
       propValues.forEach((propValue) => {
-        shallow(React.createElement(Component, { ...requiredProps, [propKey]: propValue }), {
-          autoNesting: true,
-          nestingLevel,
-        }).should.have.className(propValue)
+        const { container } = render(
+          React.createElement(Component, { ...requiredProps, [propKey]: propValue }),
+        )
+
+        expect(container.firstChild.className).to.include(propValue)
       })
     })
 
@@ -155,10 +159,11 @@ export const propValueOnlyToClassName = (Component, propKey, propValues, options
       consoleUtil.disableOnce()
 
       propValues.forEach((propValue) => {
-        shallow(React.createElement(Component, { ...requiredProps, [propKey]: propValue }), {
-          autoNesting: true,
-          nestingLevel,
-        }).should.not.have.className(propKey)
+        const { container } = render(
+          React.createElement(Component, { ...requiredProps, [propKey]: propValue }),
+        )
+
+        expect(container.firstChild.className).to.not.include(propKey)
       })
     })
   })

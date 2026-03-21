@@ -1,5 +1,6 @@
 import _ from 'lodash'
 import React, { isValidElement } from 'react'
+import { render } from '@testing-library/react'
 
 import { createShorthand, createShorthandFactory } from 'src/lib'
 import { consoleUtil, sandbox } from 'test/utils'
@@ -50,18 +51,23 @@ const itReturnsAValidElement = (value) => {
 const itAppliesDefaultProps = (value) => {
   it('applies defaultProps', () => {
     const defaultProps = { some: 'defaults' }
+    const { container } = render(getShorthand({ value, defaultProps }))
+    const element = container.firstChild
 
-    shallow(getShorthand({ value, defaultProps })).props().should.deep.equal(defaultProps)
+    Object.keys(defaultProps).forEach(key => {
+      expect(element.getAttribute(key)).to.equal(defaultProps[key])
+    })
   })
 }
 
 const itDoesNotIncludePropsFromMapValueToProps = (value) => {
   it('does not include props from mapValueToProps', () => {
     const props = { 'data-foo': 'foo' }
-    const wrapper = shallow(getShorthand({ value, mapValueToProps: () => props }))
+    const { container } = render(getShorthand({ value, mapValueToProps: () => props }))
+    const element = container.firstChild
 
-    _.each(props, (val, key) => {
-      wrapper.should.not.have.prop(key, val)
+    Object.keys(props).forEach(key => {
+      expect(element.getAttribute(key)).to.be.null()
     })
   })
 }
@@ -71,23 +77,36 @@ const itMergesClassNames = (classNameSource, extraClassName, shorthandConfig) =>
     const defaultProps = { className: 'default' }
     const overrideProps = { className: 'override' }
 
-    shallow(
+    const { container } = render(
       getShorthand({ defaultProps, overrideProps, ...shorthandConfig }),
-    ).should.have.same.className(`default override ${extraClassName}`)
+    )
+    const element = container.firstChild
+
+    expect(element.className).to.include('default')
+    expect(element.className).to.include('override')
+    expect(element.className).to.include(extraClassName)
   })
 }
 
 const itAppliesProps = (propsSource, expectedProps, shorthandConfig) => {
   it(`applies props from the ${propsSource} props`, () => {
-    shallow(getShorthand(shorthandConfig)).props().should.deep.equal(expectedProps)
+    const { container } = render(getShorthand(shorthandConfig))
+    const element = container.firstChild
+
+    Object.keys(expectedProps).forEach(key => {
+      expect(element.getAttribute(key)).to.equal(expectedProps[key])
+    })
   })
 }
 
 const itOverridesDefaultProps = (propsSource, defaultProps, expectedProps, shorthandConfig) => {
   it(`overrides defaultProps with ${propsSource} props`, () => {
-    shallow(getShorthand({ defaultProps, ...shorthandConfig }))
-      .props()
-      .should.deep.equal(expectedProps)
+    const { container } = render(getShorthand({ defaultProps, ...shorthandConfig }))
+    const element = container.firstChild
+
+    Object.keys(expectedProps).forEach(key => {
+      expect(element.getAttribute(key)).to.equal(expectedProps[key])
+    })
   })
 }
 
@@ -96,9 +115,17 @@ const itOverridesDefaultPropsWithFalseyProps = (propsSource, shorthandConfig) =>
     const defaultProps = { undef: '-', nil: '-', zero: '-', empty: '-' }
     const expectedProps = { undef: undefined, nil: null, zero: 0, empty: '' }
 
-    shallow(getShorthand({ defaultProps, ...shorthandConfig }))
-      .props()
-      .should.deep.equal(expectedProps)
+    const { container } = render(getShorthand({ defaultProps, ...shorthandConfig }))
+    const element = container.firstChild
+
+    Object.keys(expectedProps).forEach(key => {
+      const expected = expectedProps[key]
+      if (expected === undefined || expected === null) {
+        expect(element.getAttribute(key)).to.be.null()
+      } else {
+        expect(element.getAttribute(key)).to.equal(String(expected))
+      }
+    })
   })
 }
 
@@ -173,9 +200,12 @@ describe('factories', () => {
     describe('defaultProps', () => {
       it('can be an object', () => {
         const defaultProps = { 'data-some': 'defaults' }
-        shallow(getShorthand({ value: 'foo', defaultProps }))
-          .props()
-          .should.deep.equal(defaultProps)
+        const { container } = render(getShorthand({ value: 'foo', defaultProps }))
+        const element = container.firstChild
+
+        Object.keys(defaultProps).forEach(key => {
+          expect(element.getAttribute(key)).to.equal(defaultProps[key])
+        })
       })
     })
 
@@ -300,17 +330,21 @@ describe('factories', () => {
       it('can be an object', () => {
         const overrideProps = { 'data-some': 'overrides' }
 
-        shallow(getShorthand({ value: 'foo', overrideProps }))
-          .props()
-          .should.deep.equal(overrideProps)
+        const { container } = render(getShorthand({ value: 'foo', overrideProps }))
+        const element = container.firstChild
+
+        Object.keys(overrideProps).forEach(key => {
+          expect(element.getAttribute(key)).to.equal(overrideProps[key])
+        })
       })
 
       it('can be a function that returns defaultProps', () => {
         const overrideProps = () => ({ 'data-some': 'overrides' })
 
-        shallow(getShorthand({ value: 'foo', overrideProps }))
-          .props()
-          .should.deep.equal(overrideProps())
+        const { container } = render(getShorthand({ value: 'foo', overrideProps }))
+        const element = container.firstChild
+
+        expect(element.getAttribute('data-some')).to.equal('overrides')
       })
 
       it("is called with the user's element's and default props", () => {
@@ -319,7 +353,7 @@ describe('factories', () => {
         const userProps = { 'data-user': 'props' }
         const value = <div {...userProps} />
 
-        shallow(getShorthand({ defaultProps, overrideProps, value }))
+        render(getShorthand({ defaultProps, overrideProps, value }))
         overrideProps.should.have.been.calledWith({ ...defaultProps, ...userProps })
       })
 
@@ -328,7 +362,7 @@ describe('factories', () => {
         const overrideProps = sandbox.spy(() => ({}))
         const userProps = { 'data-user': 'props' }
 
-        shallow(getShorthand({ defaultProps, overrideProps, value: userProps }))
+        render(getShorthand({ defaultProps, overrideProps, value: userProps }))
         overrideProps.should.have.been.calledWith({ ...defaultProps, ...userProps })
       })
 
@@ -338,7 +372,7 @@ describe('factories', () => {
         const value = 'foo'
         const mapValueToProps = (val) => ({ 'data-mapped': val })
 
-        shallow(getShorthand({ defaultProps, mapValueToProps, overrideProps, value }))
+        render(getShorthand({ defaultProps, mapValueToProps, overrideProps, value }))
         overrideProps.should.have.been.calledWith({ ...defaultProps, ...mapValueToProps(value) })
       })
     })
@@ -549,36 +583,45 @@ describe('factories', () => {
         const userProps = { style: { bottom: 5 } }
         const overrideProps = { style: { right: 5 } }
 
-        shallow(getShorthand({ defaultProps, overrideProps, value: userProps }))
-          .should.have.prop('style')
-          .deep.equal({ left: 5, bottom: 5, right: 5 })
+        const { container } = render(getShorthand({ defaultProps, overrideProps, value: userProps }))
+        const element = container.firstChild
+
+        expect(element.style.left).to.equal('5px')
+        expect(element.style.bottom).to.equal('5px')
+        expect(element.style.right).to.equal('5px')
       })
 
       it('merges style prop and handles override by userProps', () => {
         const defaultProps = { style: { left: 10, bottom: 5 } }
         const userProps = { style: { bottom: 10 } }
 
-        shallow(getShorthand({ defaultProps, value: userProps }))
-          .should.have.prop('style')
-          .deep.equal({ left: 10, bottom: 10 })
+        const { container } = render(getShorthand({ defaultProps, value: userProps }))
+        const element = container.firstChild
+
+        expect(element.style.left).to.equal('10px')
+        expect(element.style.bottom).to.equal('10px')
       })
 
       it('merges style prop and handles override by overrideProps', () => {
         const userProps = { style: { bottom: 10, right: 5 } }
         const overrideProps = { style: { right: 10 } }
 
-        shallow(getShorthand({ overrideProps, value: userProps }))
-          .should.have.prop('style')
-          .deep.equal({ bottom: 10, right: 10 })
+        const { container } = render(getShorthand({ overrideProps, value: userProps }))
+        const element = container.firstChild
+
+        expect(element.style.bottom).to.equal('10px')
+        expect(element.style.right).to.equal('10px')
       })
 
       it('merges style prop from defaultProps and overrideProps', () => {
         const defaultProps = { style: { left: 10, bottom: 5 } }
         const overrideProps = { style: { bottom: 10 } }
 
-        shallow(getShorthand({ defaultProps, overrideProps, value: 'foo' }))
-          .should.have.prop('style')
-          .deep.equal({ left: 10, bottom: 10 })
+        const { container } = render(getShorthand({ defaultProps, overrideProps, value: 'foo' }))
+        const element = container.firstChild
+
+        expect(element.style.left).to.equal('10px')
+        expect(element.style.bottom).to.equal('10px')
       })
     })
   })

@@ -1,6 +1,7 @@
 import faker from 'faker'
 import _ from 'lodash'
 import React from 'react'
+import { render } from '@testing-library/react'
 
 import { SUI } from 'src/lib'
 import Feed from 'src/views/Feed/Feed'
@@ -25,9 +26,10 @@ describe('Feed', () => {
     it('renders <FeedEvent>', () => {
       const events = _.times(3, () => ({ summary: faker.hacker.phrase() }))
 
-      shallow(<Feed events={events} />)
-        .should.have.exactly(3)
-        .descendants('FeedEvent')
+      const { container } = render(<Feed events={events} />)
+      const feedEvents = container.querySelectorAll('.event')
+
+      expect(feedEvents).toHaveLength(3)
     })
   })
 })

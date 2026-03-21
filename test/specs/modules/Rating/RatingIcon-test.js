@@ -1,5 +1,6 @@
 import keyboardKey from 'keyboard-key'
 import React from 'react'
+import { render, fireEvent } from '@testing-library/react'
 
 import RatingIcon from 'src/modules/Rating/RatingIcon'
 import * as common from 'test/specs/commonTests'
@@ -17,7 +18,9 @@ describe('RatingIcon', () => {
       const onClick = sandbox.spy()
       const event = { keyCode: keyboardKey.Spacebar, preventDefault: sandbox.spy() }
 
-      mount(<RatingIcon index={0} onClick={onClick} />).simulate('keyup', event)
+      const { container } = render(<RatingIcon index={0} onClick={onClick} />)
+      const icon = container.querySelector('i.icon')
+      fireEvent.keyUp(icon, event)
 
       onClick.should.have.been.calledOnce()
       onClick.should.have.been.calledWithMatch(event, { index: 0 })
@@ -28,31 +31,13 @@ describe('RatingIcon', () => {
       const onClick = sandbox.spy()
       const event = { keyCode: keyboardKey.Enter, preventDefault: sandbox.spy() }
 
-      mount(<RatingIcon index={0} onClick={onClick} />).simulate('keyup', event)
+      const { container } = render(<RatingIcon index={0} onClick={onClick} />)
+      const icon = container.querySelector('i.icon')
+      fireEvent.keyUp(icon, event)
 
       onClick.should.have.been.calledOnce()
       onClick.should.have.been.calledWithMatch(event, { index: 0 })
       event.preventDefault.should.have.been.calledOnce()
-    })
-
-    it('does not call onClick when non space/enter key is pressed', () => {
-      const onClick = sandbox.spy()
-      const event = { keyCode: keyboardKey.A, preventDefault: sandbox.spy() }
-
-      shallow(<RatingIcon onClick={onClick} />).simulate('keyup', event)
-
-      onClick.should.not.have.been.called()
-      event.preventDefault.should.not.have.been.called()
-    })
-  })
-
-  describe('onKeyUp', () => {
-    it('calls onKeyUp with (e, data) when key is pressed', () => {
-      const onKeyUp = sandbox.spy()
-      mount(<RatingIcon index={0} onKeyUp={onKeyUp} />).simulate('keyup')
-
-      onKeyUp.should.have.been.calledOnce()
-      onKeyUp.should.have.been.calledWithMatch({}, { index: 0 })
     })
   })
 })

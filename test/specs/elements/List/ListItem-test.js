@@ -1,11 +1,13 @@
 import faker from 'faker'
 import _ from 'lodash'
 import React from 'react'
+import { render, fireEvent } from '@testing-library/react'
 
 import ListItem from 'src/elements/List/ListItem'
 import ListContent from 'src/elements/List/ListContent'
 import * as common from 'test/specs/commonTests'
 import { sandbox } from 'test/utils'
+import nestedShallow from 'test/utils/nestedShallow'
 
 describe('ListItem', () => {
   common.isConformant(ListItem)
@@ -19,7 +21,8 @@ describe('ListItem', () => {
 
   describe('as', () => {
     it('omits className `list` when rendered as `li`', () => {
-      shallow(<ListItem as='li' />).should.not.have.className('item')
+      const element = nestedShallow(<ListItem as='li' />)
+      expect(element).to.not.have.class('item')
     })
   })
 
@@ -27,8 +30,9 @@ describe('ListItem', () => {
     it('is called with (e, data) when clicked', () => {
       const onClick = sandbox.spy()
       const props = { onClick, 'data-foo': 'bar' }
+      const { container } = render(<ListItem {...props} />)
 
-      mount(<ListItem {...props} />).simulate('click')
+      fireEvent.click(container.firstChild)
 
       onClick.should.have.been.calledOnce()
       onClick.should.have.been.calledWithMatch({ type: 'click' }, props)
@@ -36,8 +40,9 @@ describe('ListItem', () => {
 
     it('is not called when is disabled', () => {
       const onClick = sandbox.spy()
+      const { container } = render(<ListItem disabled onClick={onClick} />)
 
-      mount(<ListItem disabled onClick={onClick} />).simulate('click')
+      fireEvent.click(container.firstChild)
       onClick.should.have.callCount(0)
     })
   })
@@ -45,14 +50,16 @@ describe('ListItem', () => {
   describe('value', () => {
     it('adds data attribute by default', () => {
       const value = faker.hacker.phrase()
+      const element = nestedShallow(<ListItem value={value} />)
 
-      shallow(<ListItem value={value} />).should.have.data('value', value)
+      expect(element.getAttribute('data-value')).to.equal(value)
     })
 
     it('adds attribute when rendered as `li`', () => {
       const value = faker.hacker.phrase()
+      const element = nestedShallow(<ListItem as='li' value={value} />)
 
-      shallow(<ListItem as='li' value={value} />).should.have.attr('value', value)
+      expect(element.getAttribute('value')).to.equal(value)
     })
   })
 
@@ -64,82 +71,92 @@ describe('ListItem', () => {
     }
 
     it('renders without wrapping ListContent', () => {
-      const wrapper = shallow(<ListItem {...baseProps} />)
+      const element = nestedShallow(<ListItem {...baseProps} />)
+      const listContent = element.querySelector('.content')
 
-      wrapper.find('ListContent').should.have.lengthOf(0)
+      expect(listContent).to.be.null()
     })
 
     it('renders without wrapping ListContent when content passed as element', () => {
       const spy = sandbox.spy(ListContent, 'create')
-      shallow(<ListItem {...baseProps} content={<div />} />)
+      nestedShallow(<ListItem {...baseProps} content={<div />} />)
 
       spy.should.not.have.been.called()
     })
 
     it('renders wrapping ListContent when content passed as props', () => {
-      const wrapper = shallow(<ListItem content={baseProps} />)
+      const element = nestedShallow(<ListItem content={baseProps} />)
+      const listContent = element.querySelector('.content')
 
-      wrapper.find('ListContent').should.have.lengthOf(1)
+      expect(listContent).to.not.be.null()
     })
 
     _.each(baseProps, (value, key) => {
       it(`renders wrapping ListContent when icon and ${key} present`, () => {
-        const wrapper = shallow(<ListItem {..._.pick(baseProps, key)} icon='user' />)
+        const element = nestedShallow(<ListItem {..._.pick(baseProps, key)} icon='user' />)
 
-        wrapper.find('ListIcon').should.have.lengthOf(1)
-        wrapper.find('ListContent').should.have.lengthOf(1)
+        expect(element.querySelector('i.icon')).to.not.be.null()
+        expect(element.querySelector('.content')).to.not.be.null()
       })
 
       it(`renders wrapping ListContent when image and ${key} present`, () => {
-        const wrapper = shallow(
+        const element = nestedShallow(
           <ListItem {..._.pick(baseProps, key)} image='/images/wireframe/image.png' />,
         )
 
-        wrapper.find('Image').should.have.lengthOf(1)
-        wrapper.find('ListContent').should.have.lengthOf(1)
+        expect(element.querySelector('img')).to.not.be.null()
+        expect(element.querySelector('.content')).to.not.be.null()
       })
     })
   })
 
   describe('role', () => {
     it('adds role=listitem', () => {
-      shallow(<ListItem />).should.have.prop('role', 'listitem')
+      const element = nestedShallow(<ListItem />)
+      expect(element.getAttribute('role')).to.equal('listitem')
     })
 
     it('adds role=listitem with children', () => {
-      shallow(
+      const element = nestedShallow(
         <ListItem>
           <div>Test</div>
         </ListItem>,
-      ).should.have.prop('role', 'listitem')
+      )
+      expect(element.getAttribute('role')).to.equal('listitem')
     })
 
     it('adds role=listitem with content', () => {
-      shallow(<ListItem content={<div />} />).should.have.prop('role', 'listitem')
+      const element = nestedShallow(<ListItem content={<div />} />)
+      expect(element.getAttribute('role')).to.equal('listitem')
     })
 
     it('adds role=listitem with icon', () => {
-      shallow(<ListItem icon='user' />).should.have.prop('role', 'listitem')
+      const element = nestedShallow(<ListItem icon='user' />)
+      expect(element.getAttribute('role')).to.equal('listitem')
     })
 
     it('allows role override without children', () => {
-      shallow(<ListItem role='option' />).should.have.prop('role', 'option')
+      const element = nestedShallow(<ListItem role='option' />)
+      expect(element.getAttribute('role')).to.equal('option')
     })
 
     it('allows role override with children', () => {
-      shallow(
+      const element = nestedShallow(
         <ListItem role='option'>
           <div>Test</div>
         </ListItem>,
-      ).should.have.prop('role', 'option')
+      )
+      expect(element.getAttribute('role')).to.equal('option')
     })
 
     it('allows role override with content', () => {
-      shallow(<ListItem role='option' content={<div />} />).should.have.prop('role', 'option')
+      const element = nestedShallow(<ListItem role='option' content={<div />} />)
+      expect(element.getAttribute('role')).to.equal('option')
     })
 
     it('allows role override with icon', () => {
-      shallow(<ListItem role='option' icon='user' />).should.have.prop('role', 'option')
+      const element = nestedShallow(<ListItem role='option' icon='user' />)
+      expect(element.getAttribute('role')).to.equal('option')
     })
   })
 })

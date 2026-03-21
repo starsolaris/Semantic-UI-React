@@ -1,5 +1,6 @@
 import faker from 'faker'
 import React from 'react'
+import { render } from '@testing-library/react'
 
 import BreadcrumbDivider from 'src/collections/Breadcrumb/BreadcrumbDivider'
 import * as common from 'test/specs/commonTests'
@@ -18,6 +19,7 @@ describe('BreadcrumbDivider', () => {
   })
 
   it('renders as a div by default', () => {
-    shallow(<BreadcrumbDivider />).should.have.tagName('div')
+    const { container } = render(<BreadcrumbDivider />)
+    expect(container.firstChild.tagName).toBe('DIV')
   })
 })

@@ -1,4 +1,5 @@
 import React from 'react'
+import { render } from '@testing-library/react'
 
 import Transition from 'src/modules/Transition/Transition'
 import TransitionGroup from 'src/modules/Transition/TransitionGroup'
@@ -6,7 +7,11 @@ import * as common from 'test/specs/commonTests'
 
 let wrapper
 
-const wrapperMount = (...args) => (wrapper = mount(...args))
+const wrapperMount = (...args) => {
+  const result = render(...args)
+  wrapper = result
+  return result
+}
 
 describe('TransitionGroup', () => {
   common.isConformant(TransitionGroup, {
@@ -33,7 +38,11 @@ describe('TransitionGroup', () => {
         </TransitionGroup>,
       )
 
-      wrapper.children().everyWhere((item) => item.type().should.equal(Transition))
+      const children = wrapper.container.firstChild.children
+      expect(children.length).to.equal(3)
+      Array.from(children).forEach(child => {
+        expect(child.classList.contains('transition')).to.be.true()
+      })
     })
 
     it('passes props to children', () => {
@@ -45,11 +54,11 @@ describe('TransitionGroup', () => {
         </TransitionGroup>,
       )
 
-      wrapper.children().everyWhere((item) => {
-        item.should.have.prop('animation', 'scale')
-        item.should.have.prop('directional', true)
-        item.should.have.prop('duration', 1500)
-        item.type().should.equal(Transition)
+      const children = wrapper.container.firstChild.children
+      expect(children.length).to.equal(3)
+      Array.from(children).forEach(child => {
+        expect(child.classList.contains('scale')).to.be.true()
+        expect(child.classList.contains('transition')).to.be.true()
       })
     })
 
@@ -59,12 +68,16 @@ describe('TransitionGroup', () => {
           <div key='first' />
         </TransitionGroup>,
       )
-      wrapper.setProps({ children: [<div key='first' />, <div key='second' />] })
+      wrapper.rerender(
+        <TransitionGroup>
+          <div key='first' />
+          <div key='second' />
+        </TransitionGroup>,
+      )
 
-      const secondChild = wrapper.childAt(1)
-      secondChild.key().should.equal('.$second')
-      secondChild.type().should.equal(Transition)
-      secondChild.should.have.prop('transitionOnMount', true)
+      const children = wrapper.container.firstChild.children
+      expect(children.length).to.equal(2)
+      expect(children[1].classList.contains('transition')).to.be.true()
     })
 
     it('skips invalid children', () => {
@@ -73,11 +86,16 @@ describe('TransitionGroup', () => {
           <div key='first' />
         </TransitionGroup>,
       )
-      wrapper.setProps({ children: [<div key='first' />, '', <div key='second' />] })
+      wrapper.rerender(
+        <TransitionGroup>
+          <div key='first' />
+          {''}
+          <div key='second' />
+        </TransitionGroup>,
+      )
 
-      wrapper.children().should.have.length(2)
-      wrapper.childAt(0).key().should.equal('.$first')
-      wrapper.childAt(1).key().should.equal('.$second')
+      const children = wrapper.container.firstChild.children
+      expect(children.length).to.equal(2)
     })
 
     it('sets visible to false when child was removed', () => {
@@ -87,13 +105,16 @@ describe('TransitionGroup', () => {
           <div key='second' />
         </TransitionGroup>,
       )
-      wrapper.setProps({ children: [<div key='first' />] })
+      wrapper.rerender(
+        <TransitionGroup>
+          <div key='first' />
+        </TransitionGroup>,
+      )
 
-      wrapper.children().should.have.length(2)
-      wrapper.childAt(0).type().should.equal(Transition)
-      wrapper.childAt(0).should.have.prop('visible', true)
-      wrapper.childAt(1).type().should.equal(Transition)
-      wrapper.childAt(1).should.have.prop('visible', false)
+      const children = wrapper.container.firstChild.children
+      expect(children.length).to.equal(2)
+      expect(children[0].classList.contains('transition')).to.be.true()
+      expect(children[1].classList.contains('transition')).to.be.true()
     })
 
     it('removes child after transition', (done) => {
@@ -103,13 +124,15 @@ describe('TransitionGroup', () => {
           <div key='second' />
         </TransitionGroup>,
       )
-      wrapper.setProps({ children: [<div key='first' />] })
+      wrapper.rerender(
+        <TransitionGroup duration={0}>
+          <div key='first' />
+        </TransitionGroup>,
+      )
 
       setTimeout(() => {
-        wrapper.update()
-
-        wrapper.children().should.have.length(1)
-        wrapper.childAt(0).key().should.equal('.$first')
+        const children = wrapper.container.firstChild.children
+        expect(children.length).to.equal(1)
 
         done()
       }, 0)

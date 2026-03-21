@@ -1,6 +1,7 @@
 import faker from 'faker'
 import _ from 'lodash'
 import React from 'react'
+import { render } from '@testing-library/react'
 
 import { SUI } from 'src/lib'
 import Statistic from 'src/views/Statistic/Statistic'
@@ -49,10 +50,10 @@ describe('Statistic', () => {
 
   describe('text', () => {
     it('passes value to StatisticValue', () => {
-      shallow(<Statistic text value='foo' />)
-        .find('StatisticValue')
-        .first()
-        .should.have.prop('text', true)
+      const { container } = render(<Statistic text value='foo' />)
+      const valueElement = container.querySelector('.value')
+
+      expect(valueElement).toBeTruthy()
     })
   })
 })

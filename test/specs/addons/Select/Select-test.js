@@ -1,4 +1,5 @@
 import React from 'react'
+import { render } from '@testing-library/react'
 
 import Select from 'src/addons/Select/Select'
 import Dropdown from 'src/modules/Dropdown/Dropdown'
@@ -14,8 +15,7 @@ describe('Select', () => {
   common.forwardsRef(Select, { requiredProps })
 
   it('renders a selection Dropdown', () => {
-    shallow(<Select {...requiredProps} />)
-      .first()
-      .should.contain(<Dropdown {...requiredProps} selection />)
+    const { container } = render(<Select {...requiredProps} />)
+    expect(container.querySelector('.ui.selection.dropdown')).to.exist()
   })
 })

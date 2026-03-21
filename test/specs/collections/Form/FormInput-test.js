@@ -1,4 +1,5 @@
 import React from 'react'
+import { render } from '@testing-library/react'
 
 import FormInput from 'src/collections/Form/FormInput'
 import Input from 'src/elements/Input/Input'
@@ -54,8 +55,8 @@ describe('FormInput', () => {
   common.forwardsRef(FormInput, { tagName: 'input' })
 
   it('renders a FormField with a Input control', () => {
-    shallow(<FormInput />)
-      .find('FormField')
-      .should.have.prop('control', Input)
+    const { container } = render(<FormInput />)
+    const input = container.querySelector('.ui.input')
+    expect(input).toBeTruthy()
   })
 })

@@ -1,32 +1,27 @@
-import fs from 'fs'
-import puppeteer from 'puppeteer'
+const fs = require('fs')
+const puppeteer = require('puppeteer')
 
-import config from './config'
-import webpackConfig from './webpack.karma.config'
+const config = require('./config.js')
+const webpackConfig = require('./webpack.karma.config.js')
 
 process.env.CHROME_BIN = puppeteer.executablePath()
 
 const { paths } = config
 
 const formatError = (msg) => {
-  // filter out empty lines and node_modules
   if (!msg.trim() || /~/.test(msg) || /node_modules\//.test(msg)) return ''
 
-  // indent the error beneath the it() message
   let newLine = `  ${msg}`
 
   if (newLine.includes('webpack:///')) {
-    // remove webpack:///
     newLine = newLine.replace('webpack:///', '')
-
-    // remove bundle location, showing only the source location
     newLine = newLine.slice(0, newLine.indexOf(' <- '))
   }
 
   return `${newLine}\n`
 }
 
-export default (karmaConfig) => {
+module.exports = (karmaConfig) => {
   karmaConfig.set({
     basePath: __dirname,
     browsers: ['puppeteer'],
@@ -36,7 +31,7 @@ export default (karmaConfig) => {
     },
     client: {
       mocha: {
-        reporter: 'html', // change Karma's debug.html to mocha web reporter
+        reporter: 'html',
         ui: 'bdd',
       },
     },
@@ -50,7 +45,6 @@ export default (karmaConfig) => {
         flags: [
           '--disable-setuid-sandbox',
           '--no-sandbox',
-          // Avoid "Maximum call stack size exceeded" errors on CircleCI
           '--stack-trace-limit 200000',
         ],
       },
@@ -65,18 +59,16 @@ export default (karmaConfig) => {
       { pattern: 'docs/public/logo.png', watched: false, included: false, served: true },
       { pattern: 'docs/public/**/*.jpg', watched: false, included: false, served: true },
       { pattern: 'docs/public/**/*.png', watched: false, included: false, served: true },
-      './test/setup.js',
       './test/tests.bundle.js',
     ],
     formatError,
     frameworks: ['mocha'],
-    // make karma serve all files that the web server does: /* => /docs/app/*
     proxies: fs.readdirSync(paths.docsPublic()).reduce((acc, file) => {
       const isDir = fs.statSync(paths.docsPublic(file)).isDirectory()
       const trailingSlash = isDir ? '/' : ''
 
       const original = `/${file}${trailingSlash}`
-      acc[original] = `/base/docs/public/${file}${trailingSlash}`
+      acc[original] = `/base/docs/public/${trailingSlash}`
 
       return acc
     }, {}),
@@ -84,8 +76,6 @@ export default (karmaConfig) => {
     reportSlowerThan: 100,
     singleRun: true,
     preprocessors: {
-      // do not include 'coverage' preprocessor for karma-coverage
-      // code is already instrumented by babel-plugin-__coverage__
       'test/tests.bundle.js': ['webpack'],
     },
     webpack: {

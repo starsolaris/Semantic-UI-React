@@ -3,6 +3,7 @@ import React from 'react'
 
 import ButtonOr from 'src/elements/Button/ButtonOr'
 import * as common from 'test/specs/commonTests'
+import nestedShallow from 'test/utils/nestedShallow'
 
 describe('ButtonOr', () => {
   common.isConformant(ButtonOr)
@@ -10,13 +11,15 @@ describe('ButtonOr', () => {
 
   describe('text', () => {
     it('should not define attr when not defined', () => {
-      shallow(<ButtonOr />).should.have.not.attr('data-text')
+      const element = nestedShallow(<ButtonOr />)
+      expect(element.getAttribute('data-text')).to.be.null()
     })
 
     it('should pass value to attr', () => {
       const word = faker.lorem.word()
+      const element = nestedShallow(<ButtonOr text={word} />)
 
-      shallow(<ButtonOr text={word} />).should.have.attr('data-text', word)
+      expect(element.getAttribute('data-text')).to.equal(word)
     })
   })
 })

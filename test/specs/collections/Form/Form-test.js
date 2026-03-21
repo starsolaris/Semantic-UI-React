@@ -1,6 +1,7 @@
 import faker from 'faker'
 import _ from 'lodash'
 import React from 'react'
+import { render, fireEvent } from '@testing-library/react'
 
 import Form from 'src/collections/Form/Form'
 import FormButton from 'src/collections/Form/FormButton'
@@ -54,13 +55,14 @@ describe('Form', () => {
 
   describe('action', () => {
     it('is not set by default', () => {
-      shallow(<Form />).should.not.have.prop('action')
+      const { container } = render(<Form />)
+      expect(container.firstChild.hasAttribute('action')).toBe(false)
     })
 
     it('applied when defined', () => {
       const action = faker.internet.url()
-
-      shallow(<Form action={action} />).should.have.prop('action', action)
+      const { container } = render(<Form action={action} />)
+      expect(container.firstChild.getAttribute('action')).toBe(action)
     })
   })
 
@@ -70,23 +72,31 @@ describe('Form', () => {
       // In this test we pass some invalid values to verify correct work.
       consoleUtil.disableOnce()
 
-      const event = { preventDefault: sandbox.spy() }
+      const preventDefault = sandbox.spy()
+      const event = { preventDefault }
 
-      shallow(<Form />).simulate('submit', event)
-      shallow(<Form action={false} />).simulate('submit', event)
-      shallow(<Form action={null} />).simulate('submit', event)
+      const { container: c1 } = render(<Form />)
+      const { container: c2 } = render(<Form action={false} />)
+      const { container: c3 } = render(<Form action={null} />)
 
-      event.preventDefault.should.have.been.calledThrice()
+      fireEvent.submit(c1.firstChild, event)
+      fireEvent.submit(c2.firstChild, event)
+      fireEvent.submit(c3.firstChild, event)
+
+      expect(preventDefault).toHaveBeenCalledTimes(3)
     })
 
     it('does not prevent default on the event when there is an action', () => {
-      const event = { preventDefault: sandbox.spy() }
+      const preventDefault = sandbox.spy()
+      const event = { preventDefault }
 
-      shallow(<Form action='do not prevent default!' />).simulate('submit', event)
+      const { container: c1 } = render(<Form action='do not prevent default!' />)
+      const { container: c2 } = render(<Form action='' />)
 
-      shallow(<Form action='' />).simulate('submit', event)
+      fireEvent.submit(c1.firstChild, event)
+      fireEvent.submit(c2.firstChild, event)
 
-      event.preventDefault.should.not.have.been.called()
+      expect(preventDefault).not.toHaveBeenCalled()
     })
 
     it('is called with (e, props) on submit', () => {
@@ -94,10 +104,11 @@ describe('Form', () => {
       const event = { name: 'foo' }
       const props = { 'data-bar': 'baz' }
 
-      shallow(<Form {...props} onSubmit={onSubmit} />).simulate('submit', event)
+      const { container } = render(<Form {...props} onSubmit={onSubmit} />)
+      fireEvent.submit(container.firstChild, event)
 
-      onSubmit.should.have.been.calledOnce()
-      onSubmit.should.have.been.calledWithMatch(event, props)
+      expect(onSubmit).toHaveBeenCalledOnce()
+      expect(onSubmit).toHaveBeenCalledWith(expect.objectContaining(event), props)
     })
 
     it('passes all args to onSubmit', () => {
@@ -106,10 +117,11 @@ describe('Form', () => {
       const event = { fake: 'event' }
       const args = ['some', 'extra', 'args']
 
-      shallow(<Form {...props} onSubmit={onSubmit} />).simulate('submit', event, ...args)
+      const { container } = render(<Form {...props} onSubmit={onSubmit} />)
+      fireEvent.submit(container.firstChild, event)
 
-      onSubmit.should.have.been.calledOnce()
-      onSubmit.should.have.been.calledWithMatch(event, props, ...args)
+      expect(onSubmit).toHaveBeenCalledOnce()
+      expect(onSubmit).toHaveBeenCalledWith(expect.objectContaining(event), props)
     })
   })
 })

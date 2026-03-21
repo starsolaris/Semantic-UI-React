@@ -1,4 +1,5 @@
 import React from 'react'
+import { render, fireEvent } from '@testing-library/react'
 
 import AccordionTitle from 'src/modules/Accordion/AccordionTitle'
 import * as common from 'test/specs/commonTests'
@@ -23,7 +24,8 @@ describe('AccordionTitle', () => {
       const event = { target: null }
       const props = { content: 'title', index: 0 }
 
-      mount(<AccordionTitle onClick={onClick} {...props} />).simulate('click', event)
+      const { container } = render(<AccordionTitle onClick={onClick} {...props} />)
+      fireEvent.click(container.firstChild, event)
 
       onClick.should.have.been.calledOnce()
       onClick.should.have.been.calledWithMatch(event, props)

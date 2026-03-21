@@ -1,5 +1,6 @@
 import faker from 'faker'
 import React from 'react'
+import { render } from '@testing-library/react'
 
 import Item from 'src/views/Item/Item'
 import ItemContent from 'src/views/Item/ItemContent'
@@ -38,37 +39,43 @@ describe('Item', () => {
 
   describe('content prop', () => {
     it('renders ItemContent component', () => {
-      shallow(<Item content={faker.hacker.phrase()} />).should.have.descendants('ItemContent')
+      const { container } = render(<Item content={faker.hacker.phrase()} />)
+      expect(container.querySelector('.content')).toBeTruthy()
     })
   })
 
   describe('description prop', () => {
     it('renders ItemContent component', () => {
-      shallow(<Item description={faker.hacker.phrase()} />).should.have.descendants('ItemContent')
+      const { container } = render(<Item description={faker.hacker.phrase()} />)
+      expect(container.querySelector('.content')).toBeTruthy()
     })
   })
 
   describe('extra prop', () => {
     it('renders ItemContent component', () => {
-      shallow(<Item extra={faker.hacker.phrase()} />).should.have.descendants('ItemContent')
+      const { container } = render(<Item extra={faker.hacker.phrase()} />)
+      expect(container.querySelector('.content')).toBeTruthy()
     })
   })
 
   describe('header prop', () => {
     it('renders ItemContent component', () => {
-      shallow(<Item header={faker.hacker.phrase()} />).should.have.descendants('ItemContent')
+      const { container } = render(<Item header={faker.hacker.phrase()} />)
+      expect(container.querySelector('.content')).toBeTruthy()
     })
   })
 
   describe('image prop', () => {
     it('renders ItemImage component', () => {
-      shallow(<Item image={faker.image.imageUrl()} />).should.have.descendants('ItemImage')
+      const { container } = render(<Item image={faker.image.imageUrl()} />)
+      expect(container.querySelector('.image')).toBeTruthy()
     })
   })
 
   describe('meta prop', () => {
     it('renders ItemContent component', () => {
-      shallow(<Item meta={faker.hacker.phrase()} />).should.have.descendants('ItemContent')
+      const { container } = render(<Item meta={faker.hacker.phrase()} />)
+      expect(container.querySelector('.content')).toBeTruthy()
     })
   })
 })

@@ -1,5 +1,6 @@
 import React from 'react'
 import { act } from 'react'
+import { render } from '@testing-library/react'
 
 import PortalInner from 'src/addons/Portal/PortalInner'
 import { isBrowser } from 'src/lib'
@@ -23,11 +24,12 @@ describe('PortalInner', () => {
     })
 
     it('renders `null` when during Server-Side Rendering', () => {
-      mount(
+      const { container } = render(
         <PortalInner>
           <p />
         </PortalInner>,
-      ).should.be.blank()
+      )
+      expect(container.innerHTML).to.equal('')
     })
   })
 
@@ -36,12 +38,12 @@ describe('PortalInner', () => {
       const portalRef = React.createRef()
       const elementRef = React.createRef()
 
-      const wrapper = mount(
+      render(
         <PortalInner ref={portalRef}>
           <p ref={elementRef} />
         </PortalInner>,
       )
-      const domNode = wrapper.getDOMNode()
+      const domNode = portalRef.current
 
       expect(elementRef.current).to.equal(domNode)
       expect(portalRef.current).to.equal(domNode)
@@ -56,12 +58,12 @@ describe('PortalInner', () => {
       const portalRef = React.createRef()
       const elementRef = React.createRef()
 
-      const wrapper = mount(
+      render(
         <PortalInner ref={portalRef}>
           <CustomComponent ref={elementRef} />
         </PortalInner>,
       )
-      const domNode = wrapper.getDOMNode()
+      const domNode = portalRef.current
 
       expect(elementRef.current).to.equal(domNode)
       expect(portalRef.current).to.equal(domNode)
@@ -74,12 +76,12 @@ describe('PortalInner', () => {
       }
 
       const portalRef = React.createRef()
-      const wrapper = mount(
+      render(
         <PortalInner ref={portalRef}>
           <CustomComponent />
         </PortalInner>,
       )
-      const domNode = wrapper.getDOMNode()
+      const domNode = portalRef.current
 
       expect(portalRef.current).to.equal(domNode)
       expect(domNode.tagName).to.equal('DIV')
@@ -90,7 +92,7 @@ describe('PortalInner', () => {
   describe('onMount', () => {
     it('called when mounting', () => {
       const onMount = sandbox.spy()
-      mount(
+      render(
         <PortalInner onMount={onMount}>
           <p />
         </PortalInner>,
@@ -103,14 +105,14 @@ describe('PortalInner', () => {
   describe('onUnmount', () => {
     it('is called only once when unmounting', () => {
       const onUnmount = sandbox.spy()
-      const wrapper = mount(
+      const { unmount } = render(
         <PortalInner onUnmount={onUnmount}>
           <p />
         </PortalInner>,
       )
 
       act(() => {
-        wrapper.unmount()
+        unmount()
       })
       onUnmount.should.have.been.calledOnce()
     })

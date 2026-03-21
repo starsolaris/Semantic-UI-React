@@ -1,4 +1,6 @@
 import React from 'react'
+import { render } from '@testing-library/react'
+
 import MessageContent from 'src/collections/Message/MessageContent'
 import * as common from 'test/specs/commonTests'
 
@@ -8,10 +10,12 @@ describe('MessageContent', () => {
   common.rendersChildren(MessageContent)
 
   it('renders an div tag', () => {
-    shallow(<MessageContent />).should.have.tagName('div')
+    const { container } = render(<MessageContent />)
+    expect(container.firstChild.tagName).toBe('DIV')
   })
 
   it('has className content', () => {
-    shallow(<MessageContent />).should.have.className('content')
+    const { container } = render(<MessageContent />)
+    expect(container.firstChild).toHaveClass('content')
   })
 })

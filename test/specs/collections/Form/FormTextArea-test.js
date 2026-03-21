@@ -1,4 +1,5 @@
 import React from 'react'
+import { render } from '@testing-library/react'
 
 import TextArea from 'src/addons/TextArea/TextArea'
 import FormTextArea from 'src/collections/Form/FormTextArea'
@@ -10,8 +11,8 @@ describe('FormTextArea', () => {
   common.labelImplementsHtmlForProp(FormTextArea)
 
   it('renders a FormField with a TextArea control', () => {
-    shallow(<FormTextArea />)
-      .find('FormField')
-      .should.have.prop('control', TextArea)
+    const { container } = render(<FormTextArea />)
+    const textarea = container.querySelector('textarea')
+    expect(textarea).toBeTruthy()
   })
 })

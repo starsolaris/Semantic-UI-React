@@ -1,4 +1,5 @@
 import React from 'react'
+import { render } from '@testing-library/react'
 
 import * as common from 'test/specs/commonTests'
 import TableCell from 'src/collections/Table/TableCell'
@@ -32,6 +33,7 @@ describe('TableCell', () => {
   common.propKeyOnlyToClassName(TableCell, 'warning')
 
   it('renders as a td by default', () => {
-    shallow(<TableCell />).should.have.tagName('td')
+    const { container } = render(<TableCell />)
+    expect(container.firstChild.tagName).toBe('TD')
   })
 })

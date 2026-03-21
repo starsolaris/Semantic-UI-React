@@ -1,4 +1,6 @@
 import React from 'react'
+import { render } from '@testing-library/react'
+
 import MessageList from 'src/collections/Message/MessageList'
 import * as common from 'test/specs/commonTests'
 
@@ -11,25 +13,26 @@ describe('MessageList', () => {
   })
 
   it('renders an ul tag', () => {
-    shallow(<MessageList />).should.have.tagName('ul')
+    const { container } = render(<MessageList />)
+    expect(container.firstChild.tagName).toBe('UL')
   })
 
   it('has className list', () => {
-    shallow(<MessageList />).should.have.className('list')
+    const { container } = render(<MessageList />)
+    expect(container.firstChild).toHaveClass('list')
   })
 
   describe('items', () => {
     it('creates MessageItem children', () => {
       const items = ['foo', 'bar', 'baz']
-      const wrapper = shallow(<MessageList items={items} />)
+      const { container, getByText } = render(<MessageList items={items} />)
 
-      wrapper.should.have.exactly(3).descendants('MessageItem')
+      const listItems = container.querySelectorAll('li')
+      expect(listItems).toHaveLength(3)
 
-      wrapper.childAt(0).shallow().should.have.text(items[0])
-
-      wrapper.childAt(1).shallow().should.have.text(items[1])
-
-      wrapper.childAt(2).shallow().should.have.text(items[2])
+      items.forEach((item) => {
+        expect(getByText(item)).toBeTruthy()
+      })
     })
   })
 })

@@ -2,6 +2,7 @@ import React from 'react'
 
 import ListList from 'src/elements/List/ListList'
 import * as common from 'test/specs/commonTests'
+import nestedShallow from 'test/utils/nestedShallow'
 
 describe('ListList', () => {
   common.isConformant(ListList)
@@ -10,11 +11,13 @@ describe('ListList', () => {
 
   describe('list', () => {
     it('omitted when rendered as `ol`', () => {
-      shallow(<ListList as='ol' />).should.not.have.className('list')
+      const element = nestedShallow(<ListList as='ol' />)
+      expect(element).to.not.have.class('list')
     })
 
     it('omitted when rendered as `ul`', () => {
-      shallow(<ListList as='ul' />).should.not.have.className('list')
+      const element = nestedShallow(<ListList as='ul' />)
+      expect(element).to.not.have.class('list')
     })
   })
 })

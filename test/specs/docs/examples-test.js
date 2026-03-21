@@ -1,6 +1,7 @@
 import * as React from 'react'
+import { render } from '@testing-library/react'
 
-const exampleContext = require.context('docs/src/examples', true, /\w+Example\w*\.js$/)
+const exampleModules = import.meta.glob('/docs/src/examples/**/*Example*.js', { eager: true })
 let wrapper
 
 describe('examples', () => {
@@ -8,14 +9,14 @@ describe('examples', () => {
     wrapper.unmount()
   })
 
-  exampleContext.keys().forEach((path) => {
+  Object.entries(exampleModules).forEach(([path, module]) => {
     const filename = path.replace(/^.*\/(\w+\.js)$/, '$1')
 
     it(`${filename} renders without console activity`, () => {
-      const Component = exampleContext(path).default
+      const Component = module.default
 
-      wrapper = mount(React.createElement(Component))
-      wrapper.should.not.be.blank()
+      wrapper = render(React.createElement(Component))
+      expect(wrapper.container.innerHTML).to.not.equal('')
     })
   })
 })

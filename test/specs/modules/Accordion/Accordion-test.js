@@ -1,4 +1,5 @@
 import React from 'react'
+import { render } from '@testing-library/react'
 
 import Accordion from 'src/modules/Accordion/Accordion'
 import AccordionAccordion from 'src/modules/Accordion/AccordionAccordion'
@@ -23,6 +24,7 @@ describe('Accordion', () => {
   common.propKeyOnlyToClassName(Accordion, 'styled')
 
   it('renders AccordionAccordion component', () => {
-    shallow(<Accordion />).should.have.descendants(AccordionAccordion)
+    const { container } = render(<Accordion />)
+    expect(container.querySelector('.accordion')).toBeTruthy()
   })
 })

@@ -1,5 +1,6 @@
 import _ from 'lodash'
 import React from 'react'
+import { render, fireEvent } from '@testing-library/react'
 
 import Message from 'src/collections/Message/Message'
 import MessageContent from 'src/collections/Message/MessageContent'
@@ -58,37 +59,44 @@ describe('Message', () => {
 
   describe('header', () => {
     it('adds MessageContent when defined', () => {
-      shallow(<Message header='This is a message' />).should.have.descendants('MessageContent')
+      const { container } = render(<Message header='This is a message' />)
+      expect(container.querySelector('.content')).toBeTruthy()
     })
   })
 
   describe('icon', () => {
     it('does not have MessageContent by default', () => {
-      shallow(<Message />).should.not.have.descendants('.content')
+      const { container } = render(<Message />)
+      expect(container.querySelector('.content')).toBeFalsy()
     })
     it('renders children when "true"', () => {
       const text = 'child text'
       const node = <div id='foo' />
 
-      shallow(<Message icon>{text}</Message>).should.have.text(text)
+      const { container: c1, getByText } = render(<Message icon>{text}</Message>)
+      expect(getByText(text)).toBeTruthy()
 
-      shallow(<Message icon>{node}</Message>).should.contain(node)
+      const { container: c2 } = render(<Message icon>{node}</Message>)
+      expect(c2.querySelector('#foo')).toBeTruthy()
     })
   })
 
   describe('list', () => {
     it('adds MessageContent when defined', () => {
-      shallow(<Message list={[]} />).should.have.descendants('MessageContent')
+      const { container } = render(<Message list={[]} />)
+      expect(container.querySelector('.content')).toBeTruthy()
     })
   })
 
   describe('onDismiss', () => {
     it('has no close icon by default', () => {
-      shallow(<Message />).should.not.have.descendants('.close.icon')
+      const { container } = render(<Message />)
+      expect(container.querySelector('.close.icon')).toBeFalsy()
     })
 
     it('adds a close icon when defined', () => {
-      render(<Message onDismiss={() => undefined} />).should.have.descendants('.close.icon')
+      const { container } = render(<Message onDismiss={() => undefined} />)
+      expect(container.querySelector('.close.icon')).toBeTruthy()
     })
 
     it('is called with (event) on close icon click', () => {
@@ -96,13 +104,13 @@ describe('Message', () => {
       const props = { icon: true }
 
       const spy = sandbox.spy()
-      const wrapper = mount(<Message {...props} onDismiss={spy} />)
+      const { container } = render(<Message {...props} onDismiss={spy} />)
 
-      wrapper.should.have.descendants('.close.icon')
-      wrapper.find('.close.icon').simulate('click', event)
+      const closeIcon = container.querySelector('.close.icon')
+      fireEvent.click(closeIcon)
 
-      spy.should.have.been.calledOnce()
-      spy.should.have.been.calledWithMatch(event, props)
+      expect(spy).toHaveBeenCalledOnce()
+      expect(spy).toHaveBeenCalledWith(expect.objectContaining({ type: 'click' }), props)
     })
   })
 })

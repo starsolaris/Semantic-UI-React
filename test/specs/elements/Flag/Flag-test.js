@@ -2,6 +2,7 @@ import React from 'react'
 
 import Flag from 'src/elements/Flag/Flag'
 import * as common from 'test/specs/commonTests'
+import nestedShallow from 'test/utils/nestedShallow'
 
 const requiredProps = { name: 'us' }
 
@@ -14,6 +15,7 @@ describe('Flag', () => {
   common.propValueOnlyToClassName(Flag, 'name', [], { requiredProps })
 
   it('renders an <i /> element', () => {
-    shallow(<Flag {...requiredProps} />).should.have.tagName('i')
+    const element = nestedShallow(<Flag {...requiredProps} />)
+    expect(element.tagName.toLowerCase()).to.equal('i')
   })
 })
