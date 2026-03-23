@@ -8,7 +8,7 @@ import validateTrigger from './validateTrigger'
  * @param {React.Ref} triggerRef
  */
 function useTrigger(trigger, triggerRef) {
-  const ref = useMergedRefs(trigger?.ref, triggerRef)
+  const ref = useMergedRefs(trigger?.props?.ref, triggerRef)
 
   if (trigger) {
     /* istanbul ignore else */
