@@ -510,35 +510,45 @@ describe('Portal', () => {
       const DELAY = 20
       const BEFORE_DELAY = 10
 
-      const { container } = wrapperMount(
-        <Portal
-          trigger={<button />}
-          openOnTriggerMouseEnter
-          closeOnTriggerMouseLeave
-          mouseLeaveDelay={DELAY}
-        >
-          <p data-testid='portal-content' />
-        </Portal>,
-      )
+      vi.useFakeTimers()
 
-      expect(document.querySelector('[data-testid="portal-content"]')).to.be.null()
-      fireEvent.mouseEnter(container.querySelector('button'))
+      try {
+        const { container } = wrapperMount(
+          <Portal
+            trigger={<button />}
+            openOnTriggerMouseEnter
+            closeOnTriggerMouseLeave
+            mouseLeaveDelay={DELAY}
+          >
+            <p data-testid='portal-content' />
+          </Portal>,
+        )
 
-      await wait(BEFORE_DELAY)
+        expect(document.querySelector('[data-testid="portal-content"]')).to.be.null()
 
-      await waitFor(() => {
+        await act(async () => {
+          fireEvent.mouseOver(container.querySelector('button'))
+          await vi.runAllTimersAsync()
+        })
+
         expect(document.querySelector('[data-testid="portal-content"]')).to.not.be.null()
-      })
-      fireEvent.mouseLeave(container.querySelector('button'))
 
-      await wait(BEFORE_DELAY)
+        await act(async () => {
+          fireEvent.mouseLeave(container.querySelector('button'))
+          await vi.advanceTimersByTimeAsync(BEFORE_DELAY)
+        })
 
-      expect(document.querySelector('[data-testid="portal-content"]')).to.not.be.null()
-      fireEvent.mouseEnter(container.querySelector('button'))
+        expect(document.querySelector('[data-testid="portal-content"]')).to.not.be.null()
 
-      await wait(DELAY)
+        await act(async () => {
+          fireEvent.mouseOver(container.querySelector('button'))
+          await vi.advanceTimersByTimeAsync(DELAY)
+        })
 
-      expect(document.querySelector('[data-testid="portal-content"]')).to.not.be.null()
+        expect(document.querySelector('[data-testid="portal-content"]')).to.not.be.null()
+      } finally {
+        vi.useRealTimers()
+      }
     })
   })
 
@@ -608,12 +618,15 @@ describe('Portal', () => {
 
       // Fire a mouseEnter on the portal within the time limit
       setTimeout(() => {
-        domEvent.mouseEnter('#inner')
+        act(() => {
+          domEvent.mouseEnter('#inner')
+        })
       }, delay - 1)
 
       // The portal should close because closeOnPortalMouseLeave not set
-      await wait(delay + 1)
-      expect(document.querySelector('[data-testid="portal-content"]')).to.be.null()
+      await waitFor(() => {
+        expect(document.querySelector('[data-testid="portal-content"]')).to.be.null()
+      })
     })
 
     it('does not close the portal on trigger mouseleave when portal receives mouseenter within limit', async () => {

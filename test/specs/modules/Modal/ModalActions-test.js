@@ -46,23 +46,24 @@ describe('ModalActions', () => {
     })
 
     it('is called with (e, actionProps) when clicked', () => {
-      const event = { target: null }
       const onActionClick = sandbox.spy()
       const onButtonClick = sandbox.spy()
 
       const action = { key: 'users', content: 'Disable', onClick: onButtonClick }
       const matchProps = { content: 'Disable' }
 
-      const { container } = render(<ModalActions actions={[...actions, action]} onActionClick={onActionClick} />)
+      const { container } = render(
+        <ModalActions actions={[...actions, action]} onActionClick={onActionClick} />,
+      )
       const buttons = container.querySelectorAll('button')
       const lastButton = buttons[buttons.length - 1]
 
-      fireEvent.click(lastButton, event)
+      fireEvent.click(lastButton)
 
       onActionClick.should.have.been.calledOnce()
-      onActionClick.should.have.been.calledWithMatch(event, matchProps)
+      onActionClick.should.have.been.calledWithMatch({ type: 'click' }, matchProps)
       onButtonClick.should.have.been.calledOnce()
-      onButtonClick.should.have.been.calledWithMatch(event, matchProps)
+      onButtonClick.should.have.been.calledWithMatch({ type: 'click' }, matchProps)
     })
   })
 })

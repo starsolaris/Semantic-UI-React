@@ -1,2 +1,3 @@
-import default from './ComponentDoc';
-export { default };
+import ComponentDoc from './ComponentDoc'
+
+export default ComponentDoc

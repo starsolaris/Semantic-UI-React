@@ -1,2 +1,3 @@
-import default from './ComponentTable';
-export { default };
+import ComponentTable from './ComponentTable'
+
+export default ComponentTable

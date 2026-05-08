@@ -2,7 +2,7 @@ import React from 'react'
 
 import Divider from 'src/elements/Divider/Divider'
 import * as common from 'test/specs/commonTests'
-import nestedShallow from 'test/utils/nestedShallow'
+import nestedShallow from 'test/utils/nestedElement'
 
 describe('Divider', () => {
   common.isConformant(Divider)

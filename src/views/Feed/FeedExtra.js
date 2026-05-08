@@ -38,7 +38,7 @@ const FeedExtra = React.forwardRef(function (props, ref) {
   // TODO need a "collection factory" to handle creating multiple image elements and their keys
   const imageElements = _.map(images, (image, index) => {
     const key = [index, image].join('-')
-    return createHTMLImage(image, { key })
+    return createHTMLImage(image, { autoGenerateKey: false, defaultProps: { key } })
   })
 
   return (

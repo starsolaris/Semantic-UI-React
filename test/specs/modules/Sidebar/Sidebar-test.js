@@ -1,5 +1,5 @@
 import React from 'react'
-import { render, fireEvent } from '@testing-library/react'
+import { render } from '@testing-library/react'
 
 import Sidebar from 'src/modules/Sidebar/Sidebar'
 import * as common from 'test/specs/commonTests'
@@ -28,16 +28,18 @@ describe('Sidebar', () => {
 
   describe('componentWillUnmount', () => {
     it('will call "clearTimeout"', (done) => {
-    const clear = sandbox.spy(window, 'clearTimeout')
-    const { unmount } = render(<Sidebar />)
+      const clear = sandbox.spy(window, 'clearTimeout')
 
-    // start animation
-    const { unmount: unmountWithTimeout } = render(<Sidebar visible />)
-    unmountWithTimeout()
+      render(<Sidebar />)
 
-    assertWithTimeout(() => {
-      expect(clear).to.have.been.called()
-    }, done)
+      // start animation
+      const { unmount } = render(<Sidebar visible />)
+      unmount()
+
+      assertWithTimeout(() => {
+        expect(clear).to.have.been.called()
+      }, done)
+    })
   })
 
   describe('onHide', () => {
@@ -99,11 +101,10 @@ describe('Sidebar', () => {
       expect(onHidden).to.have.not.been.called()
       rerender(<Sidebar onHidden={onHidden} visible={false} />)
 
-      setTimeout(() => {
+      assertWithTimeout(() => {
         expect(onHidden).to.have.been.calledOnce()
         expect(onHidden).to.have.been.calledWithMatch(null, { visible: false })
-        done()
-      }, 0)
+      }, done)
     })
   })
 
@@ -116,11 +117,10 @@ describe('Sidebar', () => {
       expect(onShow).to.have.not.been.called()
       rerender(<Sidebar onShow={onShow} visible />)
 
-      setTimeout(() => {
+      assertWithTimeout(() => {
         expect(onShow).to.have.been.calledOnce()
         expect(onShow).to.have.been.calledWithMatch(null, { visible: true })
-        done()
-      }, 0)
+      }, done)
     })
   })
 

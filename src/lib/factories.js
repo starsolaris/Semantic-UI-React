@@ -115,6 +115,19 @@ export function createShorthand(Component, mapValueToProps, val, options = {}) {
 
   // Clone ReactElements
   if (valIsReactElement) {
+    if (val.type === React.Fragment) {
+      const fragmentProps = {}
+
+      if (props.key != null) {
+        fragmentProps.key = props.key
+      }
+
+      if (_.has(props, 'children')) {
+        fragmentProps.children = props.children
+      }
+
+      return React.cloneElement(val, fragmentProps)
+    }
     return React.cloneElement(val, props)
   }
 

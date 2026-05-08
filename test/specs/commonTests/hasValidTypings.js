@@ -1,4 +1,6 @@
+import fs from 'fs'
 import _ from 'lodash'
+import path from 'path'
 
 import { customPropTypes } from 'src/lib'
 import { getComponentName, getComponentProps } from 'test/utils'
@@ -6,7 +8,6 @@ import {
   getNodes,
   getInterfaces,
   hasAnySignature,
-  requireTs,
   getComponentType,
   isForwardRefComponent,
 } from './tsHelpers'
@@ -25,6 +26,68 @@ const shorthandMap = {
   SemanticShorthandItem: customPropTypes.itemShorthand,
   SemanticShorthandCollection: customPropTypes.collectionShorthand,
 }
+const srcRoot = path.join(process.cwd(), 'src')
+
+const getRelativeTypingsPath = (filePath) =>
+  path.relative(srcRoot, filePath).split(path.sep).join('/')
+
+const findExactTypingsFile = (dir, displayName) => {
+  const entries = fs
+    .readdirSync(dir, { withFileTypes: true })
+    .sort((a, b) => a.name.localeCompare(b.name))
+
+  for (const entry of entries) {
+    if (entry.isFile() && entry.name === `${displayName}.d.ts`) {
+      return path.join(dir, entry.name)
+    }
+  }
+
+  for (const entry of entries) {
+    if (entry.isDirectory()) {
+      const match = findExactTypingsFile(path.join(dir, entry.name), displayName)
+
+      if (match) return match
+    }
+  }
+
+  return null
+}
+
+const findIndexTypingsFile = (dir, displayName) => {
+  const entries = fs
+    .readdirSync(dir, { withFileTypes: true })
+    .sort((a, b) => a.name.localeCompare(b.name))
+
+  if (path.basename(dir) === displayName) {
+    const indexFile = path.join(dir, 'index.d.ts')
+
+    if (fs.existsSync(indexFile)) {
+      return indexFile
+    }
+  }
+
+  for (const entry of entries) {
+    if (entry.isDirectory()) {
+      const match = findIndexTypingsFile(path.join(dir, entry.name), displayName)
+
+      if (match) return match
+    }
+  }
+
+  return null
+}
+
+const resolveTypingsFile = (displayName) => {
+  const exactMatch = findExactTypingsFile(srcRoot, displayName)
+
+  if (exactMatch) {
+    return getRelativeTypingsPath(exactMatch)
+  }
+
+  const indexMatch = findIndexTypingsFile(srcRoot, displayName)
+
+  return indexMatch ? getRelativeTypingsPath(indexMatch) : null
+}
 
 /**
  * Assert Component has the valid typings.
@@ -36,9 +99,9 @@ const shorthandMap = {
  */
 export default function hasValidTypings(Component, options = {}) {
   const { ignoredTypingsProps = [], forwardsRef = true, requiredProps } = options
-
-  const tsFile = repoPath.replace('src/', '').replace('.js', '.d.ts')
-  const tsContent = requireTs(tsFile)
+  const displayName = getComponentName(Component)
+  const tsFile = resolveTypingsFile(displayName)
+  const tsContent = fs.readFileSync(path.join(srcRoot, tsFile), 'utf8')
 
   describe('typings', () => {
     describe('structure', () => {
@@ -141,18 +204,21 @@ export default function hasValidTypings(Component, options = {}) {
       })
     })
 
-    describe('shorthands', () => {
-      const { shorthands } = strictInterfaceObject
-      const componentPropTypes = _.get(Component, 'propTypes')
-      const componentShorthands = _.pickBy(componentPropTypes, isShorthand)
+    const componentPropTypes = _.get(Component, 'propTypes')
+    const componentShorthands = _.pickBy(componentPropTypes, isShorthand)
 
-      _.forEach(componentShorthands, (propType, propName) => {
-        it(`"${propName}" should have the correct shorthand type `, () => {
-          const { type } = _.find(shorthands, ['name', propName])
+    if (_.size(componentShorthands) > 0) {
+      describe('shorthands', () => {
+        const { shorthands } = strictInterfaceObject
 
-          shorthandMap[type].should.to.equal(propType)
+        _.forEach(componentShorthands, (propType, propName) => {
+          it(`"${propName}" should have the correct shorthand type `, () => {
+            const { type } = _.find(shorthands, ['name', propName])
+
+            shorthandMap[type].should.to.equal(propType)
+          })
         })
       })
-    })
+    }
   })
 }

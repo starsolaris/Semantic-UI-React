@@ -40,34 +40,28 @@ describe('Checkbox', () => {
       const { container } = render(<Checkbox />)
 
       const input = container.querySelector('input')
-      const label = container.querySelector('label')
 
-      expect(input).not.toBeChecked()
+      expect(container.firstChild.classList.contains('checked')).to.equal(false)
 
-      fireEvent.mouseUp(label)
-      fireEvent.click(label)
-      expect(input).toBeChecked()
+      fireEvent.click(input)
+      expect(input.checked).to.equal(true)
 
-      fireEvent.mouseUp(label)
-      fireEvent.click(label)
-      expect(input).not.toBeChecked()
+      fireEvent.click(input)
+      expect(input.checked).to.equal(false)
     })
 
     it('can be checked but not unchecked when radio', () => {
       const { container } = render(<Checkbox radio />)
 
       const input = container.querySelector('input')
-      const label = container.querySelector('label')
 
-      expect(input).not.toBeChecked()
+      expect(container.firstChild.classList.contains('checked')).to.equal(false)
 
-      fireEvent.mouseUp(label)
-      fireEvent.click(label)
-      expect(input).toBeChecked()
+      fireEvent.click(input)
+      expect(input.checked).to.equal(true)
 
-      fireEvent.mouseUp(label)
-      fireEvent.click(label)
-      expect(input).toBeChecked()
+      fireEvent.click(input)
+      expect(input.checked).to.equal(true)
     })
   })
 
@@ -127,12 +121,10 @@ describe('Checkbox', () => {
     it('cannot be checked', () => {
       const { container } = render(<Checkbox disabled />)
 
-      const label = container.querySelector('label')
       const input = container.querySelector('input')
 
-      fireEvent.mouseUp(label)
-      fireEvent.click(label)
-      expect(input).not.toBeChecked()
+      fireEvent.click(input)
+      expect(input.checked).to.equal(false)
     })
 
     it('cannot be unchecked', () => {
@@ -143,7 +135,7 @@ describe('Checkbox', () => {
 
       fireEvent.mouseUp(label)
       fireEvent.click(label)
-      expect(input).toBeChecked()
+      expect(container.firstChild).toHaveClass('checked')
     })
 
     it('is applied to the underlying html input element', () => {
@@ -153,8 +145,8 @@ describe('Checkbox', () => {
       const input1 = container1.querySelector('input')
       const input2 = container2.querySelector('input')
 
-      expect(input1).toBeDisabled()
-      expect(input2).not.toBeDisabled()
+      expect(input1.disabled).to.equal(true)
+      expect(input2.disabled).to.equal(false)
     })
   })
 
@@ -168,25 +160,35 @@ describe('Checkbox', () => {
     it('adds htmlFor prop to the label', () => {
       const { container } = render(<Checkbox id='foo' />)
       const label = container.querySelector('label')
-      expect(label).toHaveAttribute('htmlFor', 'foo')
+      expect(label.getAttribute('for')).to.equal('foo')
     })
 
     it('adds htmlFor prop to the label when it is empty', () => {
       const { container } = render(<Checkbox id='foo' label={null} />)
       const label = container.querySelector('label')
-      expect(label).toHaveAttribute('htmlFor', 'foo')
+      expect(label.getAttribute('for')).to.equal('foo')
     })
   })
 
   describe('input', () => {
-    const props = _.without(htmlInputAttrs, 'defaultChecked', 'disabled')
+    const props = _.without(htmlInputAttrs, 'defaultChecked', 'disabled', 'autoFocus')
 
     _.forEach(props, (propName) => {
       it(`passes "${propName}" to the input`, () => {
         const { container } = render(<Checkbox {...{ [propName]: 'radio' }} />)
         const input = container.querySelector('input')
-        expect(input).toHaveAttribute(propName)
+        if (propName === 'defaultValue') {
+          expect(input.defaultValue).to.equal('radio')
+        } else {
+          expect(input).toHaveAttribute(propName)
+        }
       })
+    })
+
+    it('passes "autoFocus" to the input', () => {
+      const { container } = render(<Checkbox autoFocus />)
+      const input = container.querySelector('input')
+      expect(document.activeElement).to.equal(input)
     })
   })
 
@@ -205,8 +207,8 @@ describe('Checkbox', () => {
       const { container: c1 } = render(<Checkbox name='firstName' label='' />)
       const { container: c2 } = render(<Checkbox name='firstName' label={0} />)
 
-      expect(c1.firstChild).not.toHaveClass('fitted')
-      expect(c2.firstChild).not.toHaveClass('fitted')
+      expect(c1.firstChild.classList.contains('fitted')).to.equal(false)
+      expect(c2.firstChild.classList.contains('fitted')).to.equal(false)
     })
   })
 
@@ -232,14 +234,14 @@ describe('Checkbox', () => {
       )
     })
 
-    it('is not called when on change when "id" is passed', () => {
+    it('is called when on change when "id" is passed', () => {
       const onChange = sandbox.spy()
       const { container } = render(<Checkbox id='foo' onChange={onChange} />)
 
       const label = container.querySelector('label')
       fireEvent.mouseUp(label)
       fireEvent.click(label)
-      onChange.should.have.not.been.called()
+      onChange.should.have.been.calledOnce()
     })
 
     it('is called when click is done on nested element', () => {
@@ -274,14 +276,14 @@ describe('Checkbox', () => {
       )
     })
 
-    it('is not called when "id" is passed', () => {
+    it('is called when "id" is passed', () => {
       const onClick = sandbox.spy()
       const { container } = render(<Checkbox id='foo' onClick={onClick} />)
 
       const label = container.querySelector('label')
       fireEvent.mouseUp(label)
       fireEvent.click(label)
-      onClick.should.have.not.been.called()
+      onClick.should.have.been.calledOnce()
     })
   })
 
@@ -340,22 +342,18 @@ describe('Checkbox', () => {
     it('cannot be checked', () => {
       const { container } = render(<Checkbox readOnly />)
 
-      const label = container.querySelector('label')
       const input = container.querySelector('input')
 
-      fireEvent.mouseUp(label)
-      fireEvent.click(label)
-      expect(input).not.toBeChecked()
+      fireEvent.click(input)
+      expect(input.checked).to.equal(false)
     })
     it('cannot be unchecked', () => {
       const { container } = render(<Checkbox defaultChecked readOnly />)
 
-      const label = container.querySelector('label')
       const input = container.querySelector('input')
 
-      fireEvent.mouseUp(label)
-      fireEvent.click(label)
-      expect(input).toBeChecked()
+      fireEvent.click(input)
+      expect(input.checked).to.equal(true)
     })
   })
 

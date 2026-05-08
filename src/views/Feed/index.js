@@ -1,2 +1,3 @@
-import Feed from './Feed';
-export default Feed;
+import Feed from './Feed'
+
+export default Feed

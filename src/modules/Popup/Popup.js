@@ -439,6 +439,8 @@ Popup.propTypes = {
   wide: PropTypes.oneOfType([PropTypes.bool, PropTypes.oneOf(['very'])]),
 }
 
+Popup.handledProps = Object.keys(Popup.propTypes).sort()
+
 Popup.Content = PopupContent
 Popup.Header = PopupHeader
 

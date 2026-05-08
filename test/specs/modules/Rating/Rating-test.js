@@ -74,7 +74,7 @@ describe('Rating', () => {
       fireEvent.mouseEnter(lastIcon)
       fireEvent.click(lastIcon)
       expect(container.querySelector('.selected')).toBeFalsy()
-      expect(container.querySelectorAll('[selected=true]')).toHaveLength(0)
+      expect(container.querySelectorAll('.selected.icon')).toHaveLength(0)
     })
   })
 
@@ -105,7 +105,7 @@ describe('Rating', () => {
       fireEvent.mouseEnter(lastIcon)
       fireEvent.mouseLeave(container.firstChild)
 
-      expect(container.querySelectorAll('[selected=true]')).toHaveLength(0)
+      expect(container.querySelectorAll('.selected.icon')).toHaveLength(0)
     })
   })
 
@@ -115,7 +115,7 @@ describe('Rating', () => {
       const lastIcon = container.querySelectorAll('i.icon')[4]
 
       fireEvent.click(lastIcon)
-      expect(container.querySelectorAll('[active=true]')).toHaveLength(5)
+      expect(container.querySelectorAll('.active.icon')).toHaveLength(5)
     })
 
     it('allows toggling when set to "auto" with a single icon', () => {
@@ -142,7 +142,7 @@ describe('Rating', () => {
       const icon3 = container.querySelectorAll('i.icon')[3]
 
       fireEvent.click(icon3)
-      expect(container.querySelectorAll('[active=true]')).toHaveLength(0)
+      expect(container.querySelectorAll('.active.icon')).toHaveLength(0)
     })
 
     it('prevents clearing when false with a single icon', () => {
@@ -158,7 +158,7 @@ describe('Rating', () => {
       const lastIcon = container.querySelectorAll('i.icon')[4]
 
       fireEvent.click(lastIcon)
-      expect(container.querySelectorAll('[active=true]')).toHaveLength(5)
+      expect(container.querySelectorAll('.active.icon')).toHaveLength(5)
     })
   })
 
@@ -181,14 +181,14 @@ describe('Rating', () => {
       const { container } = render(<Rating disabled maxRating={3} rating={3} />)
       const lastIcon = container.querySelectorAll('i.icon')[2]
       fireEvent.click(lastIcon)
-      expect(container.querySelectorAll('[active=true]')).toHaveLength(3)
+      expect(container.querySelectorAll('.active.icon')).toHaveLength(3)
     })
 
     it('prevents icons from becoming selected on mouse enter', () => {
       const { container } = render(<Rating disabled maxRating={3} />)
       const lastIcon = container.querySelectorAll('i.icon')[2]
       fireEvent.mouseEnter(lastIcon)
-      expect(container.querySelectorAll('[selected=true]')).toHaveLength(0)
+      expect(container.querySelectorAll('.selected.icon')).toHaveLength(0)
     })
 
     it('prevents icons from becoming unselected on mouse leave when disabled', () => {
@@ -197,21 +197,21 @@ describe('Rating', () => {
       const lastIcon = container.querySelectorAll('i.icon')[2]
 
       fireEvent.mouseEnter(lastIcon)
-      expect(container.querySelectorAll('[selected=true]')).toHaveLength(3)
+      expect(container.querySelectorAll('.selected.icon')).toHaveLength(3)
 
       // Now test that disabled rating doesn't respond to mouse events
       const { container: c2 } = render(<Rating disabled maxRating={3} />)
       const c2LastIcon = c2.querySelectorAll('i.icon')[2]
       fireEvent.mouseEnter(c2LastIcon)
       // Should not select any icons when disabled
-      expect(c2.querySelectorAll('[selected=true]')).toHaveLength(0)
+      expect(c2.querySelectorAll('.selected.icon')).toHaveLength(0)
     })
 
     it('prevents icons from becoming active on click', () => {
       const { container } = render(<Rating disabled maxRating={3} />)
       const lastIcon = container.querySelectorAll('i.icon')[2]
       fireEvent.click(lastIcon)
-      expect(container.querySelectorAll('[active=true]')).toHaveLength(0)
+      expect(container.querySelectorAll('.active.icon')).toHaveLength(0)
     })
   })
 
@@ -229,14 +229,13 @@ describe('Rating', () => {
   describe('onRate', () => {
     it('is called with (event, { rating, maxRating } on icon click', () => {
       const spy = sandbox.spy()
-      const event = { fake: 'event data' }
 
       const { container } = render(<Rating maxRating={3} onRate={spy} />)
       const lastIcon = container.querySelectorAll('i.icon')[2]
-      fireEvent.click(lastIcon, event)
+      fireEvent.click(lastIcon)
 
       spy.should.have.been.calledOnce()
-      spy.should.have.been.calledWithMatch(event, { rating: 3, maxRating: 3 })
+      spy.should.have.been.calledWithMatch({ type: 'click' }, { rating: 3, maxRating: 3 })
     })
   })
 
@@ -245,7 +244,7 @@ describe('Rating', () => {
       const { container, rerender } = render(<Rating maxRating={10} />)
       _.times(10, (rating) => {
         rerender(<Rating maxRating={10} rating={rating} />)
-        expect(container.querySelectorAll('[active=true]').length).to.equal(
+        expect(container.querySelectorAll('.active.icon').length).to.equal(
           rating,
           `Rating should have ${rating} RatingIcon with "active" prop`,
         )

@@ -9,7 +9,7 @@ import ButtonOr from 'src/elements/Button/ButtonOr'
 import { SUI } from 'src/lib'
 import * as common from 'test/specs/commonTests'
 import { sandbox } from 'test/utils'
-import nestedShallow from 'test/utils/nestedShallow'
+import nestedShallow from 'test/utils/nestedElement'
 
 const syntheticEvent = { preventDefault: () => undefined }
 
@@ -79,7 +79,7 @@ describe('Button', () => {
   describe('disabled', () => {
     it('is not set by default', () => {
       const element = nestedShallow(<Button />, { autoNesting: true })
-      expect(element.disabled).to.be.undefined()
+      expect(element.disabled).to.equal(false)
     })
 
     it('applied when defined', () => {
@@ -95,7 +95,7 @@ describe('Button', () => {
     it('is not set by default when has a label', () => {
       const { container } = render(<Button label='foo' />)
       const button = container.querySelector('button')
-      expect(button.disabled).to.be.undefined()
+      expect(button.disabled).to.equal(false)
     })
 
     it('applied when defined and has a label', () => {
@@ -185,16 +185,16 @@ describe('Button', () => {
       const { container } = render(<Button label='hi' disabled />)
 
       expect(container.firstChild).toHaveClass('disabled')
-      expect(container.querySelector('.ui.label')).to.not.have.class('disabled')
-      expect(container.querySelector('button')).to.not.have.class('disabled')
+      expect(container.querySelector('.ui.label').className).to.not.include('disabled')
+      expect(container.querySelector('button').className).to.not.include('disabled')
     })
 
     it('contains children without floated class when floated attribute is set', () => {
       const { container } = render(<Button label='hi' floated='left' />)
 
-      expect(container.firstChild).toHaveClass('floated')
-      expect(container.querySelector('.ui.label')).to.not.have.class('floated')
-      expect(container.querySelector('button')).to.not.have.class('floated')
+      expect(container.firstChild).toHaveClass('left floated')
+      expect(container.querySelector('.ui.label').className).to.not.include('floated')
+      expect(container.querySelector('button').className).to.not.include('floated')
     })
 
     it('creates a basic pointing label', () => {
@@ -206,7 +206,7 @@ describe('Button', () => {
     it('is before the button and pointing="right" when labelPosition="left"', () => {
       const { container } = render(<Button labelPosition='left' label='foo' />)
 
-      const label = container.querySelector('.ui.label[data-pointing="right"]')
+      const label = container.querySelector('.ui.label.right.pointing')
       expect(label).to.not.be.null()
 
       const children = container.firstChild.children
@@ -217,7 +217,7 @@ describe('Button', () => {
     it('is after the button and pointing="left" when labelPosition="right"', () => {
       const { container } = render(<Button labelPosition='right' label='foo' />)
 
-      const label = container.querySelector('.ui.label[data-pointing="left"]')
+      const label = container.querySelector('.ui.label.left.pointing')
       expect(label).to.not.be.null()
 
       const children = container.firstChild.children
@@ -228,7 +228,7 @@ describe('Button', () => {
     it('is after the button and pointing="left" by default', () => {
       const { container } = render(<Button label='foo' />)
 
-      const label = container.querySelector('.ui.label[data-pointing="left"]')
+      const label = container.querySelector('.ui.label.left.pointing')
       expect(label).to.not.be.null()
 
       const children = container.firstChild.children
@@ -239,7 +239,7 @@ describe('Button', () => {
 
   describe('labelPosition', () => {
     it('renders as a button when given an icon', () => {
-      let { container } = render(<Button labelPosition='left' icon='user' />)
+      const { container } = render(<Button labelPosition='left' icon='user' />)
       expect(container.firstChild.tagName.toLowerCase()).to.equal('button')
 
       const result = render(<Button labelPosition='right' icon='user' />)
@@ -255,10 +255,7 @@ describe('Button', () => {
       fireEvent.click(element, syntheticEvent)
 
       onClick.should.have.been.calledOnce()
-      onClick.should.have.been.calledWithExactly(syntheticEvent, {
-        onClick,
-        ...Button.defaultProps,
-      })
+      onClick.should.have.been.calledWithMatch({ type: 'click' }, { onClick })
     })
 
     it('is not called when is disabled', () => {

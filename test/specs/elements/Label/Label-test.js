@@ -1,4 +1,5 @@
 import _ from 'lodash'
+import faker from 'faker'
 import React from 'react'
 import { render, fireEvent } from '@testing-library/react'
 
@@ -9,7 +10,9 @@ import LabelGroup from 'src/elements/Label/LabelGroup'
 import * as common from 'test/specs/commonTests'
 import { SUI } from 'src/lib'
 import { sandbox } from 'test/utils'
-import nestedShallow from 'test/utils/nestedShallow'
+import nestedShallow from 'test/utils/nestedElement'
+
+const hasClass = (element, className) => element.className.split(/\s+/).includes(className)
 
 describe('Label', () => {
   common.isConformant(Label)
@@ -68,7 +71,7 @@ describe('Label', () => {
   })
 
   it('passes the `data-foo` prop', () => {
-    const element = nestedShallow(<Label data-foo={true} />)
+    const element = nestedShallow(<Label data-foo />)
     expect(element.getAttribute('data-foo')).to.equal('true')
   })
 
@@ -86,13 +89,12 @@ describe('Label', () => {
   describe('onClick', () => {
     it('is called with (e) when clicked', () => {
       const onClick = sandbox.spy()
-      const event = { target: null }
       const { container } = render(<Label onClick={onClick} />)
 
-      fireEvent.click(container.firstChild, event)
+      fireEvent.click(container.firstChild)
 
       onClick.should.have.been.calledOnce()
-      onClick.should.have.been.calledWithMatch(event)
+      onClick.should.have.been.calledWithMatch({ type: 'click' })
     })
   })
 
@@ -106,7 +108,7 @@ describe('Label', () => {
       const options = ['above', 'below', 'left', 'right']
       const element = nestedShallow(<Label pointing />)
 
-      options.map((className) => expect(element).to.not.have.class(className))
+      options.forEach((className) => expect(hasClass(element, className)).to.equal(false))
     })
 
     it('adds `above` as suffix', () => {

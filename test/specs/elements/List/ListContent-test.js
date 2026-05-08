@@ -4,7 +4,7 @@ import React from 'react'
 import ListContent from 'src/elements/List/ListContent'
 import { SUI } from 'src/lib'
 import * as common from 'test/specs/commonTests'
-import nestedShallow from 'test/utils/nestedShallow'
+import nestedShallow from 'test/utils/nestedElement'
 
 describe('ListContent', () => {
   common.isConformant(ListContent)

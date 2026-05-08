@@ -7,7 +7,9 @@ import ListItem from 'src/elements/List/ListItem'
 import ListContent from 'src/elements/List/ListContent'
 import * as common from 'test/specs/commonTests'
 import { sandbox } from 'test/utils'
-import nestedShallow from 'test/utils/nestedShallow'
+import nestedShallow from 'test/utils/nestedElement'
+
+const hasClass = (element, className) => element.className.split(/\s+/).includes(className)
 
 describe('ListItem', () => {
   common.isConformant(ListItem)
@@ -22,7 +24,7 @@ describe('ListItem', () => {
   describe('as', () => {
     it('omits className `list` when rendered as `li`', () => {
       const element = nestedShallow(<ListItem as='li' />)
-      expect(element).to.not.have.class('item')
+      expect(hasClass(element, 'item')).to.equal(false)
     })
   })
 

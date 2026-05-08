@@ -398,6 +398,9 @@ Modal.propTypes = {
    */
 }
 
+Modal.autoControlledProps = ['open']
+Modal.handledProps = _.uniq([...Modal.autoControlledProps, ...Object.keys(Modal.propTypes)]).sort()
+
 Modal.Actions = ModalActions
 Modal.Content = ModalContent
 Modal.Description = ModalDescription

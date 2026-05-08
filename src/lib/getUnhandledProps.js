@@ -7,7 +7,9 @@
  */
 const getUnhandledProps = (Component, props) => {
   // Note that `handledProps` are generated automatically during build with `babel-plugin-transform-react-handled-props`
-  const { handledProps = [] } = Component
+  const handledFromComponent = Component.handledProps || []
+  const handledFromPropTypes = Object.keys(Component.propTypes || {})
+  const handledProps = Array.from(new Set(handledFromComponent.concat(handledFromPropTypes)))
 
   return Object.keys(props).reduce((acc, prop) => {
     // "childKey" and "innerRef" are internal props of Semantic UI React

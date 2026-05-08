@@ -3,7 +3,7 @@ import React from 'react'
 import Icon from 'src/elements/Icon/Icon'
 import ListIcon from 'src/elements/List/ListIcon'
 import * as common from 'test/specs/commonTests'
-import nestedShallow from 'test/utils/nestedShallow'
+import nestedShallow from 'test/utils/nestedElement'
 
 describe('ListIcon', () => {
   common.isConformant(ListIcon)

@@ -1,5 +1,10 @@
 import isBrowser from 'src/lib/isBrowser'
 
+const importFreshIsBrowser = async () => {
+  vi.resetModules()
+  return (await import('src/lib/isBrowser')).default
+}
+
 describe('isBrowser', () => {
   describe('browser', () => {
     it('should return true in a browser', () => {
@@ -7,22 +12,24 @@ describe('isBrowser', () => {
       isBrowser().should.be.true()
     })
 
-    it('should return false when there is no document', () => {
-      require('imports-loader?additionalCode=var%20document=undefined;!src/lib/isBrowser')
-        .default()
-        .should.be.false()
-      require('imports-loader?additionalCode=var%20document=null;!src/lib/isBrowser')
-        .default()
-        .should.be.false()
+    afterEach(() => {
+      vi.unstubAllGlobals()
     })
 
-    it('should return false when there is no window', () => {
-      require('imports-loader?additionalCode=var%20window=undefined;!src/lib/isBrowser')
-        .default()
-        .should.be.false()
-      require('imports-loader?additionalCode=var%20window=null;!src/lib/isBrowser')
-        .default()
-        .should.be.false()
+    it('should return false when there is no document', async () => {
+      vi.stubGlobal('document', undefined)
+      ;(await importFreshIsBrowser())().should.be.false()
+
+      vi.stubGlobal('document', null)
+      ;(await importFreshIsBrowser())().should.be.false()
+    })
+
+    it('should return false when there is no window', async () => {
+      vi.stubGlobal('window', undefined)
+      ;(await importFreshIsBrowser())().should.be.false()
+
+      vi.stubGlobal('window', null)
+      ;(await importFreshIsBrowser())().should.be.false()
     })
   })
 

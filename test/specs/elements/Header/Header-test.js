@@ -7,7 +7,9 @@ import HeaderContent from 'src/elements/Header/HeaderContent'
 import HeaderSubheader from 'src/elements/Header/HeaderSubheader'
 import { SUI } from 'src/lib'
 import * as common from 'test/specs/commonTests'
-import nestedShallow from 'test/utils/nestedShallow'
+import nestedShallow from 'test/utils/nestedElement'
+
+const hasClass = (element, className) => element.className.split(/\s+/).includes(className)
 
 describe('Header', () => {
   common.hasUIClassName(Header)
@@ -46,7 +48,7 @@ describe('Header', () => {
     })
     it('does not add an icon class given a name', () => {
       const element = nestedShallow(<Header icon='user' />)
-      expect(element).to.not.have.class('icon')
+      expect(hasClass(element, 'icon')).to.equal(false)
     })
   })
 

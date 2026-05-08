@@ -121,7 +121,7 @@ const Input = React.forwardRef(function (props, ref) {
           ...htmlInputProps,
           ...child.props,
           ref: (c) => {
-            setRef(child.ref, c)
+            setRef(child.props?.ref, c)
             setRef(ref, c)
           },
         })

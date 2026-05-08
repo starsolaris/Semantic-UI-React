@@ -1,11 +1,10 @@
-import React from 'react'
-import { render, fireEvent, screen } from '@testing-library/react'
+import { render, fireEvent } from '@testing-library/react'
 
 import AccordionAccordion from 'src/modules/Accordion/AccordionAccordion'
-import AccordionContent from 'src/modules/Accordion/AccordionContent'
-import AccordionTitle from 'src/modules/Accordion/AccordionTitle'
 import * as common from 'test/specs/commonTests'
 import { consoleUtil, sandbox } from 'test/utils'
+
+const hasClass = (element, className) => element.className.split(/\s+/).includes(className)
 
 describe('AccordionAccordion', () => {
   common.isConformant(AccordionAccordion)
@@ -36,31 +35,31 @@ describe('AccordionAccordion', () => {
     it('activates an item', () => {
       const { container } = render(<AccordionAccordion activeIndex={0} panels={panels} />)
 
-      const titles = container.querySelectorAll('.title')
-      expect(titles[0]).toHaveClass('active')
-      expect(titles[1]).not.toHaveClass('active')
-      expect(titles[2]).not.toHaveClass('active')
+      const contents = container.querySelectorAll('.content')
+      expect(hasClass(contents[0], 'active')).to.equal(true)
+      expect(hasClass(contents[1], 'active')).to.equal(false)
+      expect(hasClass(contents[2], 'active')).to.equal(false)
     })
 
     it('items can be toggled by a click', () => {
-      const { container, rerender } = render(<AccordionAccordion panels={panels} />)
+      const { container } = render(<AccordionAccordion panels={panels} />)
 
       const titles = container.querySelectorAll('.title')
       fireEvent.click(titles[0])
-      expect(titles[0]).toHaveClass('active')
+      expect(hasClass(container.querySelectorAll('.content')[0], 'active')).to.equal(true)
 
       fireEvent.click(titles[0])
-      expect(titles[0]).not.toHaveClass('active')
+      expect(hasClass(container.querySelectorAll('.content')[0], 'active')).to.equal(false)
     })
 
     it('activates a proper item', () => {
       const { container, rerender } = render(<AccordionAccordion activeIndex={0} panels={panels} />)
 
       rerender(<AccordionAccordion activeIndex={1} panels={panels} />)
-      const titles = container.querySelectorAll('.title')
-      expect(titles[0]).not.toHaveClass('active')
-      expect(titles[1]).toHaveClass('active')
-      expect(titles[2]).not.toHaveClass('active')
+      const contents = container.querySelectorAll('.content')
+      expect(hasClass(contents[0], 'active')).to.equal(false)
+      expect(hasClass(contents[1], 'active')).to.equal(true)
+      expect(hasClass(contents[2], 'active')).to.equal(false)
     })
 
     it('can activate a single item when "exclusive" is false', () => {
@@ -68,10 +67,10 @@ describe('AccordionAccordion', () => {
         <AccordionAccordion activeIndex={[0]} exclusive={false} panels={panels} />,
       )
 
-      const titles = container.querySelectorAll('.title')
-      expect(titles[0]).toHaveClass('active')
-      expect(titles[1]).not.toHaveClass('active')
-      expect(titles[2]).not.toHaveClass('active')
+      const contents = container.querySelectorAll('.content')
+      expect(hasClass(contents[0], 'active')).to.equal(true)
+      expect(hasClass(contents[1], 'active')).to.equal(false)
+      expect(hasClass(contents[2], 'active')).to.equal(false)
     })
 
     it('can activate multiple items when "exclusive" is false', () => {
@@ -79,16 +78,16 @@ describe('AccordionAccordion', () => {
         <AccordionAccordion activeIndex={[0, 1]} exclusive={false} panels={panels} />,
       )
 
-      let titles = container.querySelectorAll('.title')
-      expect(titles[0]).toHaveClass('active')
-      expect(titles[1]).toHaveClass('active')
-      expect(titles[2]).not.toHaveClass('active')
+      let contents = container.querySelectorAll('.content')
+      expect(hasClass(contents[0], 'active')).to.equal(true)
+      expect(hasClass(contents[1], 'active')).to.equal(true)
+      expect(hasClass(contents[2], 'active')).to.equal(false)
 
       rerender(<AccordionAccordion activeIndex={[1, 2]} exclusive={false} panels={panels} />)
-      titles = container.querySelectorAll('.title')
-      expect(titles[0]).not.toHaveClass('active')
-      expect(titles[1]).toHaveClass('active')
-      expect(titles[2]).toHaveClass('active')
+      contents = container.querySelectorAll('.content')
+      expect(hasClass(contents[0], 'active')).to.equal(false)
+      expect(hasClass(contents[1], 'active')).to.equal(true)
+      expect(hasClass(contents[2], 'active')).to.equal(true)
     })
 
     it('can be inclusive and can open multiple panels by clicking', () => {
@@ -96,11 +95,11 @@ describe('AccordionAccordion', () => {
 
       const titles = container.querySelectorAll('.title')
       fireEvent.click(titles[0])
-      expect(titles[0]).toHaveClass('active')
+      expect(hasClass(container.querySelectorAll('.content')[0], 'active')).to.equal(true)
 
       fireEvent.click(titles[1])
-      expect(titles[0]).toHaveClass('active')
-      expect(titles[1]).toHaveClass('active')
+      expect(hasClass(container.querySelectorAll('.content')[0], 'active')).to.equal(true)
+      expect(hasClass(container.querySelectorAll('.content')[1], 'active')).to.equal(true)
     })
 
     it('can be inclusive and close multiple panels by clicking', () => {
@@ -110,12 +109,12 @@ describe('AccordionAccordion', () => {
 
       const titles = container.querySelectorAll('.title')
       fireEvent.click(titles[0])
-      expect(titles[0]).not.toHaveClass('active')
-      expect(titles[1]).toHaveClass('active')
+      expect(hasClass(container.querySelectorAll('.content')[0], 'active')).to.equal(false)
+      expect(hasClass(container.querySelectorAll('.content')[1], 'active')).to.equal(true)
 
       fireEvent.click(titles[1])
-      expect(titles[0]).not.toHaveClass('active')
-      expect(titles[1]).not.toHaveClass('active')
+      expect(hasClass(container.querySelectorAll('.content')[0], 'active')).to.equal(false)
+      expect(hasClass(container.querySelectorAll('.content')[1], 'active')).to.equal(false)
     })
 
     it('warns if is `exclusive` and is given an array', () => {
@@ -149,14 +148,13 @@ describe('AccordionAccordion', () => {
         />,
       )
 
-      const titles = container.querySelectorAll('.title')
-      expect(titles[0]).not.toHaveClass('active')
-      expect(titles[1]).toHaveClass('active')
+      const contents = container.querySelectorAll('.content')
+      expect(hasClass(contents[0], 'active')).to.equal(false)
+      expect(hasClass(contents[1], 'active')).to.equal(true)
     })
   })
 
   describe('onTitleClick', () => {
-    const event = { target: null }
     const onClick = sandbox.spy()
     const onTitleClick = sandbox.spy()
     const panels = [
@@ -170,17 +168,16 @@ describe('AccordionAccordion', () => {
       )
 
       const title = container.querySelectorAll('.title')[0]
-      fireEvent.click(title, event)
+      fireEvent.click(title)
 
       onClick.should.have.been.calledOnce()
-      onClick.should.have.been.calledWithMatch(event, { index: 0, content: 'A' })
+      onClick.should.have.been.calledWithMatch({ type: 'click' }, { index: 0, content: 'A' })
       onTitleClick.should.have.been.calledOnce()
-      onTitleClick.should.have.been.calledWithMatch(event, { index: 0, content: 'A' })
+      onTitleClick.should.have.been.calledWithMatch({ type: 'click' }, { index: 0, content: 'A' })
     })
   })
 
   describe('panels', () => {
-    const event = { target: null }
     const onClick = sandbox.spy()
 
     const panels = [
@@ -209,10 +206,10 @@ describe('AccordionAccordion', () => {
       const { container } = render(<AccordionAccordion panels={panels} />)
 
       const title = container.querySelectorAll('.title')[0]
-      fireEvent.click(title, event)
+      fireEvent.click(title)
 
       onClick.should.have.been.calledOnce()
-      onClick.should.have.been.calledWithMatch(event, { content: 'A', index: 0 })
+      onClick.should.have.been.calledWithMatch({ type: 'click' }, { content: 'A', index: 0 })
     })
 
     it('passes arbitrary props', () => {

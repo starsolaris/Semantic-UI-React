@@ -18,10 +18,10 @@ describe('Pagination', () => {
   describe('disabled', () => {
     it('is passed to an each item', () => {
       const { container } = render(<Pagination activePage={1} disabled totalPages={3} />)
-      const items = container.querySelectorAll('.pagination-item')
+      const items = container.querySelectorAll('.menu .item')
 
       items.forEach((item) => {
-        expect(item.getAttribute('disabled')).to.equal('true')
+        expect(item.getAttribute('aria-disabled')).to.equal('true')
       })
     })
   })
@@ -40,7 +40,7 @@ describe('Pagination', () => {
         />,
       )
 
-      const items = container.querySelectorAll('.pagination-item')
+      const items = container.querySelectorAll('.menu .item')
       fireEvent.click(items[4])
 
       onPageChange.should.have.been.calledOnce()
@@ -61,7 +61,7 @@ describe('Pagination', () => {
         />,
       )
 
-      const items = container.querySelectorAll('.pagination-item')
+      const items = container.querySelectorAll('.menu .item')
       fireEvent.click(items[0])
       onPageChange.should.have.not.been.called()
     })
@@ -78,7 +78,7 @@ describe('Pagination', () => {
         />,
       )
 
-      const items = container.querySelectorAll('.pagination-item')
+      const items = container.querySelectorAll('.menu .item')
       fireEvent.click(items[1])
       onPageChange.should.have.not.been.called()
     })
@@ -87,22 +87,24 @@ describe('Pagination', () => {
   describe('activePage', () => {
     it('defaults to "1"', () => {
       const { container } = render(<Pagination totalPages={3} />)
-      const items = container.querySelectorAll('.pagination-item')
+      const items = Array.from(container.querySelectorAll('.menu .item')).map(
+        (item) => item.textContent,
+      )
 
-      expect(items[1].textContent).to.equal('1')
-      expect(items[5].textContent).to.equal('2')
+      expect(items).to.include('1')
+      expect(items).to.include('2')
     })
 
     it('can be set via "defaultActivePage"', () => {
       const { container } = render(<Pagination defaultActivePage={2} totalPages={3} />)
-      const items = container.querySelectorAll('.pagination-item')
+      const items = container.querySelectorAll('.menu .item')
 
       expect(items[3].classList.contains('active')).to.be.true()
     })
 
     it('can be set via "activePage"', () => {
       const { container } = render(<Pagination activePage={2} totalPages={3} />)
-      const items = container.querySelectorAll('.pagination-item')
+      const items = container.querySelectorAll('.menu .item')
 
       expect(items[3].classList.contains('active')).to.be.true()
     })

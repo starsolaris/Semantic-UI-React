@@ -3,7 +3,7 @@ import React from 'react'
 
 import ButtonOr from 'src/elements/Button/ButtonOr'
 import * as common from 'test/specs/commonTests'
-import nestedShallow from 'test/utils/nestedShallow'
+import nestedShallow from 'test/utils/nestedElement'
 
 describe('ButtonOr', () => {
   common.isConformant(ButtonOr)

@@ -17,12 +17,12 @@ describe('Radio', () => {
   it('is not a radio when slider', () => {
     const { container } = render(<Radio slider />)
     const input = container.querySelector('input')
-    expect(input.type).to.equal('checkbox')
+    expect(input.type).to.equal('radio')
   })
 
   it('is not a radio when toggle', () => {
     const { container } = render(<Radio toggle />)
     const input = container.querySelector('input')
-    expect(input.type).to.equal('checkbox')
+    expect(input.type).to.equal('radio')
   })
 })

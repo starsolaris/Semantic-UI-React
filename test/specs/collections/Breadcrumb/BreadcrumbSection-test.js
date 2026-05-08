@@ -47,7 +47,10 @@ describe('BreadcrumbSection', () => {
       fireEvent.click(container.firstChild)
 
       expect(onClick).toHaveBeenCalledOnce()
-      expect(onClick).toHaveBeenCalledWith(expect.objectContaining({ type: 'click' }), props)
+      expect(onClick).toHaveBeenCalledWith(
+        expect.objectContaining({ type: 'click' }),
+        expect.objectContaining(props),
+      )
     })
   })
 })

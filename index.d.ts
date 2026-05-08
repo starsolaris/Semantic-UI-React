@@ -381,7 +381,7 @@ export {
 } from './dist/commonjs/elements/Step/StepTitle'
 
 // Generics
-export * as generic from './src/generic'
+export * from './src/generic'
 
 // Modules
 export {

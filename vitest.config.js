@@ -14,13 +14,15 @@ export default defineConfig({
     include: ['test/specs/**/*-test.js'],
     setupFiles: ['test/setup.js'],
     testTimeout: 10000,
+    minWorkers: 4,
+    maxWorkers: 8,
   },
   resolve: {
     alias: [srcAlias, testAlias, suiAlias],
   },
   esbuild: {
     loader: 'jsx',
-    include: ['src/**/*', 'test/**/*'],
+    include: ['src/**/*', 'test/**/*', 'docs/**/*'],
     exclude: [],
   },
 })

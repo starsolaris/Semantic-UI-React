@@ -75,7 +75,6 @@ describe('extending AutoControlledComponent', () => {
       TestClass = createTestClass({ autoControlledProps })
       const { container } = render(<TestClass />)
 
-      
       expect(container.firstChild).to.exist()
     })
 
@@ -91,7 +90,6 @@ describe('extending AutoControlledComponent', () => {
       TestClass = createTestClass({ autoControlledProps, state: {} })
       const { container } = render(<TestClass {...props} />)
 
-      
       expect(container.firstChild).to.exist()
     })
 
@@ -109,7 +107,6 @@ describe('extending AutoControlledComponent', () => {
       TestClass = createTestClass({ autoControlledProps, state: {} })
       const { container } = render(<TestClass {...props} />)
 
-      
       expect(container.firstChild).to.exist()
     })
 
@@ -127,7 +124,6 @@ describe('extending AutoControlledComponent', () => {
       TestClass = createTestClass({ autoControlledProps, state: {} })
       const { container } = render(<TestClass {...props} />)
 
-      
       expect(container.firstChild).to.exist()
     })
   })
@@ -142,7 +138,6 @@ describe('extending AutoControlledComponent', () => {
       TestClass = createTestClass({ autoControlledProps, state: {} })
       const { container } = render(<TestClass {...props} />)
 
-      
       expect(container.firstChild).to.exist()
     })
 
@@ -150,7 +145,6 @@ describe('extending AutoControlledComponent', () => {
       const props = makeProps()
       const { container } = render(<TestClass {...props} />)
 
-      
       expect(container.firstChild).to.exist()
     })
 
@@ -160,7 +154,6 @@ describe('extending AutoControlledComponent', () => {
       TestClass = createTestClass({ autoControlledProps: [], state: { foo: 'bar' } })
       const { container } = render(<TestClass {...props} />)
 
-      
       expect(container.firstChild).to.exist()
     })
 
@@ -173,7 +166,6 @@ describe('extending AutoControlledComponent', () => {
       TestClass = createTestClass({ autoControlledProps, defaultProps, state: { foo: 'bar' } })
       const { container } = render(<TestClass foo={undefined} />)
 
-      
       expect(container.firstChild).to.exist()
     })
 
@@ -186,7 +178,6 @@ describe('extending AutoControlledComponent', () => {
       TestClass = createTestClass({ autoControlledProps, defaultProps, state: {} })
       const { container } = render(<TestClass foo={undefined} />)
 
-      
       expect(container.firstChild).to.exist()
     })
 
@@ -199,7 +190,6 @@ describe('extending AutoControlledComponent', () => {
       TestClass = createTestClass({ autoControlledProps, defaultProps, state: {} })
       const { container } = render(<TestClass foo='initial' />)
 
-      
       expect(container.firstChild).to.exist()
     })
 
@@ -209,7 +199,6 @@ describe('extending AutoControlledComponent', () => {
 
       const { container } = render(<TestClass />)
 
-      
       expect(container.firstChild).to.exist()
     })
 
@@ -219,7 +208,6 @@ describe('extending AutoControlledComponent', () => {
 
       const { container } = render(<TestClass />)
 
-      
       expect(container.firstChild).to.exist()
     })
 
@@ -229,7 +217,6 @@ describe('extending AutoControlledComponent', () => {
 
       const { container } = render(<TestClass multiple />)
 
-      
       expect(container.firstChild).to.exist()
     })
   })
@@ -245,7 +232,6 @@ describe('extending AutoControlledComponent', () => {
       TestClass = createTestClass({ autoControlledProps, state: {} })
       const { container } = render(<TestClass {...defaultProps} />)
 
-      
       expect(container.firstChild).to.exist()
     })
 
@@ -255,7 +241,6 @@ describe('extending AutoControlledComponent', () => {
 
       const { container } = render(<TestClass {...defaultProps} />)
 
-      
       expect(container.firstChild).to.exist()
     })
 
@@ -272,7 +257,6 @@ describe('extending AutoControlledComponent', () => {
       TestClass = createTestClass({ autoControlledProps, state: {} })
       const { container } = render(<TestClass {...defaultProps} />)
 
-      
       expect(container.firstChild).to.exist()
     })
   })
@@ -292,7 +276,6 @@ describe('extending AutoControlledComponent', () => {
 
       rerender(<TestClass {...props} {...{ [randomProp]: randomValue }} />)
 
-      
       expect(container.firstChild).to.exist()
     })
 
@@ -308,7 +291,6 @@ describe('extending AutoControlledComponent', () => {
 
       rerender(<TestClass {...props} {...{ [randomProp]: randomValue }} />)
 
-      
       expect(container.firstChild).to.exist()
     })
 
@@ -327,7 +309,6 @@ describe('extending AutoControlledComponent', () => {
 
       rerender(<TestClass {...defaultProps} {...{ [randomDefaultProp]: randomValue }} />)
 
-      
       expect(container.firstChild).to.exist()
     })
 
@@ -342,7 +323,6 @@ describe('extending AutoControlledComponent', () => {
 
       rerender(<TestClass foo={undefined} />)
 
-      
       expect(container.firstChild).to.exist()
     })
 
@@ -359,7 +339,6 @@ describe('extending AutoControlledComponent', () => {
 
       rerender(<TestClass {...props} {...{ [randomProp]: null }} />)
 
-      
       expect(container.firstChild).to.exist()
     })
   })

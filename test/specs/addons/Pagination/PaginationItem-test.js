@@ -20,7 +20,7 @@ describe('PaginationItem', () => {
     it('can pass its value', () => {
       const { container } = render(<PaginationItem active />)
       const element = container.firstChild
-      expect(element.getAttribute('active')).to.equal('true')
+      expect(element.getAttribute('aria-current')).to.equal('true')
     })
   })
 
@@ -51,7 +51,6 @@ describe('PaginationItem', () => {
       const { container } = render(<PaginationItem type='ellipsisItem' />)
       const element = container.firstChild
 
-      expect(element.getAttribute('disabled')).to.equal('true')
       expect(element.getAttribute('aria-disabled')).to.equal('true')
     })
 
@@ -59,45 +58,43 @@ describe('PaginationItem', () => {
       const { container } = render(<PaginationItem disabled />)
       const element = container.firstChild
 
-      expect(element.getAttribute('disabled')).to.equal('true')
       expect(element.getAttribute('aria-disabled')).to.equal('true')
     })
   })
 
   describe('onClick', () => {
     it('is called with (e, props) when clicked', () => {
-      const event = { target: null }
       const onClick = sandbox.spy()
 
       const { container } = render(<PaginationItem onClick={onClick} />)
-      fireEvent.click(container.firstChild, event)
+      fireEvent.click(container.firstChild)
 
       onClick.should.have.been.calledOnce()
-      onClick.should.have.been.calledWithMatch(event, { onClick })
+      onClick.should.have.been.calledWithMatch({ type: 'click' }, { onClick })
     })
 
     it('is called with (e, props) when "Enter" is pressed', () => {
-      const event = { key: 'Enter', target: null }
+      const event = { key: 'Enter' }
       const onClick = sandbox.spy()
 
       const { container } = render(<PaginationItem onClick={onClick} />)
       fireEvent.keyDown(container.firstChild, event)
 
       onClick.should.have.been.calledOnce()
-      onClick.should.have.been.calledWithMatch(event, { onClick })
+      onClick.should.have.been.calledWithMatch({ key: 'Enter' }, { onClick })
     })
   })
 
   describe('onKeyDown', () => {
     it('is called with (e, props) when clicked', () => {
-      const event = { key: 'Enter', target: null }
+      const event = { key: 'Enter' }
       const onKeyDown = sandbox.spy()
 
       const { container } = render(<PaginationItem onKeyDown={onKeyDown} />)
       fireEvent.keyDown(container.firstChild, event)
 
       onKeyDown.should.have.been.calledOnce()
-      onKeyDown.should.have.been.calledWithMatch(event, { onKeyDown })
+      onKeyDown.should.have.been.calledWithMatch({ key: 'Enter' }, { onKeyDown })
     })
   })
 

@@ -1481,6 +1481,11 @@ Dropdown.propTypes = {
 Dropdown.displayName = 'Dropdown'
 
 DropdownInner.autoControlledProps = ['open', 'searchQuery', 'selectedLabel', 'value', 'upward']
+Dropdown.autoControlledProps = DropdownInner.autoControlledProps
+Dropdown.handledProps = _.uniq([
+  ...Dropdown.autoControlledProps,
+  ...Object.keys(Dropdown.propTypes),
+]).sort()
 
 if (process.env.NODE_ENV !== 'production') {
   DropdownInner.propTypes = Dropdown.propTypes

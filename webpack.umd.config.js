@@ -1,4 +1,4 @@
-const TerserPlugin = require('terser-webpack-plugin')
+const UglifyJsPlugin = require('uglifyjs-webpack-plugin')
 const webpack = require('webpack')
 
 const config = require('./config')
@@ -16,7 +16,6 @@ const webpackUMDConfig = {
     react: 'React',
     'react-dom': 'ReactDOM',
   },
-  mode: 'production',
   output: {
     filename: '[name].min.js',
     libraryTarget: 'umd',
@@ -28,6 +27,12 @@ const webpackUMDConfig = {
   plugins: [
     new webpack.DefinePlugin({
       'process.env.NODE_ENV': JSON.stringify('production'),
+    }),
+    new UglifyJsPlugin({
+      source: false,
+      output: {
+        comments: false,
+      },
     }),
   ],
   module: {
@@ -47,17 +52,6 @@ const webpackUMDConfig = {
   performance: {
     maxEntrypointSize: 750000,
     maxAssetSize: 750000,
-  },
-  optimization: {
-    minimizer: [
-      new TerserPlugin({
-        terserOptions: {
-          output: {
-            comments: false,
-          },
-        },
-      }),
-    ],
   },
 }
 

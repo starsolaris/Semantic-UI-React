@@ -12,7 +12,7 @@ import ListList from 'src/elements/List/ListList'
 import { SUI } from 'src/lib'
 import * as common from 'test/specs/commonTests'
 import { sandbox } from 'test/utils'
-import nestedShallow from 'test/utils/nestedShallow'
+import nestedShallow from 'test/utils/nestedElement'
 
 describe('List', () => {
   common.isConformant(List)
@@ -54,7 +54,6 @@ describe('List', () => {
     it('is called with (e, itemProps) when clicked', () => {
       const onClick = sandbox.spy()
       const onItemClick = sandbox.spy()
-      const event = { target: null }
 
       const callbackData = { content: 'Notes', 'data-foo': 'bar' }
       const itemProps = { key: 'notes', content: 'Notes', 'data-foo': 'bar', onClick }
@@ -62,13 +61,13 @@ describe('List', () => {
       const { container } = render(<List items={[itemProps]} onItemClick={onItemClick} />)
       const listItem = container.querySelector('.list > .item')
 
-      fireEvent.click(listItem, event)
+      fireEvent.click(listItem)
 
       onClick.should.have.been.calledOnce()
-      onClick.should.have.been.calledWithMatch(event, callbackData)
+      onClick.should.have.been.calledWithMatch({ type: 'click' }, callbackData)
 
       onItemClick.should.have.been.calledOnce()
-      onItemClick.should.have.been.calledWithMatch(event, callbackData)
+      onItemClick.should.have.been.calledWithMatch({ type: 'click' }, callbackData)
     })
   })
 

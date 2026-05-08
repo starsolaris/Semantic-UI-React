@@ -4,9 +4,17 @@ import { Button, Confirm } from 'semantic-ui-react'
 class ConfirmExampleCallbacks extends Component {
   state = { open: false, result: 'show the modal to capture a result' }
 
-  show = () => this.setState({ open: true })
-  handleConfirm = () => this.setState({ result: 'confirmed', open: false })
-  handleCancel = () => this.setState({ result: 'cancelled', open: false })
+  show = () => {
+    this.setState({ open: true })
+  }
+
+  handleConfirm = () => {
+    this.setState({ result: 'confirmed', open: false })
+  }
+
+  handleCancel = () => {
+    this.setState({ result: 'cancelled', open: false })
+  }
 
   render() {
     const { open, result } = this.state

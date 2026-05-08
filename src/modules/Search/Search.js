@@ -461,7 +461,6 @@ class SearchInner extends Component {
 
     return _.map(categories, ({ childKey, ...category }) => {
       const categoryProps = {
-        key: childKey ?? category.name,
         active: _.inRange(selectedIndex, count, count + category.results.length),
         layoutRenderer: categoryLayoutRenderer,
         renderer: categoryRenderer,
@@ -471,7 +470,11 @@ class SearchInner extends Component {
 
       count += category.results.length
 
-      return <SearchCategory {...categoryProps}>{category.results.map(renderFn)}</SearchCategory>
+      return (
+        <SearchCategory key={childKey ?? category.name} {...categoryProps}>
+          {category.results.map(renderFn)}
+        </SearchCategory>
+      )
     })
   }
 
@@ -699,6 +702,11 @@ Search.propTypes = {
 }
 
 SearchInner.autoControlledProps = ['open', 'value']
+Search.autoControlledProps = SearchInner.autoControlledProps
+Search.handledProps = _.uniq([
+  ...Search.autoControlledProps,
+  ...Object.keys(Search.propTypes),
+]).sort()
 
 if (process.env.NODE_ENV !== 'production') {
   SearchInner.propTypes = Search.propTypes

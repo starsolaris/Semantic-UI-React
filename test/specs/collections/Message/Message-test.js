@@ -100,17 +100,14 @@ describe('Message', () => {
     })
 
     it('is called with (event) on close icon click', () => {
-      const event = { fake: 'event data' }
-      const props = { icon: true }
-
       const spy = sandbox.spy()
-      const { container } = render(<Message {...props} onDismiss={spy} />)
+      const { container } = render(<Message icon onDismiss={spy} />)
 
       const closeIcon = container.querySelector('.close.icon')
       fireEvent.click(closeIcon)
 
-      expect(spy).toHaveBeenCalledOnce()
-      expect(spy).toHaveBeenCalledWith(expect.objectContaining({ type: 'click' }), props)
+      spy.should.have.been.calledOnce()
+      spy.should.have.been.calledWithMatch({ type: 'click' }, { icon: true })
     })
   })
 })

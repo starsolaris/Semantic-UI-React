@@ -116,14 +116,8 @@ class ComponentExample extends Component {
 
   render() {
     const { children, description, examplePath, renderHtml, suiVersion, title } = this.props
-    const {
-      anchorName,
-      isActiveHash,
-      showCode,
-      originalSourceCode,
-      sourceCode,
-      wasEverVisible,
-    } = this.state
+    const { anchorName, isActiveHash, showCode, originalSourceCode, sourceCode, wasEverVisible } =
+      this.state
 
     return (
       <InView onChange={this.handleVisibility}>

@@ -46,7 +46,7 @@ export interface StrictSearchCategoryProps {
   renderer?: (props: SearchCategoryProps) => React.ReactElement<any>
 
   /** Array of Search.Result props. */
-  results?: typeof SearchResult[]
+  results?: (typeof SearchResult)[]
 }
 
 declare const SearchCategory: ForwardRefComponent<SearchCategoryProps, HTMLDivElement>

@@ -1,2 +1,3 @@
-import default from './ComponentProps';
-export { default };
+import ComponentProps from './ComponentProps'
+
+export default ComponentProps

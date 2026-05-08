@@ -10,18 +10,8 @@ import FeedLabel from './FeedLabel'
  * A feed contains an event.
  */
 const FeedEvent = React.forwardRef(function (props, ref) {
-  const {
-    content,
-    children,
-    className,
-    date,
-    extraImages,
-    extraText,
-    image,
-    icon,
-    meta,
-    summary,
-  } = props
+  const { content, children, className, date, extraImages, extraText, image, icon, meta, summary } =
+    props
 
   const classes = cx('event', className)
   const rest = getUnhandledProps(FeedEvent, props)

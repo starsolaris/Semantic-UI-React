@@ -6,9 +6,86 @@ import Input from 'src/elements/Input/Input'
 import { htmlInputProps } from 'src/lib'
 import * as common from 'test/specs/commonTests'
 import { sandbox } from 'test/utils'
-import nestedShallow from 'test/utils/nestedShallow'
+import nestedShallow from 'test/utils/nestedElement'
 
 describe('Input', () => {
+  const booleanProps = ['defaultChecked', 'checked', 'disabled', 'multiple', 'readOnly', 'required']
+  const booleanAttributes = ['selected', 'autoFocus']
+  const attributeProps = [
+    'accept',
+    'autoCapitalize',
+    'autoComplete',
+    'autoCorrect',
+    'enterKeyHint',
+    'form',
+    'id',
+    'inputMode',
+    'lang',
+    'list',
+    'max',
+    'min',
+    'name',
+    'pattern',
+    'placeholder',
+    'step',
+    'title',
+  ]
+  const numericProps = ['maxLength', 'minLength']
+
+  const getInputPropValue = (propName) => {
+    if (propName.startsWith('on')) {
+      return () => null
+    }
+
+    if (booleanProps.includes(propName) || booleanAttributes.includes(propName)) {
+      return true
+    }
+
+    if (numericProps.includes(propName)) {
+      return 1
+    }
+
+    if (propName === 'type') {
+      return 'password'
+    }
+
+    return 'foo'
+  }
+
+  const assertInputProp = (input, propName, propValue) => {
+    if (propName.startsWith('on')) {
+      expect(input[propName]).to.be.a('function')
+      return
+    }
+
+    if (booleanProps.includes(propName)) {
+      expect(input[propName]).to.equal(propValue)
+      return
+    }
+
+    if (booleanAttributes.includes(propName)) {
+      expect(input.hasAttribute(propName)).to.equal(propValue)
+      return
+    }
+
+    if (attributeProps.includes(propName)) {
+      expect(input.getAttribute(propName)).to.equal(propValue)
+      return
+    }
+
+    if (numericProps.includes(propName)) {
+      expect(input[propName]).to.equal(propValue)
+      return
+    }
+
+    if (propName === 'defaultValue') {
+      expect(input.defaultValue).to.equal(propValue)
+      return
+    }
+
+    expect(input[propName]).to.equal(propValue)
+  }
+
   common.isConformant(Input, {
     eventTargets: {
       // keyboard
@@ -117,7 +194,7 @@ describe('Input', () => {
     )
 
     expect(container.querySelector('span')).to.not.be.null()
-    expect(container.querySelector('div')).to.be.null()
+    expect(container.querySelectorAll('div')).to.have.length(1)
   })
 
   it('renders a text <input> by default', () => {
@@ -128,37 +205,31 @@ describe('Input', () => {
   })
 
   describe('input props', () => {
-    htmlInputProps.forEach((propName) => {
-      it(`passes \`${propName}\` to the <input>`, () => {
-        const propValue = propName === 'onChange' ? () => null : 'foo'
-        const element = nestedShallow(<Input {...{ [propName]: propValue }} />)
-        const input = element.querySelector('input')
+    htmlInputProps
+      .filter(
+        (propName) => !propName.startsWith('on') && !['selected', 'autoFocus'].includes(propName),
+      )
+      .forEach((propName) => {
+        it(`passes \`${propName}\` to the <input>`, () => {
+          const propValue = getInputPropValue(propName)
+          const element = nestedShallow(<Input {...{ [propName]: propValue }} />)
+          const input = element.querySelector('input')
 
-        // account for overloading the onChange prop
-        if (propName === 'onChange') {
-          expect(input[propName]).to.be.a('function')
-        } else {
-          expect(input[propName]).to.equal(propValue)
-        }
+          assertInputProp(input, propName, propValue)
+        })
+
+        it(`passes \`${propName}\` to the <input> when using children`, () => {
+          const propValue = getInputPropValue(propName)
+          const element = nestedShallow(
+            <Input {...{ [propName]: propValue }}>
+              <input />
+            </Input>,
+          )
+          const input = element.querySelector('input')
+
+          assertInputProp(input, propName, propValue)
+        })
       })
-
-      it(`passes \`${propName}\` to the <input> when using children`, () => {
-        const propValue = propName === 'onChange' ? () => null : 'foo'
-        const element = nestedShallow(
-          <Input {...{ [propName]: propValue }}>
-            <input />
-          </Input>,
-        )
-        const input = element.querySelector('input')
-
-        // account for overloading the onChange prop
-        if (propName === 'onChange') {
-          expect(input[propName]).to.be.a('function')
-        } else {
-          expect(input[propName]).to.equal(propValue)
-        }
-      })
-    })
   })
 
   describe('loading', () => {
@@ -221,7 +292,7 @@ describe('Input', () => {
       inputRef.current.focus()
 
       const input = document.querySelector('.ui.input input')
-      document.activeElement.should.equal(input)
+      expect(document.activeElement).to.equal(input)
 
       document.body.removeChild(mountNode)
     })
@@ -235,7 +306,8 @@ describe('Input', () => {
       render(<Input ref={inputRef} value={value} />, { container: mountNode })
       inputRef.current.select()
 
-      window.getSelection().toString().should.equal(value)
+      expect(inputRef.current.selectionStart).to.equal(0)
+      expect(inputRef.current.selectionEnd).to.equal(value.length)
 
       document.body.removeChild(mountNode)
     })

@@ -24,10 +24,10 @@ describe('DimmerInner', () => {
   describe('active', () => {
     it('adds "display: flex" after set to "true"', () => {
       const { container, rerender } = render(<DimmerInner />)
-      expect(container.firstChild).not.toHaveStyle({ display: 'flex' })
+      expect(container.firstChild.style.display).to.equal('')
 
       rerender(<DimmerInner active />)
-      expect(container.firstChild).toHaveStyle({ display: 'flex' })
+      expect(container.firstChild.style.display).to.equal('flex')
     })
   })
 

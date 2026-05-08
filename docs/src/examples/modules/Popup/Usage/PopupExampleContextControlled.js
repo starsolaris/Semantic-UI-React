@@ -17,7 +17,7 @@ function PopupExampleContextControlled() {
         position='top center'
         open={open}
       />
-      ---------->
+      {'---------->'}
       <strong ref={contextRef}>here</strong>
     </>
   )

@@ -7,7 +7,7 @@ import ImageGroup from 'src/elements/Image/ImageGroup'
 import { htmlImageProps, SUI } from 'src/lib'
 import Dimmer from 'src/modules/Dimmer/Dimmer'
 import * as common from 'test/specs/commonTests'
-import nestedShallow from 'test/utils/nestedShallow'
+import nestedShallow from 'test/utils/nestedElement'
 
 describe('Image', () => {
   common.isConformant(Image)
@@ -28,7 +28,7 @@ describe('Image', () => {
 
   common.hasSubcomponents(Image, [ImageGroup])
   common.hasUIClassName(Image)
-  common.rendersChildren(Image)
+  common.rendersChildren(Image, { requiredProps: { as: 'div' } })
 
   common.implementsCreateMethod(Image)
   common.implementsLabelProp(Image, { autoGenerateKey: false })

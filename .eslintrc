@@ -1,7 +1,13 @@
 {
   "root": true,
-  "parser": "babel-eslint",
+  "parser": "@babel/eslint-parser",
   "extends": ["airbnb", "prettier", "plugin:react-hooks/recommended"],
+  "parserOptions": {
+    "requireConfigFile": false,
+    "babelOptions": {
+      "configFile": "./.babelrc"
+    }
+  },
   "env": {
     "browser": true
   },
@@ -56,6 +62,12 @@
   },
   "overrides": [
     {
+      "files": ["**/*.d.ts"],
+      "rules": {
+        "no-use-before-define": "off"
+      }
+    },
+    {
       "files": ["**/*.ts", "**/*.tsx"],
       "parser": "@typescript-eslint/parser",
       "extends": [
@@ -67,7 +79,8 @@
       "rules": {
         "@typescript-eslint/explicit-module-boundary-types": "off",
         "@typescript-eslint/no-explicit-any": "off",
-        "@typescript-eslint/no-empty-interface": "off"
+        "@typescript-eslint/no-empty-interface": "off",
+        "no-use-before-define": "off"
       }
     }
   ]

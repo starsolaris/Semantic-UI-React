@@ -45,7 +45,7 @@ describe('DropdownSearchInput', () => {
   describe('tabIndex', () => {
     it('is not set by default', () => {
       const { container } = render(<DropdownSearchInput />)
-      expect(container.firstChild).not.toHaveAttribute('tabIndex')
+      expect(container.firstChild.getAttribute('tabIndex')).to.equal(null)
     })
 
     it('can be set explicitly', () => {
@@ -70,7 +70,7 @@ describe('DropdownSearchInput', () => {
   describe('value', () => {
     it('is not set by default', () => {
       const { container } = render(<DropdownSearchInput />)
-      expect(container.firstChild).not.toHaveAttribute('value')
+      expect(container.firstChild.getAttribute('value')).to.equal(null)
     })
 
     it('can be set explicitly', () => {

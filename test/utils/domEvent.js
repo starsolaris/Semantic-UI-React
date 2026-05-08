@@ -1,8 +1,20 @@
-import simulant from 'simulant'
+import { fireEvent } from '@testing-library/dom'
 
 // ----------------------------------------
 // Simulate DOM Events on real DOM nodes
 // ----------------------------------------
+
+const eventDispatchers = {
+  click: fireEvent.click,
+  keydown: fireEvent.keyDown,
+  mousedown: fireEvent.mouseDown,
+  mouseenter: fireEvent.mouseEnter,
+  mouseleave: fireEvent.mouseLeave,
+  mouseover: fireEvent.mouseOver,
+  mouseup: fireEvent.mouseUp,
+  resize: fireEvent.resize,
+  scroll: fireEvent.scroll,
+}
 
 /**
  * Generic method for dispatching an event on a DOM node.
@@ -13,9 +25,17 @@ import simulant from 'simulant'
  */
 export const fire = (node, eventType, data = {}) => {
   const DOMNode = typeof node === 'string' ? document.querySelector(node) : node
-  const event = simulant(eventType, data)
+  const dispatch = eventDispatchers[eventType]
 
-  return simulant.fire(DOMNode, event)
+  if (!DOMNode) {
+    throw new Error(`Unable to find DOM node for event "${eventType}"`)
+  }
+
+  if (!dispatch) {
+    throw new Error(`Unsupported DOM event type "${eventType}"`)
+  }
+
+  return dispatch(DOMNode, data)
 }
 
 /**

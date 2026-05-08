@@ -19,17 +19,8 @@ import {
  * An inner element for a Dimmer.
  */
 const DimmerInner = React.forwardRef(function (props, ref) {
-  const {
-    active,
-    children,
-    className,
-    content,
-    disabled,
-    inverted,
-    page,
-    simple,
-    verticalAlign,
-  } = props
+  const { active, children, className, content, disabled, inverted, page, simple, verticalAlign } =
+    props
 
   const containerRef = useMergedRefs(ref, React.useRef())
   const contentRef = React.useRef()

@@ -1,7 +1,7 @@
 import keyboardKey from 'keyboard-key'
 import _ from 'lodash'
 import React from 'react'
-import { render, fireEvent } from '@testing-library/react'
+import { render, fireEvent, waitFor } from '@testing-library/react'
 
 import Confirm from 'src/addons/Confirm/Confirm'
 import Modal from 'src/modules/Modal/Modal'
@@ -52,49 +52,70 @@ describe('Confirm', () => {
   })
 
   describe('children', () => {
-    it('renders a Modal', () => {
-      const { container } = render(<Confirm />)
-      expect(container.querySelector('.ui.modal')).to.exist()
+    it('renders a Modal', async () => {
+      render(<Confirm open />)
+
+      await waitFor(() => {
+        expect(document.querySelector('.ui.modal')).to.exist()
+      })
     })
   })
 
   describe('size', () => {
-    it('has "small" size by default', () => {
-      const { container } = render(<Confirm />)
-      expect(container.querySelector('.ui.modal.small')).to.exist()
+    it('has "small" size by default', async () => {
+      render(<Confirm open />)
+
+      await waitFor(() => {
+        expect(document.querySelector('.ui.modal.small')).to.exist()
+      })
     })
 
     _.forEach(['mini', 'tiny', 'small', 'large', 'fullscreen'], (size) => {
-      it(`applies ${size} size`, () => {
-        const { container } = render(<Confirm size={size} />)
-        expect(container.querySelector(`.ui.modal.${size}`)).to.exist()
+      it(`applies ${size} size`, async () => {
+        render(<Confirm open size={size} />)
+
+        await waitFor(() => {
+          expect(document.querySelector(`.ui.modal.${size}`)).to.exist()
+        })
       })
     })
   })
 
   describe('cancelButton', () => {
-    it('is "Cancel" by default', () => {
-      const { container } = render(<Confirm />)
-      const cancelButton = container.querySelector('.ui.button:not(.primary)')
-      expect(cancelButton.textContent).to.equal('Cancel')
+    it('is "Cancel" by default', async () => {
+      render(<Confirm open />)
+
+      await waitFor(() => {
+        const cancelButton = document.querySelector('.ui.button:not(.primary)')
+        expect(cancelButton.textContent).to.equal('Cancel')
+      })
     })
-    it('sets the cancel button text', () => {
-      const { container } = render(<Confirm cancelButton='foo' />)
-      const cancelButton = container.querySelector('.ui.button:not(.primary)')
-      expect(cancelButton.textContent).to.equal('foo')
+    it('sets the cancel button text', async () => {
+      render(<Confirm open cancelButton='foo' />)
+
+      await waitFor(() => {
+        const cancelButton = document.querySelector('.ui.button:not(.primary)')
+        expect(cancelButton.textContent).to.equal('foo')
+      })
     })
   })
 
   describe('confirmButton', () => {
-    it('is "OK" by default', () => {
-      const { container } = render(<Confirm />)
-      const confirmButton = container.querySelector('.ui.button.primary')
-      expect(confirmButton.textContent).to.equal('OK')
+    it('is "OK" by default', async () => {
+      render(<Confirm open />)
+
+      await waitFor(() => {
+        const confirmButton = document.querySelector('.ui.button.primary')
+        expect(confirmButton.textContent).to.equal('OK')
+      })
     })
-    it('sets the confirm button text', () => {
-      const { container } = render(<Confirm confirmButton='foo' />)
-      const confirmButton = container.querySelector('.ui.button.primary')
-      expect(confirmButton.textContent).to.equal('foo')
+    it('sets the confirm button text', async () => {
+      render(<Confirm open confirmButton='foo' />)
+
+      await waitFor(() => {
+        const confirmButton = document.querySelector('.ui.button.primary')
+        expect(confirmButton.textContent).to.equal('foo')
+      })
     })
   })
 
@@ -106,26 +127,34 @@ describe('Confirm', () => {
       wrapperMount(<Confirm onCancel={spy} defaultOpen />)
     })
 
-    it('omitted when not defined', () => {
-      const { container } = render(<Confirm />)
-      const cancelButton = container.querySelector('.ui.button:not(.primary)')
-      const click = () => fireEvent.click(cancelButton)
+    it('omitted when not defined', async () => {
+      render(<Confirm open />)
 
-      expect(click).to.not.throw()
+      await waitFor(() => {
+        const cancelButton = document.querySelector('.ui.button:not(.primary)')
+        const click = () => fireEvent.click(cancelButton)
+
+        expect(click).to.not.throw()
+      })
     })
 
-    it('is called on Cancel button click', () => {
-      const { container } = render(<Confirm onCancel={spy} />)
-      const cancelButton = container.querySelector('.ui.button:not(.primary)')
-      fireEvent.click(cancelButton)
+    it('is called on Cancel button click', async () => {
+      render(<Confirm open onCancel={spy} />)
+
+      await waitFor(() => {
+        const cancelButton = document.querySelector('.ui.button:not(.primary)')
+        fireEvent.click(cancelButton)
+      })
 
       spy.should.have.been.calledOnce()
     })
 
-    it('is passed to the Modal onClose prop', () => {
-      const func = () => null
-      const { container } = render(<Confirm onCancel={func} />)
-      expect(container.querySelector('.ui.modal')).to.exist()
+    it('is passed to the Modal onClose prop', async () => {
+      render(<Confirm open onCancel={() => null} />)
+
+      await waitFor(() => {
+        expect(document.querySelector('.ui.modal')).to.exist()
+      })
     })
 
     it('is called on dimmer click', () => {
@@ -171,19 +200,25 @@ describe('Confirm', () => {
   })
 
   describe('onConfirm', () => {
-    it('omitted when not defined', () => {
-      const { container } = render(<Confirm />)
-      const confirmButton = container.querySelector('.ui.button.primary')
-      const click = () => fireEvent.click(confirmButton)
+    it('omitted when not defined', async () => {
+      render(<Confirm open />)
 
-      expect(click).to.not.throw()
+      await waitFor(() => {
+        const confirmButton = document.querySelector('.ui.button.primary')
+        const click = () => fireEvent.click(confirmButton)
+
+        expect(click).to.not.throw()
+      })
     })
 
-    it('is called on OK button click', () => {
+    it('is called on OK button click', async () => {
       const spy = sandbox.spy()
-      const { container } = render(<Confirm onConfirm={spy} />)
-      const confirmButton = container.querySelector('.ui.button.primary')
-      fireEvent.click(confirmButton)
+      render(<Confirm open onConfirm={spy} />)
+
+      await waitFor(() => {
+        const confirmButton = document.querySelector('.ui.button.primary')
+        fireEvent.click(confirmButton)
+      })
 
       spy.should.have.been.calledOnce()
     })

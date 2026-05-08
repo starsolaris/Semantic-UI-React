@@ -22,9 +22,6 @@ const PageNotFound = () => (
               src='http://www.pizn.com/swf/classic-asteroids.swf'
               width='425'
               height='318'
-              align='center'
-              quality='high'
-              pluginspage='http://www.macromedia.com/go/getflashplayer'
               type='application/x-shockwave-flash'
               style={{ zoom: '1.13' }}
             />
@@ -36,9 +33,6 @@ const PageNotFound = () => (
               src='http://www.pizn.com/swf/1-space-invaders.swf'
               width='425'
               height='359'
-              align='center'
-              quality='high'
-              pluginspage='http://www.macromedia.com/go/getflashplayer'
               type='application/x-shockwave-flash'
             />
           </Segment>

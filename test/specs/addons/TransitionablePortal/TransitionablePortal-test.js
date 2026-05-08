@@ -19,9 +19,9 @@ describe('TransitionablePortal', () => {
 
   describe('children', () => {
     it('renders a Transition', () => {
-      const { container } = render(<TransitionablePortal {...requiredProps} open />)
+      render(<TransitionablePortal {...requiredProps} open />)
 
-      expect(container.querySelector('.transition')).to.exist()
+      expect(document.body.querySelector('.transition')).to.exist()
     })
   })
 
@@ -54,10 +54,10 @@ describe('TransitionablePortal', () => {
 
       const button = container.querySelector('button')
       fireEvent.click(button)
-      expect(container.querySelector('.in#children')).to.exist()
+      expect(document.body.querySelector('.in#children')).to.exist()
 
       domEvent.click(document.body)
-      expect(container.querySelector('.out#children')).to.exist()
+      expect(document.body.querySelector('.out#children')).to.exist()
     })
   })
 
@@ -114,35 +114,35 @@ describe('TransitionablePortal', () => {
 
       const button = container.querySelector('button')
       fireEvent.click(button)
-      expect(container.querySelector('.in#children')).to.exist()
+      expect(document.body.querySelector('.in#children')).to.exist()
     })
   })
 
   describe('open', () => {
     it('blocks update of state on a portal close', () => {
-      const { container } = render(<TransitionablePortal {...requiredProps} open />)
-      expect(container.querySelector('#children').classList.contains('in')).to.be.true()
+      render(<TransitionablePortal {...requiredProps} open />)
+      expect(document.body.querySelector('#children').classList.contains('in')).to.be.true()
 
       domEvent.click(document.body)
-      expect(container.querySelector('#children').classList.contains('in')).to.be.true()
+      expect(document.body.querySelector('#children').classList.contains('in')).to.be.true()
     })
 
     it('passes `open` prop to Transition when defined', () => {
-      const { container, rerender } = render(<TransitionablePortal {...requiredProps} />)
+      const { rerender } = render(<TransitionablePortal {...requiredProps} />)
 
       rerender(<TransitionablePortal {...requiredProps} open />)
-      expect(container.querySelector('#children').classList.contains('in')).to.be.true()
+      expect(document.body.querySelector('#children').classList.contains('in')).to.be.true()
 
       rerender(<TransitionablePortal {...requiredProps} open={false} />)
-      expect(container.querySelector('#children').classList.contains('out')).to.be.true()
+      expect(document.body.querySelector('#children').classList.contains('out')).to.be.true()
     })
 
     it('does not pass `open` prop to Transition when not defined', () => {
-      const { container } = render(<TransitionablePortal {...requiredProps} />)
-      expect(container.querySelector('#children')).to.be.null()
+      render(<TransitionablePortal {...requiredProps} />)
+      expect(document.body.querySelector('#children')).to.be.null()
 
-      const { container: container2 } = render(<TransitionablePortal {...requiredProps} transition={{}} />)
-      expect(container2.querySelector('#children')).to.be.null()
+      render(<TransitionablePortal {...requiredProps} transition={{}} />)
+      expect(document.body.querySelector('#children')).to.be.null()
     })
   })
 })

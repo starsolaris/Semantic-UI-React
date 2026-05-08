@@ -12,7 +12,7 @@ function PopupExampleContext() {
         content='Hello'
         position='top center'
       />
-      ---------->
+      {'---------->'}
       <strong ref={contextRef}>here</strong>
     </>
   )

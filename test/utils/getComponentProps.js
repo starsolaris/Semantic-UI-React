@@ -1,5 +1,7 @@
 import * as ReactIs from 'react-is'
 
+const getPropKeys = (propTypes) => (propTypes ? Object.keys(propTypes) : [])
+
 /**
  * Gets proper props for a component.
  *
@@ -11,9 +13,19 @@ export default function getComponentProps(Component) {
     return getComponentProps(Component.type)
   }
 
+  const autoControlledProps = Component.autoControlledProps || []
+  const propTypes = Component.propTypes || {}
+  const handledProps = [
+    ...new Set([
+      ...(Component.handledProps || []),
+      ...autoControlledProps,
+      ...getPropKeys(propTypes),
+    ]),
+  ].sort()
+
   return {
-    autoControlledProps: Component.autoControlledProps,
-    handledProps: Component.handledProps,
-    propTypes: Component.propTypes,
+    autoControlledProps,
+    handledProps,
+    propTypes,
   }
 }

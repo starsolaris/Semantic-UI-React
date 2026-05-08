@@ -1,6 +1,5 @@
 import faker from 'faker'
 import _ from 'lodash'
-import React from 'react'
 import { render, fireEvent } from '@testing-library/react'
 
 import Form from 'src/collections/Form/Form'
@@ -67,61 +66,75 @@ describe('Form', () => {
   })
 
   describe('onSubmit', () => {
+    const createSubmitEvent = (preventDefault = sandbox.spy()) => {
+      const event = new Event('submit', { bubbles: true, cancelable: true })
+      event.preventDefault = preventDefault
+
+      return { event, preventDefault }
+    }
+
     it('prevents default on the event when there is no action', () => {
       // Heads up!
       // In this test we pass some invalid values to verify correct work.
       consoleUtil.disableOnce()
 
-      const preventDefault = sandbox.spy()
-      const event = { preventDefault }
+      const submitEvent1 = createSubmitEvent()
+      const submitEvent2 = createSubmitEvent()
+      const submitEvent3 = createSubmitEvent()
 
       const { container: c1 } = render(<Form />)
       const { container: c2 } = render(<Form action={false} />)
       const { container: c3 } = render(<Form action={null} />)
 
-      fireEvent.submit(c1.firstChild, event)
-      fireEvent.submit(c2.firstChild, event)
-      fireEvent.submit(c3.firstChild, event)
+      fireEvent(c1.firstChild, submitEvent1.event)
+      fireEvent(c2.firstChild, submitEvent2.event)
+      fireEvent(c3.firstChild, submitEvent3.event)
 
-      expect(preventDefault).toHaveBeenCalledTimes(3)
+      expect(submitEvent1.preventDefault).toHaveBeenCalledOnce()
+      expect(submitEvent2.preventDefault).toHaveBeenCalledOnce()
+      expect(submitEvent3.preventDefault).toHaveBeenCalledOnce()
     })
 
     it('does not prevent default on the event when there is an action', () => {
-      const preventDefault = sandbox.spy()
-      const event = { preventDefault }
+      const submitEvent1 = createSubmitEvent()
+      const submitEvent2 = createSubmitEvent()
 
       const { container: c1 } = render(<Form action='do not prevent default!' />)
       const { container: c2 } = render(<Form action='' />)
 
-      fireEvent.submit(c1.firstChild, event)
-      fireEvent.submit(c2.firstChild, event)
+      fireEvent(c1.firstChild, submitEvent1.event)
+      fireEvent(c2.firstChild, submitEvent2.event)
 
-      expect(preventDefault).not.toHaveBeenCalled()
+      expect(submitEvent1.event.defaultPrevented).toBe(false)
+      expect(submitEvent2.event.defaultPrevented).toBe(false)
     })
 
     it('is called with (e, props) on submit', () => {
       const onSubmit = sandbox.spy()
-      const event = { name: 'foo' }
       const props = { 'data-bar': 'baz' }
 
       const { container } = render(<Form {...props} onSubmit={onSubmit} />)
-      fireEvent.submit(container.firstChild, event)
+      fireEvent.submit(container.firstChild)
 
       expect(onSubmit).toHaveBeenCalledOnce()
-      expect(onSubmit).toHaveBeenCalledWith(expect.objectContaining(event), props)
+      expect(onSubmit).toHaveBeenCalledWith(
+        expect.objectContaining({ type: 'submit' }),
+        expect.objectContaining(props),
+      )
     })
 
     it('passes all args to onSubmit', () => {
       const onSubmit = sandbox.spy()
       const props = { 'data-baz': 'baz' }
-      const event = { fake: 'event' }
-      const args = ['some', 'extra', 'args']
 
       const { container } = render(<Form {...props} onSubmit={onSubmit} />)
-      fireEvent.submit(container.firstChild, event)
+      fireEvent.submit(container.firstChild)
 
       expect(onSubmit).toHaveBeenCalledOnce()
-      expect(onSubmit).toHaveBeenCalledWith(expect.objectContaining(event), props)
+      expect(onSubmit).toHaveBeenCalledWith(
+        expect.objectContaining({ type: 'submit' }),
+        expect.objectContaining(props),
+      )
     })
   })
 })

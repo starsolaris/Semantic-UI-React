@@ -1,2 +1,3 @@
-import default from './DocumentationPage';
-export { default };
+import DocumentationPage from './DocumentationPage'
+
+export default DocumentationPage

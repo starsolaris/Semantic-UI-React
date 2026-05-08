@@ -10,7 +10,7 @@ import { useMergedRefs } from '../../lib'
  * @param {React.Ref} userRef
  */
 export default function usePortalElement(node, userRef) {
-  const ref = useMergedRefs(node.ref, userRef)
+  const ref = useMergedRefs(node?.props?.ref, userRef)
 
   if (React.isValidElement(node)) {
     if (ReactIs.isForwardRef(node)) {

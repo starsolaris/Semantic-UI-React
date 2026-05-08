@@ -3,7 +3,7 @@ import React from 'react'
 import ButtonGroup from 'src/elements/Button/ButtonGroup'
 import { SUI } from 'src/lib'
 import * as common from 'test/specs/commonTests'
-import nestedShallow from 'test/utils/nestedShallow'
+import nestedShallow from 'test/utils/nestedElement'
 
 describe('ButtonGroup', () => {
   common.isConformant(ButtonGroup)

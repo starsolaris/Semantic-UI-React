@@ -407,6 +407,12 @@ Portal.propTypes = {
   triggerRef: customPropTypes.ref,
 }
 
+Portal.autoControlledProps = ['open']
+Portal.handledProps = _.uniq([
+  ...Portal.autoControlledProps,
+  ...Object.keys(Portal.propTypes),
+]).sort()
+
 Portal.Inner = PortalInner
 
 export default Portal

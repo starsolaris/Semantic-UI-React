@@ -5,7 +5,7 @@ import { render } from '@testing-library/react'
 import { SUI } from 'src/lib'
 import Progress from 'src/modules/Progress/Progress'
 import * as common from 'test/specs/commonTests'
-import nestedShallow from 'test/utils/nestedShallow'
+import nestedShallow from 'test/utils/nestedElement'
 
 describe('Progress', () => {
   common.isConformant(Progress)
@@ -24,11 +24,7 @@ describe('Progress', () => {
   common.propKeyOnlyToClassName(Progress, 'warning')
 
   common.propValueOnlyToClassName(Progress, 'color', SUI.COLORS)
-  common.propValueOnlyToClassName(
-    Progress,
-    'size',
-    _.without(SUI.SIZES, 'mini', 'huge', 'massive'),
-  )
+  common.propValueOnlyToClassName(Progress, 'size', _.without(SUI.SIZES, 'mini', 'huge', 'massive'))
 
   it('contains div with className bar', () => {
     const { container } = render(<Progress />)
@@ -226,8 +222,8 @@ describe('Progress', () => {
 
       const { container: c2 } = render(<Progress percent={10.12345} precision={4} />)
       const progressEl2 = c2.querySelector('.progress')
-      expect(progressEl).toBeTruthy()
-      expect(progressEl.textContent).to.contain('10.1235%')
+      expect(progressEl2).toBeTruthy()
+      expect(progressEl2.textContent).to.contain('10.1235%')
     })
   })
 

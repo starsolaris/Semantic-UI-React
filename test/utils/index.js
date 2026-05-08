@@ -1,29 +1,28 @@
-import * as assertNodeContains from './assertNodeContains'
-export { assertNodeContains }
-
-import { shallow, mount } from './enzymeCompat'
-export { shallow, mount }
+import { shallow, mount } from './renderCompat'
 
 import assertWithTimeout from './assertWithTimeout'
-export { assertWithTimeout }
 
 import consoleUtil from './consoleUtil'
-export { consoleUtil }
 
 import domEvent from './domEvent'
-export { domEvent }
 
 import getComponentName from './getComponentName'
-export { getComponentName }
 
 import getComponentProps from './getComponentProps'
-export { getComponentProps }
 
-import nestedShallow from './nestedShallow'
-export { nestedShallow }
+import nestedShallow from './nestedElement'
 
 import sandbox from './sandbox'
-export { sandbox }
 
 import syntheticEvent from './syntheticEvent'
+
+export { assertNodeContains, assertBodyContains } from './assertNodeContains'
+export { shallow, mount }
+export { assertWithTimeout }
+export { consoleUtil }
+export { domEvent }
+export { getComponentName }
+export { getComponentProps }
+export { nestedShallow }
+export { sandbox }
 export { syntheticEvent }

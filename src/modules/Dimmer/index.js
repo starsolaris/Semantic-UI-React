@@ -1,2 +1,3 @@
-import Dimmer from './Dimmer';
-export default Dimmer;
+import Dimmer from './Dimmer'
+
+export default Dimmer

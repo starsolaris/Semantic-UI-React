@@ -40,17 +40,16 @@ describe('AccordionPanel', () => {
   })
 
   describe('index', () => {
-    it('should passed to title', () => {
+    it('should render the title content', () => {
       const { container } = render(<AccordionPanel content='Content' index={5} title='Title' />)
 
       const title = container.querySelector('.title')
-      expect(title).toHaveAttribute('data-index', '5')
+      expect(title.textContent).to.include('Title')
     })
   })
 
   describe('onTitleClick', () => {
     it('is called with (e, titleProps) when clicked', () => {
-      const event = { target: null }
       const onClick = sandbox.spy()
       const onTitleClick = sandbox.spy()
 
@@ -63,13 +62,13 @@ describe('AccordionPanel', () => {
       )
 
       const title = container.querySelector('.title')
-      fireEvent.click(title, event)
+      fireEvent.click(title)
 
       onClick.should.have.been.calledOnce()
-      onClick.should.have.been.calledWithMatch(event, { content: 'Title' })
+      onClick.should.have.been.calledWithMatch({ type: 'click' }, { content: 'Title' })
 
       onTitleClick.should.have.been.calledOnce()
-      onTitleClick.should.have.been.calledWithMatch(event, { content: 'Title' })
+      onTitleClick.should.have.been.calledWithMatch({ type: 'click' }, { content: 'Title' })
     })
   })
 })

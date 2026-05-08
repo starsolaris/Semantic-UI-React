@@ -120,12 +120,9 @@ const TransitionGroup = React.forwardRef(function (props, ref) {
 
   const ElementType = getComponentType(props, { defaultAs: React.Fragment })
   const rest = getUnhandledProps(TransitionGroup, props)
+  const rootProps = ElementType === React.Fragment ? rest : { ...rest, ref }
 
-  return (
-    <ElementType {...rest} ref={ref}>
-      {_.values(children)}
-    </ElementType>
-  )
+  return <ElementType {...rootProps}>{_.values(children)}</ElementType>
 })
 
 TransitionGroup.displayName = 'TransitionGroup'

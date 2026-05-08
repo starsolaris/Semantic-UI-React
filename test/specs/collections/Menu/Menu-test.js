@@ -61,16 +61,17 @@ describe('Menu', () => {
     })
 
     it('is set when clicking an item', () => {
-      const { container, getAllByRole } = render(<Menu items={items} />)
+      const { container } = render(<Menu items={items} />)
+      const menuItems = container.querySelectorAll('.item')
 
-      fireEvent.click(getAllByRole('menuitem')[1])
+      fireEvent.click(menuItems[1])
 
-      expect(getAllByRole('menuitem')[1]).toHaveClass('active')
+      expect(menuItems[1]).toHaveClass('active')
     })
 
     it('works as a string', () => {
-      const { getAllByRole } = render(<Menu items={items} activeIndex={1} />)
-      expect(getAllByRole('menuitem')[1]).toHaveClass('active')
+      const { container } = render(<Menu items={items} activeIndex={1} />)
+      expect(container.querySelectorAll('.item')[1]).toHaveClass('active')
     })
   })
 
@@ -82,33 +83,32 @@ describe('Menu', () => {
     ]
 
     it('renders children', () => {
-      const { getAllByRole } = render(<Menu items={items} />)
-      const menuItems = getAllByRole('menuitem')
+      const { container } = render(<Menu items={items} />)
+      const menuItems = container.querySelectorAll('.item')
 
       expect(menuItems[0]).toHaveTextContent('Home')
       expect(menuItems[1]).toHaveTextContent('Users')
     })
 
     it('onClick can omitted', () => {
-      const { getAllByRole } = render(<Menu items={items} />)
-      const click = () => fireEvent.click(getAllByRole('menuitem')[1])
-      expect(click).not.toThrow()
+      const { container } = render(<Menu items={items} />)
+      const click = () => fireEvent.click(container.querySelectorAll('.item')[1])
+      expect(click).to.not.throw()
     })
 
     it('passes onClick handler', () => {
-      const { getAllByRole } = render(<Menu items={items} />)
-      const event = { target: null }
+      const { container } = render(<Menu items={items} />)
       const props = { name: 'home', index: 0 }
 
-      fireEvent.click(getAllByRole('menuitem')[0], event)
+      fireEvent.click(container.querySelectorAll('.item')[0])
 
-      expect(spy).toHaveBeenCalledOnce()
-      expect(spy).toHaveBeenCalledWith(expect.objectContaining({ type: 'click' }), props)
+      spy.should.have.been.calledOnce()
+      spy.should.have.been.calledWithMatch({ type: 'click' }, props)
     })
 
     it('passes arbitrary props', () => {
-      const { getAllByRole } = render(<Menu items={items} />)
-      const menuItems = getAllByRole('menuitem')
+      const { container } = render(<Menu items={items} />)
+      const menuItems = container.querySelectorAll('.item')
 
       menuItems.forEach((item) => {
         expect(item.getAttribute('data-foo')).toBe('something')
@@ -127,17 +127,14 @@ describe('Menu', () => {
       ]
       const matchProps = { index: 1, name: 'users' }
 
-      const { getAllByRole } = render(<Menu items={items} onItemClick={onItemClick} />)
+      const { container } = render(<Menu items={items} onItemClick={onItemClick} />)
 
-      fireEvent.click(getAllByRole('menuitem')[1])
+      fireEvent.click(container.querySelectorAll('.item')[1])
 
-      expect(onClick).toHaveBeenCalledOnce()
-      expect(onClick).toHaveBeenCalledWith(expect.objectContaining({ type: 'click' }), matchProps)
-      expect(onItemClick).toHaveBeenCalledOnce()
-      expect(onItemClick).toHaveBeenCalledWith(
-        expect.objectContaining({ type: 'click' }),
-        matchProps,
-      )
+      onClick.should.have.been.calledOnce()
+      onClick.should.have.been.calledWithMatch({ type: 'click' }, matchProps)
+      onItemClick.should.have.been.calledOnce()
+      onItemClick.should.have.been.calledWithMatch({ type: 'click' }, matchProps)
     })
   })
 })

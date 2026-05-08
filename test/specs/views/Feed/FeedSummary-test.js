@@ -29,7 +29,7 @@ describe('FeedSummary', () => {
     it('inserts whitespace on both sides of the content', () => {
       const { container } = render(<FeedSummary content='test' />)
 
-      expect(container).toHaveTextContent(' test ')
+      expect(container.firstChild.textContent).toBe(' test ')
     })
   })
 })

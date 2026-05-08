@@ -1,10 +1,7 @@
-import componentInfoShape from './componentInfoShape';
-export { componentInfoShape };
-import componentMenu from './componentMenu';
-export { componentMenu };
-import seeTags from './seeTags';
-export { seeTags };
-import sidebarSections from './sidebarSections';
-export { sidebarSections };
-import versions from './versions';
-export { versions };
+import componentInfoShape from './componentInfoShape'
+import componentMenu from './componentMenu'
+import seeTags from './seeTags'
+import sidebarSections from './sidebarSections'
+import versions from './versions'
+
+export { componentInfoShape, componentMenu, seeTags, sidebarSections, versions }

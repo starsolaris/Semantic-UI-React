@@ -4,7 +4,9 @@ import React from 'react'
 import Loader from 'src/elements/Loader/Loader'
 import { SUI } from 'src/lib'
 import * as common from 'test/specs/commonTests'
-import nestedShallow from 'test/utils/nestedShallow'
+import nestedShallow from 'test/utils/nestedElement'
+
+const hasClass = (element, className) => element.className.split(/\s+/).includes(className)
 
 describe('Loader', () => {
   common.isConformant(Loader)
@@ -24,7 +26,7 @@ describe('Loader', () => {
   describe('text (class)', () => {
     it('omitted by default', () => {
       const element = nestedShallow(<Loader />)
-      expect(element).to.not.have.class('text')
+      expect(hasClass(element, 'text')).to.equal(false)
     })
 
     it('add class when has children', () => {

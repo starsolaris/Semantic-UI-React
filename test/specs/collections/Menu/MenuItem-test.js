@@ -6,6 +6,8 @@ import { SUI } from 'src/lib'
 import * as common from 'test/specs/commonTests'
 import { sandbox } from 'test/utils'
 
+const hasClass = (element, className) => element.className.split(/\s+/).includes(className)
+
 describe('MenuItem', () => {
   common.isConformant(MenuItem)
   common.forwardsRef(MenuItem)
@@ -48,11 +50,11 @@ describe('MenuItem', () => {
   describe('icon', () => {
     it('does not add `icon` className if there is also `name`', () => {
       const { container } = render(<MenuItem icon='user' name='users' />)
-      expect(container.firstChild).not.toHaveClass('icon')
+      expect(hasClass(container.firstChild, 'icon')).to.equal(false)
     })
     it('does not add `icon` className if there is also `content`', () => {
       const { container } = render(<MenuItem icon='user' content='Users' />)
-      expect(container.firstChild).not.toHaveClass('icon')
+      expect(hasClass(container.firstChild, 'icon')).to.equal(false)
     })
     it('adds `icon` className if there is an `icon` without `name` or `content`', () => {
       const { container } = render(<MenuItem icon='user' />)
@@ -68,8 +70,8 @@ describe('MenuItem', () => {
       const { container } = render(<MenuItem onClick={onClick} {...props} />)
       fireEvent.click(container.firstChild)
 
-      expect(onClick).toHaveBeenCalledOnce()
-      expect(onClick).toHaveBeenCalledWith(expect.objectContaining({ type: 'click' }), props)
+      onClick.should.have.been.calledOnce()
+      onClick.should.have.been.calledWithMatch({ type: 'click' }, props)
     })
 
     it('is not called when is disabled', () => {
@@ -77,7 +79,7 @@ describe('MenuItem', () => {
 
       const { container } = render(<MenuItem disabled onClick={onClick} />)
       fireEvent.click(container.firstChild)
-      expect(onClick).not.toHaveBeenCalled()
+      onClick.should.not.have.been.called()
     })
   })
 })

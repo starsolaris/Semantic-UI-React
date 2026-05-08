@@ -1,5 +1,5 @@
 import React from 'react'
-import { render } from '@testing-library/react'
+import { render, waitFor } from '@testing-library/react'
 
 import Transition from 'src/modules/Transition/Transition'
 import TransitionGroup from 'src/modules/Transition/TransitionGroup'
@@ -12,6 +12,8 @@ const wrapperMount = (...args) => {
   wrapper = result
   return result
 }
+
+const getTransitionChildren = () => wrapper.container.querySelectorAll('.transition')
 
 describe('TransitionGroup', () => {
   common.isConformant(TransitionGroup, {
@@ -38,9 +40,9 @@ describe('TransitionGroup', () => {
         </TransitionGroup>,
       )
 
-      const children = wrapper.container.firstChild.children
+      const children = getTransitionChildren()
       expect(children.length).to.equal(3)
-      Array.from(children).forEach(child => {
+      Array.from(children).forEach((child) => {
         expect(child.classList.contains('transition')).to.be.true()
       })
     })
@@ -54,9 +56,9 @@ describe('TransitionGroup', () => {
         </TransitionGroup>,
       )
 
-      const children = wrapper.container.firstChild.children
+      const children = getTransitionChildren()
       expect(children.length).to.equal(3)
-      Array.from(children).forEach(child => {
+      Array.from(children).forEach((child) => {
         expect(child.classList.contains('scale')).to.be.true()
         expect(child.classList.contains('transition')).to.be.true()
       })
@@ -75,7 +77,7 @@ describe('TransitionGroup', () => {
         </TransitionGroup>,
       )
 
-      const children = wrapper.container.firstChild.children
+      const children = getTransitionChildren()
       expect(children.length).to.equal(2)
       expect(children[1].classList.contains('transition')).to.be.true()
     })
@@ -89,12 +91,12 @@ describe('TransitionGroup', () => {
       wrapper.rerender(
         <TransitionGroup>
           <div key='first' />
-          {''}
+
           <div key='second' />
         </TransitionGroup>,
       )
 
-      const children = wrapper.container.firstChild.children
+      const children = getTransitionChildren()
       expect(children.length).to.equal(2)
     })
 
@@ -111,13 +113,13 @@ describe('TransitionGroup', () => {
         </TransitionGroup>,
       )
 
-      const children = wrapper.container.firstChild.children
+      const children = getTransitionChildren()
       expect(children.length).to.equal(2)
       expect(children[0].classList.contains('transition')).to.be.true()
       expect(children[1].classList.contains('transition')).to.be.true()
     })
 
-    it('removes child after transition', (done) => {
+    it('removes child after transition', async () => {
       wrapperMount(
         <TransitionGroup duration={0}>
           <div key='first' />
@@ -130,12 +132,10 @@ describe('TransitionGroup', () => {
         </TransitionGroup>,
       )
 
-      setTimeout(() => {
-        const children = wrapper.container.firstChild.children
+      await waitFor(() => {
+        const children = getTransitionChildren()
         expect(children.length).to.equal(1)
-
-        done()
-      }, 0)
+      })
     })
   })
 })

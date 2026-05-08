@@ -2,7 +2,7 @@ import React from 'react'
 
 import IconGroup from 'src/elements/Icon/IconGroup'
 import * as common from 'test/specs/commonTests'
-import nestedShallow from 'test/utils/nestedShallow'
+import nestedShallow from 'test/utils/nestedElement'
 
 describe('IconGroup', () => {
   common.isConformant(IconGroup)

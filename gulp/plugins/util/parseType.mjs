@@ -1,12 +1,12 @@
-await import('@babel/register')
-
 import _ from 'lodash'
 
-const { names } = (await import('../../../src/elements/Flag/Flag.js')).default
-const { positions } = (await import('../../../src/modules/Popup/lib/positions.js')).default
-const SUI = (await import('../../../src/lib/SUI.js')).default
+const { names } = (await import('../../../dist/commonjs/elements/Flag/Flag.js'))
+const { positions } = (await import('../../../dist/commonjs/modules/Popup/lib/positions.js'))
+const SUI = (await import('../../../dist/commonjs/lib/SUI.js'))
 
-const evalValue = (value) => eval(value) // eslint-disable-line no-eval
+// eslint-disable-next-line no-new-func
+const evalValue = (value) =>
+  new Function('names', 'positions', 'SUI', '_', `return ${value}`)(names, positions, SUI, _)
 
 const isTransformable = (value) =>
   typeof value === 'string' &&

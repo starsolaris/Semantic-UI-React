@@ -2,6 +2,7 @@ import cx from 'clsx'
 import _ from 'lodash'
 import PropTypes from 'prop-types'
 import * as React from 'react'
+import * as ReactIs from 'react-is'
 
 import {
   childrenUtils,
@@ -78,19 +79,26 @@ const AccordionAccordion = React.forwardRef(function (props, ref) {
     }, [exclusive, activeIndex])
   }
 
+  const renderPanel = (panel, index) => {
+    const panelProps = {
+      active: isIndexActive(exclusive, activeIndex, index),
+      index,
+      onTitleClick: handleTitleClick,
+    }
+
+    if (_.isPlainObject(panel) && !ReactIs.isElement(panel)) {
+      const { key, ...panelRest } = panel
+      return <AccordionPanel key={key ?? index} {...panelRest} {...panelProps} />
+    }
+
+    return AccordionPanel.create(panel, {
+      overrideProps: panelProps,
+    })
+  }
+
   return (
     <ElementType {...rest} className={classes} ref={ref}>
-      {childrenUtils.isNil(children)
-        ? _.map(panels, (panel, index) =>
-            AccordionPanel.create(panel, {
-              defaultProps: {
-                active: isIndexActive(exclusive, activeIndex, index),
-                index,
-                onTitleClick: handleTitleClick,
-              },
-            }),
-          )
-        : children}
+      {childrenUtils.isNil(children) ? _.map(panels, renderPanel) : children}
     </ElementType>
   )
 })

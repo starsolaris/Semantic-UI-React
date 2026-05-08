@@ -1,14 +1,10 @@
 import forwardsRef from './forwardsRef'
-export { forwardsRef }
 
 import hasSubcomponents from './hasSubcomponents'
-export { hasSubcomponents }
 
 import hasValidTypings from './hasValidTypings'
-export { hasValidTypings }
 
 import hasUIClassName from './hasUIClassName'
-export { hasUIClassName }
 
 import * as implementsClassNameProps from './implementsClassNameProps'
 import {
@@ -17,6 +13,35 @@ import {
   propKeyOrValueAndKeyToClassName,
   propValueOnlyToClassName,
 } from './implementsClassNameProps'
+
+import * as implementsCommonProps from './implementsCommonProps'
+import {
+  implementsButtonProp,
+  implementsHTMLIFrameProp,
+  implementsHTMLInputProp,
+  implementsHTMLLabelProp,
+  implementsIconProp,
+  implementsImageProp,
+  implementsLabelProp,
+  implementsMultipleProp,
+  implementsTextAlignProp,
+  implementsVerticalAlignProp,
+  implementsWidthProp,
+  labelImplementsHtmlForProp,
+} from './implementsCommonProps'
+
+import implementsCreateMethod from './implementsCreateMethod'
+
+import implementsShorthandProp from './implementsShorthandProp'
+
+import isConformant from './isConformant'
+
+import rendersChildren from './rendersChildren'
+
+export { forwardsRef }
+export { hasSubcomponents }
+export { hasValidTypings }
+export { hasUIClassName }
 export {
   implementsClassNameProps,
   propKeyAndValueToClassName,
@@ -24,19 +49,22 @@ export {
   propKeyOrValueAndKeyToClassName,
   propValueOnlyToClassName,
 }
-
-import * as implementsCommonProps from './implementsCommonProps'
-import { implementsIconProp, implementsLabelProp } from './implementsCommonProps'
-export { implementsCommonProps, implementsIconProp, implementsLabelProp }
-
-import implementsCreateMethod from './implementsCreateMethod'
+export {
+  implementsCommonProps,
+  implementsButtonProp,
+  implementsHTMLIFrameProp,
+  implementsHTMLInputProp,
+  implementsHTMLLabelProp,
+  implementsIconProp,
+  implementsImageProp,
+  implementsLabelProp,
+  implementsMultipleProp,
+  implementsTextAlignProp,
+  implementsVerticalAlignProp,
+  implementsWidthProp,
+  labelImplementsHtmlForProp,
+}
 export { implementsCreateMethod }
-
-import implementsShorthandProp from './implementsShorthandProp'
 export { implementsShorthandProp }
-
-import isConformant from './isConformant'
 export { isConformant }
-
-import rendersChildren from './rendersChildren'
 export { rendersChildren }

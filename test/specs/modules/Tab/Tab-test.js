@@ -57,7 +57,8 @@ describe('Tab', () => {
 
       expect(container.querySelector('.grid')).to.not.be.null()
       expect(container.querySelector('.grid .column:last-child .menu')).to.not.be.null()
-      expect(container.querySelector('.menu').getAttribute('data-tabular')).to.equal('right')
+      expect(container.querySelector('.menu')).to.have.class('right')
+      expect(container.querySelector('.menu')).to.have.class('tabular')
     })
 
     it("does not infer tabular's value from tab's menuPosition if tabular is explicitly set", () => {
@@ -65,7 +66,8 @@ describe('Tab', () => {
       const { container } = render(<Tab menu={menu} menuPosition='left' panes={panes} />)
 
       expect(container.querySelector('.grid')).to.not.be.null()
-      expect(container.querySelector('.menu').getAttribute('data-tabular')).to.equal('right')
+      expect(container.querySelector('.menu')).to.have.class('right')
+      expect(container.querySelector('.menu')).to.have.class('tabular')
     })
 
     it('renders right when tabular is set to right', () => {
@@ -106,8 +108,8 @@ describe('Tab', () => {
   describe('activeIndex', () => {
     it('is passed to the Menu', () => {
       const { container } = render(<Tab panes={panes} activeIndex={123} />)
-      const menu = container.querySelector('.menu')
-      expect(menu.getAttribute('data-active-index')).to.equal('123')
+      const activeItems = container.querySelectorAll('.menu .active.item')
+      expect(activeItems).to.have.length(0)
     })
 
     it('is set when clicking an item', () => {
@@ -148,17 +150,16 @@ describe('Tab', () => {
     it('is called with (e, { ...props, activeIndex }) a menu item is clicked', () => {
       const activeIndex = 1
       const spy = sandbox.spy()
-      const event = { fake: 'event' }
       const props = { onTabChange: spy, panes }
 
       const { container } = render(<Tab {...props} />)
       const items = container.querySelectorAll('.menu .item')
-      fireEvent.click(items[activeIndex], event)
+      fireEvent.click(items[activeIndex])
 
       // Since React will have generated a key the returned tab won't match
       // exactly so match on the props instead.
       spy.should.have.been.calledOnce()
-      spy.firstCall.args[0].should.have.property('fake', 'event')
+      spy.firstCall.args[0].should.have.property('type', 'click')
       spy.firstCall.args[1].should.have.property('activeIndex', 1)
       spy.firstCall.args[1].should.have.property('onTabChange', spy)
       spy.firstCall.args[1].should.have.property('panes', panes)

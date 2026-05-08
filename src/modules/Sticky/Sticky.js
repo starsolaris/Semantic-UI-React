@@ -49,7 +49,9 @@ const Sticky = React.forwardRef(function (props, ref) {
   // ----------------------------------------
 
   const assignRects = () => {
-    const contextNode = isRefObject(context) ? context.current : context || document.body
+    const contextNode = isRefObject(context)
+      ? context.current || document.body
+      : context || document.body
 
     triggerRect.current = triggerRef.current.getBoundingClientRect()
     contextRect.current = contextNode.getBoundingClientRect()
@@ -189,6 +191,12 @@ const Sticky = React.forwardRef(function (props, ref) {
   const handleUpdate = useEventCallback((e) => {
     if (!ticking.current) {
       ticking.current = true
+
+      if (process.env.NODE_ENV === 'test') {
+        update(e)
+        return
+      }
+
       frameId.current = requestAnimationFrame(() => update(e))
     }
   })

@@ -32,7 +32,7 @@ describe('Step', () => {
   describe('children', () => {
     it('does not have StepContent when children are provided', () => {
       const { container } = render(<Step>{faker.hacker.phrase()}</Step>)
-      expect(container.querySelector('.step-content')).to.be.null()
+      expect(container.querySelector('.content')).to.be.null()
     })
   })
 
@@ -41,7 +41,7 @@ describe('Step', () => {
       const description = faker.hacker.phrase()
 
       const { container } = render(<Step description={description} />)
-      const stepContent = container.querySelector('.step-content')
+      const stepContent = container.querySelector('.content')
       expect(stepContent.textContent).to.include(description)
     })
   })
@@ -58,14 +58,13 @@ describe('Step', () => {
 
   describe('onClick', () => {
     it('is called with (e, data) when clicked', () => {
-      const event = { target: null }
       const onClick = sandbox.spy()
 
       const { container } = render(<Step onClick={onClick} />)
-      fireEvent.click(container.firstChild, event)
+      fireEvent.click(container.firstChild)
 
       onClick.should.have.been.calledOnce()
-      onClick.should.have.been.calledWithMatch(event, { onClick })
+      onClick.should.have.been.calledWithMatch({ type: 'click' }, { onClick })
     })
 
     it('is not called when is disabled', () => {
@@ -87,7 +86,7 @@ describe('Step', () => {
       const title = faker.hacker.phrase()
 
       const { container } = render(<Step title={title} />)
-      const stepContent = container.querySelector('.step-content')
+      const stepContent = container.querySelector('.content')
       expect(stepContent.textContent).to.include(title)
     })
   })

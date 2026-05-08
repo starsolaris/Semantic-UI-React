@@ -143,90 +143,94 @@ export const disallow = (disallowedProps) => (props, propName, componentName) =>
  * Ensure a prop adherers to multiple prop type validators.
  * @param {function[]} validators An array of propType functions.
  */
-export const every = (validators) => (props, propName, componentName, ...rest) => {
-  if (!Array.isArray(validators)) {
-    throw new Error(
-      [
-        'Invalid argument supplied to every, expected an instance of array.',
-        `See \`${propName}\` prop in \`${componentName}\`.`,
-      ].join(' '),
-    )
-  }
-
-  const errors = []
-
-  validators.forEach((validator) => {
-    if (typeof validator !== 'function') {
+export const every =
+  (validators) =>
+  (props, propName, componentName, ...rest) => {
+    if (!Array.isArray(validators)) {
       throw new Error(
-        `every() argument "validators" should contain functions, found: ${typeOf(validator)}.`,
+        [
+          'Invalid argument supplied to every, expected an instance of array.',
+          `See \`${propName}\` prop in \`${componentName}\`.`,
+        ].join(' '),
       )
     }
 
-    const error = validator(props, propName, componentName, ...rest)
+    const errors = []
 
-    if (error) {
-      errors.push(error)
-    }
-  })
+    validators.forEach((validator) => {
+      if (typeof validator !== 'function') {
+        throw new Error(
+          `every() argument "validators" should contain functions, found: ${typeOf(validator)}.`,
+        )
+      }
 
-  // we can only return one error at a time
-  return errors[0]
-}
+      const error = validator(props, propName, componentName, ...rest)
+
+      if (error) {
+        errors.push(error)
+      }
+    })
+
+    // we can only return one error at a time
+    return errors[0]
+  }
 
 /**
  * Ensure a validator passes only when a component has a given propsShape.
  * @param {object} propsShape An object describing the prop shape.
  * @param {function} validator A propType function.
  */
-export const givenProps = (propsShape, validator) => (props, propName, componentName, ...rest) => {
-  if (!_.isPlainObject(propsShape)) {
-    throw new Error(
-      [
-        'Invalid argument supplied to givenProps, expected an object.',
-        `See \`${propName}\` prop in \`${componentName}\`.`,
-      ].join(' '),
-    )
+export const givenProps =
+  (propsShape, validator) =>
+  (props, propName, componentName, ...rest) => {
+    if (!_.isPlainObject(propsShape)) {
+      throw new Error(
+        [
+          'Invalid argument supplied to givenProps, expected an object.',
+          `See \`${propName}\` prop in \`${componentName}\`.`,
+        ].join(' '),
+      )
+    }
+
+    if (typeof validator !== 'function') {
+      throw new Error(
+        [
+          'Invalid argument supplied to givenProps, expected a function.',
+          `See \`${propName}\` prop in \`${componentName}\`.`,
+        ].join(' '),
+      )
+    }
+
+    const shouldValidate = _.keys(propsShape).every((key) => {
+      const val = propsShape[key]
+      // require propShape validators to pass or prop values to match
+      return typeof val === 'function'
+        ? !val(props, key, componentName, ...rest)
+        : val === props[propName]
+    })
+
+    if (!shouldValidate) return
+
+    const error = validator(props, propName, componentName, ...rest)
+
+    if (error) {
+      // poor mans shallow pretty print, prevents JSON circular reference errors
+      const prettyProps = `{ ${_.keys(_.pick(_.keys(propsShape), props))
+        .map((key) => {
+          const val = props[key]
+          let renderedValue = val
+          if (typeof val === 'string') renderedValue = `"${val}"`
+          else if (Array.isArray(val)) renderedValue = `[${val.join(', ')}]`
+          else if (_.isObject(val)) renderedValue = '{...}'
+
+          return `${key}: ${renderedValue}`
+        })
+        .join(', ')} }`
+
+      error.message = `Given props ${prettyProps}: ${error.message}`
+      return error
+    }
   }
-
-  if (typeof validator !== 'function') {
-    throw new Error(
-      [
-        'Invalid argument supplied to givenProps, expected a function.',
-        `See \`${propName}\` prop in \`${componentName}\`.`,
-      ].join(' '),
-    )
-  }
-
-  const shouldValidate = _.keys(propsShape).every((key) => {
-    const val = propsShape[key]
-    // require propShape validators to pass or prop values to match
-    return typeof val === 'function'
-      ? !val(props, key, componentName, ...rest)
-      : val === props[propName]
-  })
-
-  if (!shouldValidate) return
-
-  const error = validator(props, propName, componentName, ...rest)
-
-  if (error) {
-    // poor mans shallow pretty print, prevents JSON circular reference errors
-    const prettyProps = `{ ${_.keys(_.pick(_.keys(propsShape), props))
-      .map((key) => {
-        const val = props[key]
-        let renderedValue = val
-        if (typeof val === 'string') renderedValue = `"${val}"`
-        else if (Array.isArray(val)) renderedValue = `[${val.join(', ')}]`
-        else if (_.isObject(val)) renderedValue = '{...}'
-
-        return `${key}: ${renderedValue}`
-      })
-      .join(', ')} }`
-
-    error.message = `Given props ${prettyProps}: ${error.message}`
-    return error
-  }
-}
 
 /**
  * Define prop dependencies by requiring other props.
@@ -323,42 +327,44 @@ export const collectionShorthand = (...args) =>
  * @param {string} help A help message to display with the deprecation warning.
  * @param {function} [validator] A propType function.
  */
-export const deprecate = (help, validator) => (props, propName, componentName, ...args) => {
-  if (typeof help !== 'string') {
-    throw new Error(
-      [
-        'Invalid `help` argument supplied to deprecate, expected a string.',
-        `See \`${propName}\` prop in \`${componentName}\`.`,
-      ].join(' '),
-    )
-  }
-
-  // skip if prop is undefined
-  if (props[propName] === undefined) return
-
-  // deprecation error and help
-  const error = new Error(`The \`${propName}\` prop in \`${componentName}\` is deprecated.`)
-  if (help) error.message += ` ${help}`
-
-  // add optional validation error message
-  if (validator) {
-    if (typeof validator === 'function') {
-      const validationError = validator(props, propName, componentName, ...args)
-      if (validationError) {
-        error.message = `${error.message} ${validationError.message}`
-      }
-    } else {
+export const deprecate =
+  (help, validator) =>
+  (props, propName, componentName, ...args) => {
+    if (typeof help !== 'string') {
       throw new Error(
         [
-          'Invalid argument supplied to deprecate, expected a function.',
+          'Invalid `help` argument supplied to deprecate, expected a string.',
           `See \`${propName}\` prop in \`${componentName}\`.`,
         ].join(' '),
       )
     }
-  }
 
-  return error
-}
+    // skip if prop is undefined
+    if (props[propName] === undefined) return
+
+    // deprecation error and help
+    const error = new Error(`The \`${propName}\` prop in \`${componentName}\` is deprecated.`)
+    if (help) error.message += ` ${help}`
+
+    // add optional validation error message
+    if (validator) {
+      if (typeof validator === 'function') {
+        const validationError = validator(props, propName, componentName, ...args)
+        if (validationError) {
+          error.message = `${error.message} ${validationError.message}`
+        }
+      } else {
+        throw new Error(
+          [
+            'Invalid argument supplied to deprecate, expected a function.',
+            `See \`${propName}\` prop in \`${componentName}\`.`,
+          ].join(' '),
+        )
+      }
+    }
+
+    return error
+  }
 
 /** A checker that matches the React.RefObject type. */
 export const refObject = PropTypes.shape({

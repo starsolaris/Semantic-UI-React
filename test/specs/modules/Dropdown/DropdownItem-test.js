@@ -65,7 +65,7 @@ describe('DropdownItem', () => {
     })
     it('should render normal DropdownItem without aria-disabled', () => {
       const { container } = render(<DropdownItem />)
-      expect(container.firstChild).not.toHaveAttribute('aria-disabled')
+      expect(container.firstChild.getAttribute('aria-disabled')).to.be.null()
     })
     it('should render active DropdownItem with aria-checked', () => {
       const { container } = render(<DropdownItem active />)
@@ -73,7 +73,7 @@ describe('DropdownItem', () => {
     })
     it('should render normal DropdownItem without aria-checked', () => {
       const { container } = render(<DropdownItem />)
-      expect(container.firstChild).not.toHaveAttribute('aria-checked')
+      expect(container.firstChild.getAttribute('aria-checked')).to.be.null()
     })
     it('should render selected DropdownItem with aria-selected', () => {
       const { container } = render(<DropdownItem selected />)
@@ -81,7 +81,7 @@ describe('DropdownItem', () => {
     })
     it('should render normal DropdownItem without aria-selected', () => {
       const { container } = render(<DropdownItem />)
-      expect(container.firstChild).not.toHaveAttribute('aria-selected')
+      expect(container.firstChild.getAttribute('aria-selected')).to.be.null()
     })
   })
 
@@ -117,14 +117,13 @@ describe('DropdownItem', () => {
       const onClick = sandbox.spy()
 
       const value = faker.hacker.phrase()
-      const event = { target: null }
       const props = { value, 'data-foo': 'bar' }
 
       const { container } = render(<DropdownItem onClick={onClick} {...props} />)
-      fireEvent.click(container.firstChild, event)
+      fireEvent.click(container.firstChild)
 
       onClick.should.have.been.calledOnce()
-      onClick.should.have.been.calledWithMatch(event, props)
+      onClick.should.have.been.calledWithMatch({ type: 'click' }, props)
     })
   })
 })

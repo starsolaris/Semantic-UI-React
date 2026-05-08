@@ -13,7 +13,16 @@ import {
 import * as customPropTypes from './customPropTypes'
 import eventStack from './eventStack'
 import * as factories from './factories'
-import { createShorthand, createShorthandFactory } from './factories'
+import {
+  createHTMLDivision,
+  createHTMLIframe,
+  createHTMLImage,
+  createHTMLInput,
+  createHTMLLabel,
+  createHTMLParagraph,
+  createShorthand,
+  createShorthandFactory,
+} from './factories'
 import getComponentType from './getComponentType'
 import getUnhandledProps from './getUnhandledProps'
 import {
@@ -54,6 +63,12 @@ export {
   customPropTypes,
   eventStack,
   factories,
+  createHTMLDivision,
+  createHTMLIframe,
+  createHTMLImage,
+  createHTMLInput,
+  createHTMLLabel,
+  createHTMLParagraph,
   createShorthand,
   createShorthandFactory,
   getComponentType,

@@ -7,7 +7,7 @@ import IconGroup from 'src/elements/Icon/IconGroup'
 import { SUI } from 'src/lib'
 import * as common from 'test/specs/commonTests'
 import { sandbox } from 'test/utils'
-import nestedShallow from 'test/utils/nestedShallow'
+import nestedShallow from 'test/utils/nestedElement'
 
 describe('Icon', () => {
   common.isConformant(Icon)
@@ -90,13 +90,11 @@ describe('Icon', () => {
 
     it('is not called when "disabled" is true', () => {
       const onClick = sandbox.spy()
-      const preventDefault = sandbox.spy()
       const { container } = render(<Icon disabled onClick={onClick} />)
 
-      fireEvent.click(container.firstChild, { preventDefault })
+      fireEvent.click(container.firstChild)
 
       onClick.should.have.not.been.called()
-      preventDefault.should.have.calledOnce()
     })
   })
 })

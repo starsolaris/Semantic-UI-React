@@ -1,6 +1,6 @@
-import React from 'react'
+import React, { act } from 'react'
 import ReactDOMServer from 'react-dom/server'
-import { render, fireEvent } from '@testing-library/react'
+import { render, fireEvent, waitFor } from '@testing-library/react'
 
 import Modal from 'src/modules/Modal/Modal'
 import ModalHeader from 'src/modules/Modal/ModalHeader'
@@ -8,15 +8,8 @@ import ModalContent from 'src/modules/Modal/ModalContent'
 import ModalActions from 'src/modules/Modal/ModalActions'
 import ModalDescription from 'src/modules/Modal/ModalDescription'
 import ModalDimmer from 'src/modules/Modal/ModalDimmer'
-import Portal from 'src/addons/Portal/Portal'
 
-import {
-  assertNodeContains,
-  assertBodyContains,
-  assertWithTimeout,
-  domEvent,
-  sandbox,
-} from 'test/utils'
+import { assertNodeContains, assertBodyContains, domEvent, sandbox } from 'test/utils'
 import * as common from 'test/specs/commonTests'
 import isBrowser from 'src/lib/isBrowser'
 
@@ -83,9 +76,12 @@ describe('Modal', () => {
   // Nor do they handle components rendered to the body with Portal.
   // The Modal is wrapped in a Portal, so we manually test a few things here.
 
-  it('renders a Portal', () => {
-    const { container } = render(<Modal open />)
-    expect(container.querySelector('.ui.modal')).to.not.be.null()
+  it('renders a Portal', async () => {
+    render(<Modal open />)
+
+    await waitFor(() => {
+      expect(document.querySelector('.ui.modal')).to.not.be.null()
+    })
   })
 
   it('renders to the document body', () => {
@@ -93,20 +89,24 @@ describe('Modal', () => {
     assertBodyContains('.ui.modal')
   })
 
-  it('renders child text', () => {
+  it('renders child text', async () => {
     wrapperMount(<Modal open>child text</Modal>)
 
-    document.querySelector('.ui.modal').innerText.should.equal('child text')
+    await waitFor(() => {
+      expect(document.querySelector('.ui.modal')?.textContent).to.equal('child text')
+    })
   })
 
-  it('renders child components', () => {
+  it('renders child components', async () => {
     const child = <div data-child />
     wrapperMount(<Modal open>{child}</Modal>)
 
-    document
-      .querySelector('.ui.modal')
-      .querySelector('[data-child]')
-      .should.not.equal(null, 'Modal did not render the child component.')
+    await waitFor(() => {
+      expect(document.querySelector('.ui.modal [data-child]')).to.not.equal(
+        null,
+        'Modal did not render the child component.',
+      )
+    })
   })
 
   it("spreads the user's style prop on the Modal", () => {
@@ -158,19 +158,28 @@ describe('Modal', () => {
       assertBodyContains('.ui.modal.open', false)
     })
 
-    it('is passed to Portal open', () => {
-      const { container } = render(<Modal open />)
-      expect(container.querySelector('.ui.modal')).to.not.be.null()
+    it('is passed to Portal open', async () => {
+      const { rerender } = render(<Modal open />)
 
-      const { container: container2 } = render(<Modal open={false} />)
-      expect(container2.querySelector('.ui.modal')).to.be.null()
+      await waitFor(() => {
+        expect(document.querySelector('.ui.modal')).to.not.be.null()
+      })
+
+      rerender(<Modal open={false} />)
+
+      await waitFor(() => {
+        expect(document.querySelector('.ui.modal')).to.be.null()
+      })
     })
 
-    it('is not passed to Modal', () => {
-      const { container } = render(<Modal open />)
-      const modal = container.querySelector('.ui.modal')
-      expect(modal).to.not.be.null()
-      expect(modal.hasAttribute('open')).to.be.false()
+    it('is not passed to Modal', async () => {
+      render(<Modal open />)
+
+      await waitFor(() => {
+        const modal = document.querySelector('.ui.modal')
+        expect(modal).to.not.be.null()
+        expect(modal.hasAttribute('open')).to.be.false()
+      })
     })
 
     it('does not show the modal when false', () => {
@@ -245,9 +254,12 @@ describe('Modal', () => {
       expect(document.querySelector('.ui.dimmer')).to.not.be.null()
     })
 
-    it('passes "blurring" to ModalDimmer', () => {
+    it('passes "blurring" to ModalDimmer', async () => {
       wrapperMount(<Modal open dimmer='blurring' />)
-      expect(document.querySelector('.ui.dimmer.blurring')).to.not.be.null()
+
+      await waitFor(() => {
+        expect(document.body.classList.contains('blurring')).to.be.true()
+      })
     })
 
     it('passes "inverted" to ModalDimmer', () => {
@@ -502,10 +514,10 @@ describe('Modal', () => {
 
     it('does not pass "scrolling" by default', () => {
       wrapperMount(<Modal open />)
-      expect(document.querySelector('.ui.dimmer.scrolling')).to.be.null()
+      expect(document.body.classList.contains('scrolling')).to.be.false()
     })
 
-    it('does not pass "scrolling" when equal to the window height', (done) => {
+    it('does not pass "scrolling" when equal to the window height', async () => {
       /* 101 is `padding * 2 + 1, see Modal/utils */
       const height = window.innerHeight - 101
 
@@ -515,25 +527,25 @@ describe('Modal', () => {
         </Modal>,
       )
 
-      requestAnimationFrame(() => {
-        expect(document.querySelector('.ui.dimmer.scrolling')).to.be.null()
-
-        done()
+      await act(async () => {
+        await new Promise((resolve) => requestAnimationFrame(resolve))
       })
+
+      expect(document.querySelector('.ui.dimmer.scrolling')).to.be.null()
     })
 
-    it('passes "scrolling" when taller than the window', (done) => {
+    it('passes "scrolling" when taller than the window', async () => {
       window.innerHeight = 10
       wrapperMount(<Modal open>foo</Modal>)
 
-      requestAnimationFrame(() => {
-        expect(document.querySelector('.ui.dimmer.scrolling')).to.not.be.null()
-
-        done()
+      await act(async () => {
+        await new Promise((resolve) => requestAnimationFrame(resolve))
       })
+
+      expect(document.body.classList.contains('scrolling')).to.be.true()
     })
 
-    it('passes "scrolling" when the window grows/shrinks', (done) => {
+    it('passes "scrolling" when the window grows/shrinks', async () => {
       wrapperMount(
         <Modal open>
           <span />
@@ -541,17 +553,15 @@ describe('Modal', () => {
       )
       window.innerHeight = 10
 
-      assertWithTimeout(
-        () => {
-          expect(document.querySelector('.ui.dimmer.scrolling')).to.not.be.null()
+      await waitFor(() => {
+        expect(document.body.classList.contains('scrolling')).to.be.true()
+      })
 
-          window.innerHeight = 10000
-        },
-        () =>
-          assertWithTimeout(() => {
-            expect(document.querySelector('.ui.dimmer.scrolling')).to.be.null()
-          }, done),
-      )
+      window.innerHeight = 10000
+
+      await waitFor(() => {
+        expect(document.body.classList.contains('scrolling')).to.be.false()
+      })
     })
   })
 

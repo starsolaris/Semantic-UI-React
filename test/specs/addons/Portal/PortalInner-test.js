@@ -1,5 +1,4 @@
-import React from 'react'
-import { act } from 'react'
+import React, { act } from 'react'
 import { render } from '@testing-library/react'
 
 import PortalInner from 'src/addons/Portal/PortalInner'

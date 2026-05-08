@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { act } from 'react'
 import { render, fireEvent } from '@testing-library/react'
 
 import { SUI } from 'src/lib'
@@ -51,7 +51,11 @@ describe('Transition', () => {
         )
 
         expect(container.querySelector('p').dataset.testStatus).to.equal(TRANSITION_STATUS_ENTERING)
-        animation.split(' ').forEach((className) => expect(container.firstChild.classList.contains(className)).to.be.true())
+        animation
+          .split(' ')
+          .forEach((className) =>
+            expect(container.firstChild.classList.contains(className)).to.be.true(),
+          )
         expect(container.firstChild.classList.contains('in')).to.be.true()
 
         rerenderFn(
@@ -60,7 +64,11 @@ describe('Transition', () => {
           </Transition>,
         )
         expect(container.querySelector('p').dataset.testStatus).to.equal(TRANSITION_STATUS_EXITING)
-        animation.split(' ').forEach((className) => expect(container.firstChild.classList.contains(className)).to.be.true())
+        animation
+          .split(' ')
+          .forEach((className) =>
+            expect(container.firstChild.classList.contains(className)).to.be.true(),
+          )
         expect(container.firstChild.classList.contains('out')).to.be.true()
       })
     })
@@ -222,13 +230,14 @@ describe('Transition', () => {
       expect(container.querySelector('p.foo')).to.not.be.null()
     })
 
-    it('returns null when UNMOUNTED', () => {
+    it('returns hidden content when EXITED and unmount is disabled', () => {
       wrapperMount(
         <Transition mountOnShow={false} unmountOnHide={false} visible={false}>
           <p className='foo bar' />
         </Transition>,
       )
-      expect(container.innerHTML).to.equal('')
+      expect(container.querySelector('p')).to.not.be.null()
+      expect(container.querySelector('p').dataset.testStatus).to.equal(TRANSITION_STATUS_EXITED)
     })
   })
 
@@ -415,7 +424,9 @@ describe('Transition', () => {
         </Transition>,
       )
       expect(container.querySelector('p').dataset.testStatus).to.equal(TRANSITION_STATUS_ENTERING)
-      expect(container.querySelector('p').dataset.testNextStatus).to.equal(TRANSITION_STATUS_ENTERED)
+      expect(container.querySelector('p').dataset.testNextStatus).to.equal(
+        TRANSITION_STATUS_ENTERED,
+      )
     })
 
     it('updates next status when set to true while performs an ENTERING transition', (done) => {
@@ -459,37 +470,42 @@ describe('Transition', () => {
         </Transition>,
       )
       expect(container.querySelector('p').dataset.testStatus).to.equal(TRANSITION_STATUS_ENTERING)
-      expect(container.querySelector('p').dataset.testNextStatus).to.equal(TRANSITION_STATUS_ENTERED)
+      expect(container.querySelector('p').dataset.testNextStatus).to.equal(
+        TRANSITION_STATUS_ENTERED,
+      )
     })
   })
 
   describe('onComplete', () => {
-    it('is called with (null, props) when transition completed', (done) => {
+    it('is called with (null, props) when transition completed', async () => {
       const onComplete = sandbox.spy()
-      const handleComplete = (...args) => {
-        onComplete(...args)
+      const args = await new Promise((resolve) => {
+        const handleComplete = (...callbackArgs) => {
+          onComplete(...callbackArgs)
+          resolve(callbackArgs)
+        }
 
-        onComplete.should.have.been.calledOnce()
-        onComplete.should.have.been.calledWithMatch(null, {
-          duration: 0,
-          status: TRANSITION_STATUS_ENTERED,
-        })
+        wrapperMount(
+          <Transition duration={0} onComplete={handleComplete} transitionOnMount>
+            <p />
+          </Transition>,
+        )
+      })
 
-        done()
-      }
-
-      wrapperMount(
-        <Transition duration={0} onComplete={handleComplete} transitionOnMount>
-          <p />
-        </Transition>,
-      )
+      onComplete.should.have.been.calledOnce()
+      onComplete.should.have.been.calledWithMatch(null, {
+        duration: 0,
+        status: TRANSITION_STATUS_ENTERED,
+      })
+      expect(args[0]).to.equal(null)
     })
 
-    it('is called after a render with visibility changes', (done) => {
+    it('is called after a render with visibility changes', async () => {
       // This test ensures that a setTimeout will not be cleared on a simple rerender
       // https://github.com/Semantic-Org/Semantic-UI-React/issues/4059
 
       const onComplete = sandbox.spy()
+      vi.useFakeTimers()
 
       wrapperMount(
         <Transition duration={200} onComplete={onComplete} transitionOnMount>
@@ -504,38 +520,43 @@ describe('Transition', () => {
           </Transition>,
         )
       }, 100)
-      setTimeout(() => {
-        onComplete.should.have.been.calledOnce()
-        done()
-      }, 250)
+
+      await act(async () => {
+        await vi.advanceTimersByTimeAsync(250)
+      })
+
+      onComplete.should.have.been.calledOnce()
+      vi.useRealTimers()
     })
   })
 
   describe('onHide', () => {
-    it('is called with (null, props) when hidden', (done) => {
+    it('is called with (null, props) when hidden', async () => {
       const onHide = sandbox.spy()
-      const handleHide = (...args) => {
-        onHide(...args)
+      const args = await new Promise((resolve) => {
+        const handleHide = (...callbackArgs) => {
+          onHide(...callbackArgs)
+          resolve(callbackArgs)
+        }
 
-        onHide.should.have.been.calledOnce()
-        onHide.should.have.been.calledWithMatch(null, {
-          duration: 0,
-          status: TRANSITION_STATUS_EXITED,
-        })
+        wrapperMount(
+          <Transition duration={0} onHide={handleHide} transitionOnMount={false}>
+            <p />
+          </Transition>,
+        )
+        rerenderFn(
+          <Transition duration={0} onHide={handleHide} transitionOnMount={false} visible={false}>
+            <p />
+          </Transition>,
+        )
+      })
 
-        done()
-      }
-
-      wrapperMount(
-        <Transition duration={0} onHide={handleHide} transitionOnMount={false}>
-          <p />
-        </Transition>,
-      )
-      rerenderFn(
-        <Transition duration={0} onHide={handleHide} transitionOnMount={false} visible={false}>
-          <p />
-        </Transition>,
-      )
+      onHide.should.have.been.calledOnce()
+      onHide.should.have.been.calledWithMatch(null, {
+        duration: 0,
+        status: TRANSITION_STATUS_EXITED,
+      })
+      expect(args[0]).to.equal(null)
     })
 
     it('depends on the specified duration', (done) => {
@@ -547,7 +568,12 @@ describe('Transition', () => {
       )
 
       rerenderFn(
-        <Transition duration={{ hide: 200 }} onHide={onHide} transitionOnMount={false} visible={false}>
+        <Transition
+          duration={{ hide: 200 }}
+          onHide={onHide}
+          transitionOnMount={false}
+          visible={false}
+        >
           <p />
         </Transition>,
       )
@@ -564,7 +590,7 @@ describe('Transition', () => {
       }, 200)
     })
 
-    it('will be called once even during rerender', (done) => {
+    it('will be called once even during rerender', async () => {
       const onStart = sandbox.spy()
 
       wrapperMount(
@@ -592,30 +618,31 @@ describe('Transition', () => {
       expect(container.querySelector('p').dataset.testNextStatus).to.equal(TRANSITION_STATUS_EXITED)
 
       onStart.should.have.been.calledOnce()
-      done()
     })
   })
 
   describe('onShow', () => {
-    it('is called with (null, props) when shown', (done) => {
+    it('is called with (null, props) when shown', async () => {
       const onShow = sandbox.spy()
-      const handleShow = (...args) => {
-        onShow(...args)
+      const args = await new Promise((resolve) => {
+        const handleShow = (...callbackArgs) => {
+          onShow(...callbackArgs)
+          resolve(callbackArgs)
+        }
 
-        onShow.should.have.been.calledOnce()
-        onShow.should.have.been.calledWithMatch(null, {
-          duration: 0,
-          status: TRANSITION_STATUS_ENTERED,
-        })
+        wrapperMount(
+          <Transition duration={0} onShow={handleShow} transitionOnMount>
+            <p />
+          </Transition>,
+        )
+      })
 
-        done()
-      }
-
-      wrapperMount(
-        <Transition duration={0} onShow={handleShow} transitionOnMount>
-          <p />
-        </Transition>,
-      )
+      onShow.should.have.been.calledOnce()
+      onShow.should.have.been.calledWithMatch(null, {
+        duration: 0,
+        status: TRANSITION_STATUS_ENTERED,
+      })
+      expect(args[0]).to.equal(null)
     })
 
     it('depends on the specified duration', (done) => {
@@ -640,28 +667,30 @@ describe('Transition', () => {
   })
 
   describe('onStart', () => {
-    it('is called with (null, props) when transition started', (done) => {
+    it('is called with (null, props) when transition started', async () => {
       const onStart = sandbox.spy()
-      const handleStart = (...args) => {
-        onStart(...args)
+      const args = await new Promise((resolve) => {
+        const handleStart = (...callbackArgs) => {
+          onStart(...callbackArgs)
+          resolve(callbackArgs)
+        }
 
-        onStart.should.have.been.calledOnce()
-        onStart.should.have.been.calledWithMatch(null, {
-          duration: 0,
-          status: TRANSITION_STATUS_ENTERING,
-        })
+        wrapperMount(
+          <Transition duration={0} onStart={handleStart} transitionOnMount>
+            <p />
+          </Transition>,
+        )
+      })
 
-        done()
-      }
-
-      wrapperMount(
-        <Transition duration={0} onStart={handleStart} transitionOnMount>
-          <p />
-        </Transition>,
-      )
+      onStart.should.have.been.calledOnce()
+      onStart.should.have.been.calledWithMatch(null, {
+        duration: 0,
+        status: TRANSITION_STATUS_ENTERING,
+      })
+      expect(args[0]).to.equal(null)
     })
 
-    it('will be called once even during rerender', (done) => {
+    it('will be called once even during rerender', async () => {
       const onStart = sandbox.spy()
 
       wrapperMount(
@@ -671,7 +700,9 @@ describe('Transition', () => {
       )
 
       expect(container.querySelector('p').dataset.testStatus).to.equal(TRANSITION_STATUS_ENTERING)
-      expect(container.querySelector('p').dataset.testNextStatus).to.equal(TRANSITION_STATUS_ENTERED)
+      expect(container.querySelector('p').dataset.testNextStatus).to.equal(
+        TRANSITION_STATUS_ENTERED,
+      )
 
       rerenderFn(
         <Transition duration={200} onStart={onStart} transitionOnMount>
@@ -680,10 +711,11 @@ describe('Transition', () => {
       )
 
       expect(container.querySelector('p').dataset.testStatus).to.equal(TRANSITION_STATUS_ENTERING)
-      expect(container.querySelector('p').dataset.testNextStatus).to.equal(TRANSITION_STATUS_ENTERED)
+      expect(container.querySelector('p').dataset.testNextStatus).to.equal(
+        TRANSITION_STATUS_ENTERED,
+      )
 
       onStart.should.have.been.calledOnce()
-      done()
     })
   })
 
@@ -709,7 +741,9 @@ describe('Transition', () => {
       )
 
       expect(container.querySelector('p').dataset.testStatus).to.equal(TRANSITION_STATUS_ENTERING)
-      expect(container.querySelector('p').dataset.testNextStatus).to.equal(TRANSITION_STATUS_ENTERED)
+      expect(container.querySelector('p').dataset.testNextStatus).to.equal(
+        TRANSITION_STATUS_ENTERED,
+      )
     })
   })
 

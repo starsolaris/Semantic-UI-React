@@ -1,4 +1,5 @@
 import gulp from 'gulp'
+import { createRequire } from 'module'
 import path from 'path'
 import rimraf from 'rimraf'
 
@@ -7,6 +8,14 @@ import gulpComponentMenu from '../plugins/gulp-component-menu.mjs'
 import gulpExampleMenu from '../plugins/gulp-example-menu.mjs'
 import gulpExampleSources from '../plugins/gulp-example-source.mjs'
 import gulpReactDocgen from '../plugins/gulp-react-docgen.mjs'
+
+const require_ = createRequire(import.meta.url)
+
+require_('@babel/register')({
+  configFile: path.resolve('./.babelrc'),
+  extensions: ['.js', '.jsx', '.ts', '.tsx'],
+  ignore: [/node_modules/],
+})
 
 const { paths } = (await import('../../config.js')).default
 const { build, reloadRoutes, start } = await import('react-static/node/index.js')

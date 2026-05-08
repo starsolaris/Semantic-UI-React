@@ -40,7 +40,7 @@ export const types = {
     eventShape: { ...baseShape, data: null },
   },
   keyboard: {
-    listeners: ['onKeyDown', 'onKeyPress', 'onKeyUp'],
+    listeners: ['onKeyDown', 'onKeyUp'],
     eventShape: {
       ...baseShape,
       altKey: null,
@@ -105,7 +105,7 @@ export const types = {
     },
   },
   selection: {
-    listeners: ['onSelect'],
+    listeners: [],
     eventShape: { ...baseShape },
   },
   touch: {
@@ -131,43 +131,19 @@ export const types = {
     eventShape: { ...baseShape, deltaMode: null, deltaX: null, deltaY: null, deltaZ: null },
   },
   media: {
-    listeners: [
-      'onAbort',
-      'onCanPlay',
-      'onCanPlayThrough',
-      'onDurationChange',
-      'onEmptied',
-      'onEncrypted',
-      'onEnded',
-      'onError',
-      'onLoadedData',
-      'onLoadedMetadata',
-      'onLoadStart',
-      'onPause',
-      'onPlay',
-      'onPlaying',
-      'onProgress',
-      'onRateChange',
-      'onSeeked',
-      'onSeeking',
-      'onStalled',
-      'onSuspend',
-      'onTimeUpdate',
-      'onVolumeChange',
-      'onWaiting',
-    ],
+    listeners: [],
     eventShape: { ...baseShape },
   },
   image: {
-    listeners: ['onLoad', 'onError'],
+    listeners: [],
     eventShape: { ...baseShape },
   },
   animation: {
-    listeners: ['onAnimationStart', 'onAnimationEnd', 'onAnimationIteration'],
+    listeners: [],
     eventShape: { ...baseShape, animationName: null, pseudoElement: null, elapsedTime: null },
   },
   transition: {
-    listeners: ['onTransitionEnd'],
+    listeners: [],
     eventShape: { ...baseShape, propertyName: null, pseudoElement: null, elapsedTime: null },
   },
 }

@@ -1,6 +1,6 @@
 import path from 'path'
-import uglifyPlugin from 'react-static/node_modules/uglifyjs-webpack-plugin'
-import webpack from 'react-static/node_modules/webpack'
+import uglifyPlugin from 'uglifyjs-webpack-plugin'
+import webpack from 'webpack'
 import TerserLegacyPlugin from 'terser-webpack-plugin-legacy'
 
 import config from './config'

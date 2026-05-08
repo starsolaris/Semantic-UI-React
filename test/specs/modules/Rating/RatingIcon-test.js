@@ -16,28 +16,28 @@ describe('RatingIcon', () => {
   describe('onClick', () => {
     it('calls onClick with (e, data) when space key is pressed', () => {
       const onClick = sandbox.spy()
-      const event = { keyCode: keyboardKey.Spacebar, preventDefault: sandbox.spy() }
+      const event = { keyCode: keyboardKey.Spacebar }
 
       const { container } = render(<RatingIcon index={0} onClick={onClick} />)
       const icon = container.querySelector('i.icon')
       fireEvent.keyUp(icon, event)
 
       onClick.should.have.been.calledOnce()
-      onClick.should.have.been.calledWithMatch(event, { index: 0 })
-      event.preventDefault.should.have.been.calledOnce()
+      onClick.should.have.been.calledWithMatch({ keyCode: keyboardKey.Spacebar }, { index: 0 })
+      expect(onClick.firstCall.args[0].defaultPrevented).to.equal(true)
     })
 
     it('calls onClick with (e, data) when enter key is pressed', () => {
       const onClick = sandbox.spy()
-      const event = { keyCode: keyboardKey.Enter, preventDefault: sandbox.spy() }
+      const event = { keyCode: keyboardKey.Enter }
 
       const { container } = render(<RatingIcon index={0} onClick={onClick} />)
       const icon = container.querySelector('i.icon')
       fireEvent.keyUp(icon, event)
 
       onClick.should.have.been.calledOnce()
-      onClick.should.have.been.calledWithMatch(event, { index: 0 })
-      event.preventDefault.should.have.been.calledOnce()
+      onClick.should.have.been.calledWithMatch({ keyCode: keyboardKey.Enter }, { index: 0 })
+      expect(onClick.firstCall.args[0].defaultPrevented).to.equal(true)
     })
   })
 })

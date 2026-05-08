@@ -1,2 +1,3 @@
-import Segment from './Segment';
-export default Segment;
+import Segment from './Segment'
+
+export default Segment

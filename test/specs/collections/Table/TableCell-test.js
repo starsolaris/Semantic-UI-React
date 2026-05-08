@@ -5,11 +5,24 @@ import * as common from 'test/specs/commonTests'
 import TableCell from 'src/collections/Table/TableCell'
 import { SUI } from 'src/lib'
 
+const renderWithWrapper = (element) =>
+  render(
+    <table>
+      <tbody>
+        <tr>{element}</tr>
+      </tbody>
+    </table>,
+  )
+
 describe('TableCell', () => {
-  common.isConformant(TableCell)
-  common.forwardsRef(TableCell, { tagName: 'td' })
-  common.forwardsRef(TableCell, { requiredProps: { children: <span /> }, tagName: 'td' })
-  common.rendersChildren(TableCell)
+  common.isConformant(TableCell, { renderWithWrapper })
+  common.forwardsRef(TableCell, { tagName: 'td', renderWithWrapper })
+  common.forwardsRef(TableCell, {
+    requiredProps: { children: <span /> },
+    tagName: 'td',
+    renderWithWrapper,
+  })
+  common.rendersChildren(TableCell, { renderWithWrapper })
 
   common.implementsCreateMethod(TableCell)
   common.implementsTextAlignProp(TableCell, ['left', 'center', 'right'])

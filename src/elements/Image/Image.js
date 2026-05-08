@@ -79,6 +79,7 @@ const Image = React.forwardRef(function (props, ref) {
         !_.isNil(dimmer) ||
         !_.isNil(label) ||
         !_.isNil(wrapped) ||
+        !childrenUtils.isNil(content) ||
         !childrenUtils.isNil(children)
       ) {
         return 'div'

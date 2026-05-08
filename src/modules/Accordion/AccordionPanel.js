@@ -24,12 +24,15 @@ class AccordionPanel extends Component {
       <>
         {AccordionTitle.create(title, {
           autoGenerateKey: false,
-          defaultProps: { active, index },
-          overrideProps: this.handleTitleOverrides,
+          overrideProps: (predefinedProps) => ({
+            active,
+            index,
+            ...this.handleTitleOverrides(predefinedProps),
+          }),
         })}
         {AccordionContent.create(content, {
           autoGenerateKey: false,
-          defaultProps: { active },
+          overrideProps: { active },
         })}
       </>
     )

@@ -1,13 +1,21 @@
 import React from 'react'
-import ReactDOM from 'react-dom'
+import { createRoot, hydrateRoot } from 'react-dom/client'
 
 import App from './App'
 
 export default App
 
 if (typeof document !== 'undefined') {
-  const renderMethod = module.hot ? ReactDOM.render : ReactDOM.hydrate || ReactDOM.render
-  const render = (Component) => renderMethod(<Component />, document.getElementById('root'))
+  const rootNode = document.getElementById('root')
+  const root = module.hot ? createRoot(rootNode) : null
+  const render = (Component) => {
+    if (root) {
+      root.render(<Component />)
+      return
+    }
+
+    hydrateRoot(rootNode, <Component />)
+  }
 
   render(App)
 }

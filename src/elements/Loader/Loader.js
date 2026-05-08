@@ -17,17 +17,8 @@ import {
  * @see Dimmer
  */
 const Loader = React.forwardRef(function (props, ref) {
-  const {
-    active,
-    children,
-    className,
-    content,
-    disabled,
-    indeterminate,
-    inline,
-    inverted,
-    size,
-  } = props
+  const { active, children, className, content, disabled, indeterminate, inline, inverted, size } =
+    props
 
   const classes = cx(
     'ui',

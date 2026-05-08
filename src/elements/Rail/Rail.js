@@ -17,17 +17,8 @@ import {
  * A rail is used to show accompanying content outside the boundaries of the main view of a site.
  */
 const Rail = React.forwardRef(function (props, ref) {
-  const {
-    attached,
-    children,
-    className,
-    close,
-    content,
-    dividing,
-    internal,
-    position,
-    size,
-  } = props
+  const { attached, children, className, close, content, dividing, internal, position, size } =
+    props
 
   const classes = cx(
     'ui',

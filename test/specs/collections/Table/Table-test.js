@@ -27,6 +27,7 @@ describe('Table', () => {
   common.hasUIClassName(Table)
   common.rendersChildren(Table, {
     rendersContent: false,
+    requiredProps: { as: 'div' },
   })
 
   common.implementsWidthProp(Table, SUI.WIDTHS, {

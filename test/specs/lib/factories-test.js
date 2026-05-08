@@ -1,5 +1,6 @@
 import _ from 'lodash'
-import React, { isValidElement } from 'react'
+import * as React from 'react'
+import { isValidElement } from 'react'
 import { render } from '@testing-library/react'
 
 import { createShorthand, createShorthandFactory } from 'src/lib'
@@ -54,7 +55,7 @@ const itAppliesDefaultProps = (value) => {
     const { container } = render(getShorthand({ value, defaultProps }))
     const element = container.firstChild
 
-    Object.keys(defaultProps).forEach(key => {
+    Object.keys(defaultProps).forEach((key) => {
       expect(element.getAttribute(key)).to.equal(defaultProps[key])
     })
   })
@@ -66,7 +67,7 @@ const itDoesNotIncludePropsFromMapValueToProps = (value) => {
     const { container } = render(getShorthand({ value, mapValueToProps: () => props }))
     const element = container.firstChild
 
-    Object.keys(props).forEach(key => {
+    Object.keys(props).forEach((key) => {
       expect(element.getAttribute(key)).to.be.null()
     })
   })
@@ -77,9 +78,7 @@ const itMergesClassNames = (classNameSource, extraClassName, shorthandConfig) =>
     const defaultProps = { className: 'default' }
     const overrideProps = { className: 'override' }
 
-    const { container } = render(
-      getShorthand({ defaultProps, overrideProps, ...shorthandConfig }),
-    )
+    const { container } = render(getShorthand({ defaultProps, overrideProps, ...shorthandConfig }))
     const element = container.firstChild
 
     expect(element.className).to.include('default')
@@ -93,7 +92,7 @@ const itAppliesProps = (propsSource, expectedProps, shorthandConfig) => {
     const { container } = render(getShorthand(shorthandConfig))
     const element = container.firstChild
 
-    Object.keys(expectedProps).forEach(key => {
+    Object.keys(expectedProps).forEach((key) => {
       expect(element.getAttribute(key)).to.equal(expectedProps[key])
     })
   })
@@ -101,11 +100,10 @@ const itAppliesProps = (propsSource, expectedProps, shorthandConfig) => {
 
 const itOverridesDefaultProps = (propsSource, defaultProps, expectedProps, shorthandConfig) => {
   it(`overrides defaultProps with ${propsSource} props`, () => {
-    const { container } = render(getShorthand({ defaultProps, ...shorthandConfig }))
-    const element = container.firstChild
+    const element = getShorthand({ defaultProps, ...shorthandConfig })
 
-    Object.keys(expectedProps).forEach(key => {
-      expect(element.getAttribute(key)).to.equal(expectedProps[key])
+    Object.keys(expectedProps).forEach((key) => {
+      expect(element.props[key]).to.equal(expectedProps[key])
     })
   })
 }
@@ -118,7 +116,7 @@ const itOverridesDefaultPropsWithFalseyProps = (propsSource, shorthandConfig) =>
     const { container } = render(getShorthand({ defaultProps, ...shorthandConfig }))
     const element = container.firstChild
 
-    Object.keys(expectedProps).forEach(key => {
+    Object.keys(expectedProps).forEach((key) => {
       const expected = expectedProps[key]
       if (expected === undefined || expected === null) {
         expect(element.getAttribute(key)).to.be.null()
@@ -203,7 +201,7 @@ describe('factories', () => {
         const { container } = render(getShorthand({ value: 'foo', defaultProps }))
         const element = container.firstChild
 
-        Object.keys(defaultProps).forEach(key => {
+        Object.keys(defaultProps).forEach((key) => {
           expect(element.getAttribute(key)).to.equal(defaultProps[key])
         })
       })
@@ -333,7 +331,7 @@ describe('factories', () => {
         const { container } = render(getShorthand({ value: 'foo', overrideProps }))
         const element = container.firstChild
 
-        Object.keys(overrideProps).forEach(key => {
+        Object.keys(overrideProps).forEach((key) => {
           expect(element.getAttribute(key)).to.equal(overrideProps[key])
         })
       })
@@ -411,6 +409,49 @@ describe('factories', () => {
       )
       itOverridesDefaultPropsWithFalseyProps('element', {
         value: <div undef={undefined} nil={null} zero={0} empty='' />,
+      })
+
+      describe('React.Fragment', () => {
+        it('does not pass className to Fragment (React 19)', () => {
+          consoleUtil.disableOnce()
+          const result = createShorthand('div', (val) => ({ children: val }), <>foo</>, {
+            defaultProps: { className: 'ignored' },
+          })
+          expect(result.type).to.equal(React.Fragment)
+          expect(result.props.className).to.be.undefined()
+        })
+
+        it('does not pass invalid props to Fragment and preserves children', () => {
+          consoleUtil.disableOnce()
+          const result = createShorthand('div', (val) => ({ children: val }), <>foo</>, {
+            defaultProps: { 'data-foo': 'ignored' },
+          })
+
+          expect(result.type).to.equal(React.Fragment)
+          expect(result.props['data-foo']).to.be.undefined()
+          expect(result.props.children).to.equal('foo')
+        })
+
+        it('preserves key on Fragment', () => {
+          const result = createShorthand(
+            'div',
+            (val) => ({ children: val }),
+            <React.Fragment key='my-key'>bar</React.Fragment>,
+            { defaultProps: { className: 'ignored' } },
+          )
+          expect(result.key).to.equal('my-key')
+          expect(result.props.className).to.be.undefined()
+        })
+
+        it('allows children override on Fragment', () => {
+          const result = createShorthand('div', (val) => ({ children: val }), <>foo</>, {
+            overrideProps: { children: 'bar', className: 'ignored' },
+          })
+
+          expect(result.type).to.equal(React.Fragment)
+          expect(result.props.className).to.be.undefined()
+          expect(result.props.children).to.equal('bar')
+        })
       })
     })
 
@@ -583,7 +624,9 @@ describe('factories', () => {
         const userProps = { style: { bottom: 5 } }
         const overrideProps = { style: { right: 5 } }
 
-        const { container } = render(getShorthand({ defaultProps, overrideProps, value: userProps }))
+        const { container } = render(
+          getShorthand({ defaultProps, overrideProps, value: userProps }),
+        )
         const element = container.firstChild
 
         expect(element.style.left).to.equal('5px')

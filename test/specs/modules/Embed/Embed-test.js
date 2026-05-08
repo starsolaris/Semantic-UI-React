@@ -6,7 +6,7 @@ import { SUI } from 'src/lib'
 import Embed from 'src/modules/Embed/Embed'
 import * as common from 'test/specs/commonTests'
 import { sandbox } from 'test/utils'
-import nestedShallow from 'test/utils/nestedShallow'
+import nestedShallow from 'test/utils/nestedElement'
 
 const assertIframeSrc = (props, srcPart) => {
   const { id = 'default-test-id', source = 'youtube', ...rest } = props
@@ -127,7 +127,7 @@ describe('Embed', () => {
 
   describe('onClick', () => {
     it('sets to active state', () => {
-      const { container } = render(<Embed active={false} id='test' source='youtube' />)
+      const { container } = render(<Embed id='test' source='youtube' />)
       const wrapper = container.firstChild
       expect(wrapper.classList.contains('active')).to.equal(false)
       fireEvent.click(wrapper)

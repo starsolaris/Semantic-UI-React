@@ -4,7 +4,7 @@ import React from 'react'
 import Rail from 'src/elements/Rail/Rail'
 import { SUI } from 'src/lib'
 import * as common from 'test/specs/commonTests'
-import nestedShallow from 'test/utils/nestedShallow'
+import nestedShallow from 'test/utils/nestedElement'
 
 const requiredProps = { position: 'left' }
 

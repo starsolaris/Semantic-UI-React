@@ -55,14 +55,14 @@ describe('ModalDimmer', () => {
       const { container } = render(<ModalDimmer />)
       const dimmer = container.querySelector('.dimmer')
 
-      expect(dimmer.classList.contains('top aligned')).to.be.true()
+      expect(dimmer.className).to.include('top aligned')
     })
 
     it('adds nothing to "className" when is "true"', () => {
       const { container } = render(<ModalDimmer centered />)
       const dimmer = container.querySelector('.dimmer')
 
-      expect(dimmer.classList.contains('top aligned')).to.be.false()
+      expect(dimmer.className).to.not.include('top aligned')
     })
   })
 
