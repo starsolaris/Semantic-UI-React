@@ -1,10 +1,7 @@
 {
-  "name": "@libs/semantic-ui-react",
-  "version": "3.0.0-beta.2-vn7",
-  "description": "The official Semantic-UI-React integration.",
-  "publishConfig": {
-    "registry": "http://nexus.dev.videonext.net:8081/repository/npm-hosted/"
-  },
+  "name": "@starsolaris/semantic-ui-react",
+  "version": "3.0.0-beta.2-starsolaris.0",
+
   "exports": {
     ".": {
       "import": {
@@ -77,14 +74,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+ssh://github.com/Semantic-Org/Semantic-UI-React.git"
+    "url": "git+https://github.com/starsolaris/Semantic-UI-React.git"
   },
   "author": "Levi Thomason <me@levithomason.com>",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/Semantic-Org/Semantic-UI-React/issues"
+    "url": "https://github.com/starsolaris/Semantic-UI-React/issues"
   },
-  "homepage": "https://github.com/Semantic-Org/Semantic-UI-React#readme",
+  "homepage": "https://github.com/starsolaris/Semantic-UI-React#readme",
   "dependencies": {
     "@babel/runtime": "^7.29.7",
     "@fluentui/react-component-event-listener": "~0.63.0",
