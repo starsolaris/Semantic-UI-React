@@ -40,7 +40,6 @@
     "build:dist": "gulp build:dist",
     "prebuild:size": "gulp build:dist:es",
     "build:size": "node bundle-size/bundle.js",
-    "check:has-valid-typings": "node check-has-valid-typings.mjs",
     "check:typings": "yarn tsd:test && yarn test",
     "ci": "yarn tsd:test && yarn lint && yarn test",
     "predeploy:docs": "cross-env NODE_ENV=production yarn build:docs && gulp build:docs:cname",
