@@ -2,6 +2,7 @@ import _ from 'lodash'
 import PropTypes from 'prop-types'
 import React, { act } from 'react'
 import { render, fireEvent, waitFor } from '@testing-library/react'
+import { instance as eventStack } from '@semantic-ui-react/event-stack'
 
 import * as common from 'test/specs/commonTests'
 import { domEvent, sandbox } from 'test/utils'
@@ -92,6 +93,67 @@ describe('Portal', () => {
       await waitFor(() => {
         expect(document.querySelector('[data-testid="portal-content"]')).to.be.null()
       })
+    })
+
+    it('removes the portal node from the event stack targets after close', async () => {
+      // A function component forces usePortalElement to render the wrapping
+      // `<div data-suir-portal="true">` instead of cloning the child directly.
+      const PortalContent = () => <p />
+
+      const baselineTargets = eventStack.targets.size
+
+      const { rerender } = wrapperMount(
+        <Portal open>
+          <PortalContent />
+        </Portal>,
+      )
+      await waitFor(() => {
+        expect(document.querySelector('[data-suir-portal="true"]')).to.not.be.null()
+      })
+
+      rerender(
+        <Portal open={false}>
+          <p />
+        </Portal>,
+      )
+      await waitFor(() => {
+        expect(document.querySelector('[data-suir-portal="true"]')).to.be.null()
+      })
+
+      // The EventStack singleton's `targets` Map is keyed by the subscribed DOM node.
+      // React 19 detaches `contentRef.current` before the sibling EventStack
+      // components unmount, which made the unsub fall back to `document` and leak
+      // the detached portal node in the map. It must be back to baseline after close.
+      expect(eventStack.targets.size).to.equal(baselineTargets)
+    })
+
+    it('removes the portal node from the event stack targets after close with a trigger', async () => {
+      // The trigger element's React props retain the Portal event handlers, whose
+      // closures must not pin the portal node after the portal is gone.
+      const PortalContent = () => <p />
+
+      const baselineTargets = eventStack.targets.size
+
+      const { container, rerender } = wrapperMount(
+        <Portal open trigger={<button data-testid='trigger' />}>
+          <PortalContent />
+        </Portal>,
+      )
+      await waitFor(() => {
+        expect(document.querySelector('[data-suir-portal="true"]')).to.not.be.null()
+      })
+      expect(container.querySelector('[data-testid="trigger"]')).to.not.be.null()
+
+      rerender(
+        <Portal open={false} trigger={<button data-testid='trigger' />}>
+          <p />
+        </Portal>,
+      )
+      await waitFor(() => {
+        expect(document.querySelector('[data-suir-portal="true"]')).to.be.null()
+      })
+
+      expect(eventStack.targets.size).to.equal(baselineTargets)
     })
   })
 

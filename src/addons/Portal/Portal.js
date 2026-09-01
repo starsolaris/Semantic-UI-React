@@ -1,4 +1,4 @@
-import EventStack from '@semantic-ui-react/event-stack'
+import EventStack, { instance } from '@semantic-ui-react/event-stack'
 import keyboardKey from 'keyboard-key'
 import _ from 'lodash'
 import PropTypes from 'prop-types'
@@ -10,6 +10,7 @@ import {
   makeDebugger,
   useAutoControlledValue,
   useEventCallback,
+  useIsomorphicLayoutEffect,
 } from '../../lib'
 import useTrigger from './utils/useTrigger'
 import PortalInner from './PortalInner'
@@ -158,7 +159,7 @@ function Portal(props) {
 
       // Do not hide the popup when scroll comes from inside the popup
       // https://github.com/Semantic-Org/Semantic-UI-React/issues/4305
-      if (_.isElement(e.target) && contentRef.current.contains(e.target)) {
+      if (_.isElement(e.target) && contentRef.current?.contains(e.target)) {
         return
       }
 
@@ -196,6 +197,32 @@ function Portal(props) {
     debug('handlePortalMouseEnter()')
     clearTimeout(mouseLeaveTimer.current)
   }
+
+  // Subscribes `mouseenter`/`mouseleave` to the portal node. The node is captured
+  // in the effect's own closure (not in a ref that outlives the subscription):
+  // React 19 detaches `contentRef.current` (→ null) before the portal is torn
+  // down, so re-reading it at cleanup time would make the event stack fall back
+  // to `document` and leak the detached portal node in its `targets` map — while
+  // keeping the node in a long-lived ref would let the trigger handlers (retained
+  // via the trigger element's React props) pin the portal node forever.
+  useIsomorphicLayoutEffect(() => {
+    if (!open) {
+      return
+    }
+
+    const node = contentRef.current
+    if (!node) {
+      return
+    }
+
+    instance.sub('mouseenter', handlePortalMouseEnter, { target: node, pool: eventPool })
+    instance.sub('mouseleave', handlePortalMouseLeave, { target: node, pool: eventPool })
+
+    return () => {
+      instance.unsub('mouseenter', handlePortalMouseEnter, { target: node, pool: eventPool })
+      instance.unsub('mouseleave', handlePortalMouseLeave, { target: node, pool: eventPool })
+    }
+  }, [open, eventPool, handlePortalMouseEnter, handlePortalMouseLeave])
 
   const handleTriggerBlur = (e, ...rest) => {
     // Call original event handler
@@ -281,18 +308,6 @@ function Portal(props) {
             {children}
           </PortalInner>
 
-          <EventStack
-            name='mouseleave'
-            on={handlePortalMouseLeave}
-            pool={eventPool}
-            target={contentRef}
-          />
-          <EventStack
-            name='mouseenter'
-            on={handlePortalMouseEnter}
-            pool={eventPool}
-            target={contentRef}
-          />
           <EventStack name='mousedown' on={handleDocumentMouseDown} pool={eventPool} />
           <EventStack name='click' on={handleDocumentClick} pool={eventPool} />
           <EventStack name='keydown' on={handleEscape} pool={eventPool} />
