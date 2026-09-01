@@ -189,6 +189,30 @@ const Popup = React.forwardRef(function (props, ref) {
   }) => {
     positionUpdate.current = update
 
+    // Hide the popup while the reference element is hidden or detached:
+    // Popper would compute a zero-size reference rect and park the popup at
+    // the top-left corner (or at a stale previous position). A popup anchored
+    // to an invisible trigger is invisible itself; it appears again once the
+    // reference has valid geometry.
+    // Resolve the same node Popper positions against: `context` may be a ref
+    // object or an element, and takes precedence over the trigger.
+    const referenceNode = _.isNil(context)
+      ? triggerRef.current
+      : context && typeof context === 'object' && 'current' in context
+        ? context.current
+        : context
+    const referenceRect =
+      referenceNode && typeof referenceNode.getBoundingClientRect === 'function'
+        ? referenceNode.getBoundingClientRect()
+        : null
+    const isDeadReference = !referenceRect || (!referenceRect.width && !referenceRect.height)
+
+    let effectiveStyle = popperStyle
+
+    if (isDeadReference) {
+      effectiveStyle = { ...effectiveStyle, visibility: 'hidden' }
+    }
+
     const classes = cx(
       'ui',
       placementMapping[popperPlacement],
@@ -208,6 +232,7 @@ const Popup = React.forwardRef(function (props, ref) {
       right: 'auto',
       // This is required to be properly positioned inside wrapping `div`
       position: 'initial',
+      // the Popup's own `style` prop (the popper positioning lives on the wrapper)
       ...style,
     }
 
@@ -236,7 +261,7 @@ const Popup = React.forwardRef(function (props, ref) {
           // Fixes layout for floated elements
           // https://github.com/Semantic-Org/Semantic-UI-React/issues/4092
           display: 'flex',
-          ...popperStyle,
+          ...effectiveStyle,
         },
       },
     })

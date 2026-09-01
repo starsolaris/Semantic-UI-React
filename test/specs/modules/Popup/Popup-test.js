@@ -442,6 +442,56 @@ describe('Popup', () => {
     })
   })
 
+  describe('reference visibility', () => {
+    const popupWrapper = () => document.querySelector('.ui.popup').parentElement
+
+    it('hides the popup when the reference has no geometry', async () => {
+      const { rerender } = wrapperMount(
+        <Popup open trigger={<button>t</button>}><p>content</p></Popup>,
+      )
+      await waitFor(() => expect(document.querySelector('.ui.popup')).to.not.be.null())
+
+      rerender(
+        <Popup open trigger={<button>t</button>}><p>content</p></Popup>,
+      )
+
+      // jsdom gives every element a zero-size rect, so the reference is dead
+      expect(popupWrapper().style.visibility).to.equal('hidden')
+    })
+
+    it('keeps the popup visible when the reference has a valid rect', async () => {
+      const { container, rerender } = wrapperMount(
+        <Popup open trigger={<button>t</button>}><p>content</p></Popup>,
+      )
+      await waitFor(() => expect(document.querySelector('.ui.popup')).to.not.be.null())
+
+      container.querySelector('button').getBoundingClientRect = () => ({
+        width: 100, height: 50, top: 0, left: 0, right: 100, bottom: 50, x: 0, y: 0,
+      })
+
+      rerender(
+        <Popup open trigger={<button>t</button>}><p>content</p></Popup>,
+      )
+
+      expect(popupWrapper().style.visibility).to.not.equal('hidden')
+    })
+
+    it('uses the context node as the reference when provided', async () => {
+      const contextNode = document.createElement('div')
+      contextNode.getBoundingClientRect = () => ({
+        width: 100, height: 50, top: 0, left: 0, right: 100, bottom: 50, x: 0, y: 0,
+      })
+
+      wrapperMount(
+        <Popup open context={contextNode}><p>content</p></Popup>,
+      )
+      await waitFor(() => expect(document.querySelector('.ui.popup')).to.not.be.null())
+
+      // triggerRef is null here - only the context node can satisfy the check
+      expect(popupWrapper().style.visibility).to.not.equal('hidden')
+    })
+  })
+
   describe.skip('popperDependencies', () => {
     // TODO: find a way to implement these tests
     // it('will call "scheduleUpdate" if dependencies changed', () => {
